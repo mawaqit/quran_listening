@@ -279,26 +279,6 @@ downloadController.setMaxConcurrentDownloads(3);
 ### Version History
 
 - **v1.0.0** - Initial release with core functionality
-- **v1.1.0** - Added download management and offline playback
-- **v1.2.0** - Enhanced UI components and search functionality
-- **v1.3.0** - Added floating player and background playback
-- **v2.0.0** - Major UI overhaul and performance improvements
 
-### Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to contribute to this project.
-
-### License
-
-This package is licensed under the MIT License. See [LICENSE](LICENSE) file for details.
-
-### Support
-
-For support and questions:
-- Create an issue on GitHub
-- Contact the development team
-- Check the documentation wiki
-
----
 
 **Made with ❤️ by the Mawaqit Team**
