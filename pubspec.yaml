@@ -1,6 +1,6 @@
 name: mawaqit_quran_listening
-description: "A Flutter package that provides Quran listing functionality, enabling easy access, display, and navigation of Surahs and Ayahs."
-version: 0.0.1
+description: "A Flutter package that provides Quran listening functionality, enabling easy access, display, and navigation of Surahs and Ayahs with audio playback capabilities."
+version: 1.0.0
 publish_to: none
 
 environment:
@@ -10,38 +10,44 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+
   # Core dependencies
   provider: ^6.1.1
   path_provider: ^2.0.9
   dio: ^5.1.1
   dio_cache_interceptor: ^3.4.0
   dio_cache_interceptor_hive_store: ^3.2.1
-  
+
+
   # Audio player
   just_audio: ^0.10.4
   just_audio_background: ^0.0.1-beta.17
-  
+
   # Local storage
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   shared_preferences: ^2.2.1
-  
+
   # UI
   sizer: ^2.0.15
   flutter_svg: ^2.0.3
   fluttertoast: ^8.0.9
   modal_bottom_sheet: ^3.0.0-pre
-  
+  skeletonizer:
+
   # Utilities
   super_converter: ^1.1.0
   collection: ^1.18.0
-  
+
   # Internationalization
   mawaqit_mobile_i18n:
     git:
       url: https://github.com/mawaqit/mawaqit-mobile-i18n.git
       ref: main
+
+#  # Main app dependencies for icons
+#  mawaqit:
+#    path: ../../
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +64,10 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/icons/
+    - assets/reciters/
+    - assets/fonts/
   #
   # For details regarding assets in packages, see
   # https://flutter.dev/to/asset-from-package
@@ -70,6 +80,10 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
+  fonts:
+    - family: MawaqitIcons
+      fonts:
+        - asset: assets/fonts/MawaqitIcons.ttf
   # fonts:
   #   - family: Schyler
   #     fonts:
