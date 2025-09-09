@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../extensions/theme_extension.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:mawaqit/modules/common/shared/widgets/svg_image.dart';
 import 'package:sizer/sizer.dart';
+
+import '../components/svg_image_asset.dart';
 
 class PlayerBottomSheetWidget extends StatelessWidget {
   const PlayerBottomSheetWidget({

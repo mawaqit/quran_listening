@@ -9,4 +9,5 @@ class ReciterIconV3 {
   static const IconData pause = IconData(0xe83d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData download = IconData(0xe80c, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData downloaded = IconData(0xe82d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData close = IconData(0xe80d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }
