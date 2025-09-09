@@ -67,9 +67,9 @@ The package automatically includes these dependencies:
 
 ## Usage
 
-### 1. Basic Setup
+### Step 1: Initialize the Package
 
-First, initialize the package in your `main.dart`:
+Add this to your `main.dart` file:
 
 ```dart
 import 'package:mawaqit_quran_listening/mawaqit_quran_listening.dart';
@@ -84,9 +84,9 @@ void main() async {
 }
 ```
 
-### 2. Provider Setup
+### Step 2: Add Required Providers
 
-Add the required providers to your app's provider tree:
+Add these providers to your app's provider tree (usually in your main app widget):
 
 ```dart
 import 'package:provider/provider.dart';
@@ -97,7 +97,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Core providers
+        // Quran Listening Package Providers
         ChangeNotifierProvider(create: (_) => RecitorsProvider(
           QuranListeningRepository(QuranListeningConfig.hiveManager)
         )),
@@ -120,9 +120,9 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-### 3. Basic Usage
+### Step 3: Use the Package
 
-#### Display the Quran Listening Page
+Simply add the `QuranListeningPage` widget to your app:
 
 ```dart
 import 'package:mawaqit_quran_listening/mawaqit_quran_listening.dart';
@@ -132,110 +132,43 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Quran Listening')),
-      body: QuranListeningPage(),
+      body: QuranListeningPage(), // This is all you need!
     );
   }
 }
 ```
 
-#### Play Audio Programmatically
-
-```dart
-class AudioController {
-  final AudioPlayerProvider audioProvider;
-  
-  AudioController(this.audioProvider);
-  
-  Future<void> playSurah(Reciter reciter, SurahModel surah) async {
-    await audioProvider.playSurah(
-      reciter: reciter,
-      surah: surah,
-      context: context,
-    );
-  }
-  
-  Future<void> pauseAudio() async {
-    await audioProvider.pause();
-  }
-  
-  Future<void> resumeAudio() async {
-    await audioProvider.play();
-  }
-}
-```
-
-#### Download Surahs for Offline Use
-
-```dart
-class DownloadManager {
-  final DownloadController downloadController;
-  
-  DownloadManager(this.downloadController);
-  
-  Future<void> downloadSurah(Reciter reciter, SurahModel surah) async {
-    await downloadController.downloadSurah(
-      reciterId: reciter.id.toString(),
-      surahId: surah.id,
-    );
-  }
-  
-  List<SurahAudio> getDownloadedSurahs() {
-    return downloadController.downloadedSurahs;
-  }
-}
-```
+That's it! The package will handle all the audio playback, downloads, favorites, and UI automatically.
 
 ## Configuration
 
-### Package Configuration
+### Automatic Configuration
 
-The package requires minimal configuration. The main configuration is handled through the `QuranListeningConfig` class:
+**Good news!** The package handles all configuration automatically. You don't need to configure anything manually.
 
-```dart
-// Initialize with custom Hive manager
-await QuranListeningConfig.initialize(
-  hiveManager: CustomHiveManager(),
-);
+The package comes with sensible defaults for:
+- ✅ Audio quality and playback settings
+- ✅ Download management and storage
+- ✅ UI themes and styling
+- ✅ Database setup and management
+- ✅ API endpoints and caching
 
-// Check if initialized
-if (QuranListeningConfig.isInitialized) {
-  // Package is ready to use
-}
+### Optional Customization (Advanced Users Only)
 
-// Get the Hive manager instance
-final hiveManager = QuranListeningConfig.hiveManager;
-```
-
-### Audio Configuration
-
-Configure audio settings through the `AudioPlayerProvider`:
+If you need to customize the package behavior, you can access these settings:
 
 ```dart
+// Audio settings (optional)
 final audioProvider = context.read<AudioPlayerProvider>();
+audioProvider.setPlaybackSpeed(1.5);  // Change playback speed
+audioProvider.setLoopMode(LoopMode.one);  // Set loop mode
 
-// Set playback speed
-audioProvider.setPlaybackSpeed(1.5);
-
-// Set loop mode
-audioProvider.setLoopMode(LoopMode.one);
-
-// Enable shuffle
-audioProvider.setShuffle(true);
-```
-
-### Download Configuration
-
-Configure download settings through the `DownloadController`:
-
-```dart
+// Download settings (optional)
 final downloadController = context.read<DownloadController>();
-
-// Set download quality
-downloadController.setDownloadQuality(AudioQuality.high);
-
-// Set maximum concurrent downloads
-downloadController.setMaxConcurrentDownloads(3);
+// Download quality and concurrent downloads are handled automatically
 ```
+
+**For most users:** Just follow the 3 steps in the Usage section above - no additional configuration needed!
 ## Roadmap
 
 ### Planned Features
