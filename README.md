@@ -120,6 +120,40 @@ class MyApp extends StatelessWidget {
 }
 ```
 
+### Step 2.5: Initialize Reciters Cache (Important!)
+
+**⚠️ IMPORTANT**: You must call `cacheReciters()` in your home page or top-level widget to preload reciters data:
+
+```dart
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize reciters cache - REQUIRED!
+    context.read<RecitorsProvider>().cacheReciters();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Quran Listening')),
+      body: QuranListeningPage(),
+    );
+  }
+}
+```
+
+**Why is this needed?**
+- Preloads reciters data for all languages (English, Arabic, French)
+- Enables faster search and filtering
+- Improves app performance and user experience
+- Must be called once when the app starts
+
 ### Step 3: Use the Package
 
 Simply add the `QuranListeningPage` widget to your app:

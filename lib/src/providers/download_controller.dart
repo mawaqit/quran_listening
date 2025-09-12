@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -219,14 +220,15 @@ class DownloadController extends ChangeNotifier {
   }
 
   String? singleSavedRecitation({
-    required String reciterId,
+    required int reciterId,
     required int recitationId,
   }) {
-    final reciterData = _downloadedSurahsForSpecificReciter[reciterId];
-    if (reciterData is Map) {
-      return reciterData[recitationId.toString()] as String?;
-    }
-    return null;
+    var recitation = _downloadedSurahs.firstWhereOrNull(
+      (element) =>
+          element['chapterId'] == recitationId.toString() &&
+          element['reciterId'] == reciterId.toString(),
+    );
+    return recitation?['path'];
   }
 
   Future<void> cancelDownload({

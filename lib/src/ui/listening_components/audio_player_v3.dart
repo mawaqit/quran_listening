@@ -71,15 +71,22 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
       // final audioPlayer = audioManager;
       if (widget.playerType == audioManager.playerType) {
         if (widget.playerType == PlayerType.allSavedSurahs) {
-          if (widget.reciterFromAllSaved?.id == audioManager.currentReciterDetail?.id &&
+          if (widget.reciterFromAllSaved?.id ==
+                  audioManager.currentReciterDetail?.id &&
               widget.chapter.id == audioManager.playingChapter?.id) {
             ///Already Playing the same Chapter from Same Section
             audioManager.audioPlayer.play();
-            audioManager.showHideFloatingPlayer(context: context, false, notify: false);
+            audioManager.showHideFloatingPlayer(
+              context: context,
+              false,
+              notify: false,
+            );
             return;
           } else {
             ///Playing Other Chapter
-            int chapterIndex = audioManager.chapters.indexWhere((element) => element.id == widget.chapter.id);
+            int chapterIndex = audioManager.chapters.indexWhere(
+              (element) => element.id == widget.chapter.id,
+            );
             if (chapterIndex != -1) {
               final downloadedManager = context.read<DownloadController>();
               List<AudioSource> playlist = [];
@@ -88,7 +95,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
               for (int ind = 0; ind < widget.chapters.length; ind++) {
                 final chap = widget.chapters[ind];
                 String? path = downloadedManager.singleSavedRecitation(
-                  reciterId: widget.reciters[ind].id.toString(),
+                  reciterId: widget.reciters[ind].id,
                   recitationId: chap.id,
                 );
                 if (path != null) {
@@ -106,24 +113,40 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                     ),
                   );
                 } else {
-                  playlist.add(
-                    AudioSource.uri(
-                      Uri.parse(chap.id.toString()),
-                      tag: MediaItem(
-                        id: chap.id.toString(),
-                        title: chap.name ?? '',
-                        album: widget.reciters[ind].reciterName,
-                        artist: widget.reciters[ind].reciterName,
-                        artUri: artUri,
-                        displaySubtitle: widget.reciters[ind].reciterName,
+                  // Use the proper server URL for non-downloaded recitations
+                  final serverUrl = audioManager.reciter?.serverUrl ?? '';
+                  if (serverUrl.isNotEmpty) {
+                    final audioUrl =
+                        '${serverUrl}${chap.id.toString().padLeft(3, '0')}.mp3';
+                    playlist.add(
+                      AudioSource.uri(
+                        Uri.parse(audioUrl),
+                        tag: MediaItem(
+                          id: chap.id.toString(),
+                          title: chap.name ?? '',
+                          album: widget.reciters[ind].reciterName,
+                          artist: widget.reciters[ind].reciterName,
+                          artUri: artUri,
+                          displaySubtitle: widget.reciters[ind].reciterName,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 }
               }
-              audioManager.setPlaylist(playlist, widget.chapters, widget.reciters, widget.playerType, index: 0);
+              audioManager.setPlaylist(
+                playlist,
+                widget.chapters,
+                widget.reciters,
+                widget.playerType,
+                index: 0,
+              );
               audioManager.audioPlayer.setLoopMode(LoopMode.off);
-              audioManager.showHideFloatingPlayer(context: context, false, notify: false);
+              audioManager.showHideFloatingPlayer(
+                context: context,
+                false,
+                notify: false,
+              );
               return;
             } else {
               ///Play other section
@@ -132,21 +155,31 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
           }
         } else {
           final reciter = widget.reciters.first;
-          final reciterFromManager = audioManager.reciters?.first;
-          if (reciter.id == reciterFromManager!.id) {
+          final reciterFromManager = audioManager.reciters.first;
+          if (reciter.id == reciterFromManager.id) {
             ///When Player Screen is already playing for this reciter
             if (audioManager.playingChapter?.id == widget.chapter.id) {
               ///Already Playing the same Chapter from Same Section
               audioManager.audioPlayer.play();
-              audioManager.showHideFloatingPlayer(context: context, false, notify: false);
+              audioManager.showHideFloatingPlayer(
+                context: context,
+                false,
+                notify: false,
+              );
               return;
             } else {
               ///Playing Other Chapter
-              int chapterIndex = audioManager.chapters.indexWhere((element) => element.id == widget.chapter.id);
+              int chapterIndex = audioManager.chapters.indexWhere(
+                (element) => element.id == widget.chapter.id,
+              );
               if (chapterIndex != -1) {
                 ///Playing Other Surah/Chapter from same sectoin
                 audioManager.playIndex(index: chapterIndex);
-                audioManager.showHideFloatingPlayer(context: context, false, notify: false);
+                audioManager.showHideFloatingPlayer(
+                  context: context,
+                  false,
+                  notify: false,
+                );
                 return;
               } else {
                 ///Play other section
@@ -170,7 +203,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
         for (int ind = 0; ind < widget.chapters.length; ind++) {
           final chap = widget.chapters[ind];
           String? path = downloadedManager.singleSavedRecitation(
-            reciterId: widget.reciters[ind].id.toString(),
+            reciterId: widget.reciters[ind].id,
             recitationId: chap.id,
           );
           if (path != null) {
@@ -188,19 +221,25 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
               ),
             );
           } else {
-            playlist.add(
-              AudioSource.uri(
-                Uri.parse(chap.id.toString()),
-                tag: MediaItem(
-                  id: chap.id.toString(),
-                  title: chap.name ?? '',
-                  album: widget.reciters[ind].reciterName,
-                  artUri: artUri,
-                  artist: widget.reciters[ind].reciterName,
-                  displaySubtitle: widget.reciters[ind].reciterName,
+            // Use the proper server URL for non-downloaded recitations
+            final serverUrl = audioManager.reciter?.serverUrl ?? '';
+            if (serverUrl.isNotEmpty) {
+              final audioUrl =
+                  '${serverUrl}${chap.id.toString().padLeft(3, '0')}.mp3';
+              playlist.add(
+                AudioSource.uri(
+                  Uri.parse(audioUrl),
+                  tag: MediaItem(
+                    id: chap.id.toString(),
+                    title: chap.name ?? '',
+                    album: widget.reciters[ind].reciterName,
+                    artUri: artUri,
+                    artist: widget.reciters[ind].reciterName,
+                    displaySubtitle: widget.reciters[ind].reciterName,
+                  ),
                 ),
-              ),
-            );
+              );
+            }
           }
         }
       } else if (widget.playerType == PlayerType.reciterSavedSurahs) {
@@ -208,7 +247,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
         for (int ind = 0; ind < widget.chapters.length; ind++) {
           final chap = widget.chapters[ind];
           String? path = downloadedManager.singleSavedRecitation(
-            reciterId: widget.reciters.first.id.toString(),
+            reciterId: widget.reciters.first.id,
             recitationId: chap.id,
           );
           if (path != null) {
@@ -232,7 +271,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
         final reciter = widget.reciters.first;
         for (int i = 0; i < widget.chapters.length; i++) {
           String? path = downloadedManager.singleSavedRecitation(
-            reciterId: reciter.id.toString(),
+            reciterId: reciter.id,
             recitationId: widget.chapters[i].id,
           );
           if (path == null) {
@@ -274,11 +313,21 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
       }
 
       ///Multiple Items
-      audioManager.setPlaylist(playlist, widget.chapters, widget.reciters, widget.playerType, index: 0);
+      if (playlist.isNotEmpty) {
+        audioManager.setPlaylist(
+          playlist,
+          widget.chapters,
+          widget.reciters,
+          widget.playerType,
+          index: 0,
+        );
 
-      audioManager.audioPlayer.setLoopMode(LoopMode.off);
-      Future.delayed(const Duration(milliseconds: 100));
-      audioManager.subscribeToStreams();
+        audioManager.audioPlayer.setLoopMode(LoopMode.off);
+        Future.delayed(const Duration(milliseconds: 100));
+        audioManager.subscribeToStreams();
+      } else {
+        debugPrint('No valid audio sources in playlist');
+      }
     });
 
     /// 2. Load audio from File
@@ -316,7 +365,10 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
       key: const Key('audio_player_bottom_sheet'),
       padding: const EdgeInsets.symmetric(vertical: 26),
       decoration: BoxDecoration(
-        color: context.isDark ? Colors.transparent : context.colorScheme.primary.withOpacity(0.04),
+        color:
+            context.isDark
+                ? Colors.transparent
+                : context.colorScheme.primary.withOpacity(0.04),
       ),
       child: Stack(
         alignment: Alignment.topRight,
@@ -348,8 +400,11 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                 ),
                               ),
                               Text(
-                                (audioManager.reciters != null && audioManager.reciters!.isNotEmpty)
-                                    ? audioManager.playingRecitor?.reciterName ?? ''
+                                audioManager.reciters.isNotEmpty
+                                    ? audioManager
+                                            .playingRecitor
+                                            ?.reciterName ??
+                                        ''
                                     : '',
                                 style: TextStyle(
                                   fontSize: 10.sp,
@@ -370,18 +425,22 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                       data: SliderThemeData(
                         overlayShape: SliderComponentShape.noThumb,
                         trackShape: CustomTrackShape(),
-                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                        thumbShape: const RoundSliderThumbShape(
+                          enabledThumbRadius: 8,
+                        ),
                       ),
                       child: Slider(
                         min: 0,
                         max: audioManager.duration.inSeconds.toDouble(),
                         value:
                             _lastSliderValue ??
-                            (audioManager.position.inSeconds.toDouble() < audioManager.duration.inSeconds.toDouble()
+                            (audioManager.position.inSeconds.toDouble() <
+                                    audioManager.duration.inSeconds.toDouble()
                                 ? audioManager.position.inSeconds.toDouble()
                                 : audioManager.duration.inSeconds.toDouble()),
                         activeColor: context.colorScheme.primaryFixed,
-                        inactiveColor: context.colorScheme.primaryFixed.withOpacity(0.1),
+                        inactiveColor: context.colorScheme.primaryFixed
+                            .withOpacity(0.1),
                         onChanged: (value) {
                           final position = Duration(seconds: value.toInt());
                           setState(() {
@@ -408,15 +467,25 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           children: [
                             Expanded(
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     formatTime(audioManager.position),
-                                    style: TextStyle(fontSize: 16, color: context.colorScheme.primaryFixed),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: context.colorScheme.primaryFixed,
+                                    ),
                                   ),
                                   Text(
-                                    formatTime(audioManager.duration - audioManager.position),
-                                    style: TextStyle(fontSize: 16, color: context.colorScheme.primaryFixed),
+                                    formatTime(
+                                      audioManager.duration -
+                                          audioManager.position,
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: context.colorScheme.primaryFixed,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -439,7 +508,9 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                 width: audioPlayer.shuffleModeEnabled ? 30 : 20,
                               ),
                               onPressed: () async {
-                                await audioPlayer.setShuffleModeEnabled(!audioPlayer.shuffleModeEnabled);
+                                await audioPlayer.setShuffleModeEnabled(
+                                  !audioPlayer.shuffleModeEnabled,
+                                );
                               },
                             ),
 
@@ -466,7 +537,8 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                             ///Play/Pause/RePlay
                             CircularButton(
                               icon:
-                                  audioPlayer.processingState == ProcessingState.completed
+                                  audioPlayer.processingState ==
+                                          ProcessingState.completed
                                       ? Icons.replay_rounded
                                       : audioManager.isPlaying
                                       ? Icons.pause_rounded
@@ -474,10 +546,12 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                               iconColor: context.colorScheme.primaryFixed,
                               size: 62,
                               iconSize: 40,
-                              color: context.colorScheme.primaryFixed.withOpacity(0.09),
+                              color: context.colorScheme.primaryFixed
+                                  .withOpacity(0.09),
                               borderColor: Colors.transparent,
                               onTap: () async {
-                                if (audioPlayer.processingState == ProcessingState.completed) {
+                                if (audioPlayer.processingState ==
+                                    ProcessingState.completed) {
                                   audioPlayer.seek(Duration.zero, index: 0);
                                 } else if (audioManager.isPlaying) {
                                   await audioPlayer.pause();
@@ -513,11 +587,16 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                               icon: SvgImageAsset(
                                 'assets/icons/loop.svg',
                                 color: context.colorScheme.primaryFixed,
-                                width: audioPlayer.loopMode == LoopMode.one ? 30 : 20,
+                                width:
+                                    audioPlayer.loopMode == LoopMode.one
+                                        ? 30
+                                        : 20,
                               ),
                               onPressed: () async {
                                 await audioPlayer.setLoopMode(
-                                  audioPlayer.loopMode == LoopMode.one ? LoopMode.off : LoopMode.one,
+                                  audioPlayer.loopMode == LoopMode.one
+                                      ? LoopMode.off
+                                      : LoopMode.one,
                                 );
                               },
                             ),

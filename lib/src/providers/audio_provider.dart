@@ -148,7 +148,6 @@ class AudioPlayerProvider extends ChangeNotifier {
 
   double get playbackSpeed => _playbackSpeed;
 
-  // List<AudioSource> _playlist1 = [];
   Future<void> setPlaylist(
     List<AudioSource> playlist,
     List<SurahModel> chaptersList,
@@ -156,14 +155,10 @@ class AudioPlayerProvider extends ChangeNotifier {
     PlayerType playerType1, {
     int? index,
   }) async {
-    await _audioPlayer.stop();
     playerType = playerType1;
     chapters = chaptersList;
     reciters = reciter1;
     playingChapterIndex = index ?? 0;
-    if (playingChapterIndex! >= chaptersList.length) {
-      playingChapterIndex = 0;
-    }
     playingChapter = chapters[playingChapterIndex!];
     playingChapterId = playingChapter!.id;
     notifyListeners();
@@ -212,7 +207,7 @@ class AudioPlayerProvider extends ChangeNotifier {
     });
 
     audioPlayer.currentIndexStream.listen((event) {
-      if (event != null && event >= 0 && event < chapters.length) {
+      if (event != null) {
         playingChapterIndex = event;
         playingChapter = chapters[event];
         playingChapterId = playingChapter!.id;

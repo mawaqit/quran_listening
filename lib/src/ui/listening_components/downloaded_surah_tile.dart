@@ -340,7 +340,7 @@ class DownloadedSurahTileV3 extends StatelessWidget {
         for (int ind = 0; ind < chapters.length; ind++) {
           final chap = chapters[ind];
           String? path = downloadController.singleSavedRecitation(
-            reciterId: reciter.id.toString(),
+            reciterId: reciter.id,
             recitationId: chap.id,
           );
           if (path != null) {
