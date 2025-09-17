@@ -43,11 +43,9 @@ Add this package to your `pubspec.yaml` file:
 ```yaml
 dependencies:
   mawaqit_quran_listening:
-    path: packages/quran_listening  # For local development
-    # OR
-    # git:
-    #   url: https://github.com/your-repo/mawaqit_quran_listening.git
-    #   ref: main
+     git:
+      url: https://github.com/your-repo/mawaqit_quran_listening.git
+      ref: main
 ```
 
 Then run:
