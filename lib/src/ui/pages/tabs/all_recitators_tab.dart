@@ -68,16 +68,26 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
                     onTap: () {
                       context.closeKeyboard();
                       FocusManager.instance.primaryFocus?.unfocus();
+                      
+                      final selectedReciter = provider.reciters[index];
+                      
+                      // Set reciters list in audio provider
                       context.read<AudioPlayerProvider>().reciters =
                           context
                               .read<recitor_controller.RecitorsProvider>()
                               .reciters;
+                      
+                      // Change reciter (this sets currentReciterId)
                       context.read<AudioPlayerProvider>().changeReciter(
-                        provider.reciters[index],
+                        selectedReciter,
                       );
+                      
+                      // Set reciter in player screens controller
                       context.read<PlayerScreensController>().setRecitor(
-                        provider.reciters[index],
+                        selectedReciter,
                       );
+                      
+                      // Navigate to page 1 (Surah page)
                       context.read<NavigationControllerV3>().navigateToPage(
                         pageIndex: 1,
                       );

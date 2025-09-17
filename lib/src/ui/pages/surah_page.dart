@@ -39,8 +39,20 @@ class _SurahPageState extends State<SurahPage> {
       if (recitationsManager.surahs.isEmpty) {
         await recitationsManager.initializeSurahs();
       }
+      
+      // Ensure we have a valid currentReciterId before loading recitations
       if (audioPlayerProvider.currentReciterId != null) {
+        debugPrint('Loading recitations for reciter ID: ${audioPlayerProvider.currentReciterId}');
         await recitationsManager.getRecitations(reciterId: audioPlayerProvider.currentReciterId!);
+      } else {
+        debugPrint('Warning: currentReciterId is null - cannot load recitations');
+        // Try to get the first available reciter if none is selected
+        final recitorsProvider = context.read<RecitorsProvider>();
+        if (recitorsProvider.reciters.isNotEmpty) {
+          final firstReciter = recitorsProvider.reciters.first;
+          audioPlayerProvider.changeReciter(firstReciter);
+          await recitationsManager.getRecitations(reciterId: firstReciter.id);
+        }
       }
     });
   }
@@ -65,6 +77,8 @@ class _SurahPageState extends State<SurahPage> {
         // Load recitations for the current reciter
         if (audioPlayerProvider.currentReciterId != null) {
           await recitationsManager.getRecitations(reciterId: audioPlayerProvider.currentReciterId!);
+        } else {
+          debugPrint('Warning: currentReciterId is null after reciter change');
         }
       });
     }

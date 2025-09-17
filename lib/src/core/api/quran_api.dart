@@ -68,9 +68,25 @@ class QuranApi {
     required int reciterId,
   }) async {
     var url = 'https://mp3quran.net/api/v3/suwar';
-    final response = await dio.get<Map>(url);
+    print('QuranApi: Fetching recitations from: $url for reciter ID: $reciterId');
 
-    return response.data!.fromList('audio_files', skipInvalid: true);
+    try {
+      final response = await dio.get<Map>(url);
+      print('QuranApi: Response status: ${response.statusCode}');
+      print('QuranApi: Response data type: ${response.data.runtimeType}');
+
+      if (response.data != null && response.data!.containsKey('audio_files')) {
+        final audioFiles = response.data!['audio_files'] as List;
+        print('QuranApi: Found ${audioFiles.length} audio files');
+        return response.data!.fromList('audio_files', skipInvalid: true);
+      } else {
+        print('QuranApi: No audio_files found in response');
+        return [];
+      }
+    } catch (e) {
+      print('QuranApi: Error fetching recitations: $e');
+      rethrow;
+    }
   }
 
   static Future<List<SurahModel>> getSurah({required String language}) async {

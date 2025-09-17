@@ -39,29 +39,7 @@ class RecitorsProvider extends ChangeNotifier {
 
   Future<void> getReciters(BuildContext context, {String? language}) async {
     String? localeName = language ?? context.tr.localeName;
-    List<String> availableLocales = [
-      'ar',
-      'en',
-      'fr',
-      'ru',
-      'de',
-      'es',
-      'tr',
-      'cn',
-      'th',
-      'ur',
-      'bn',
-      'bs',
-      'ug',
-      'fa',
-      'tg',
-      'ml',
-      'tl',
-      'id',
-      'pt',
-      'ha',
-      'sw',
-    ];
+    List<String> availableLocales = ['ar', 'en', 'fr', 'ru', 'de', 'es', 'tr', 'cn', 'th', 'ur', 'bn', 'bs', 'ug', 'fa', 'tg', 'ml', 'tl', 'id', 'pt', 'ha', 'sw'];
     if (!availableLocales.contains(localeName)) {
       localeName = 'eng';
     }
@@ -88,10 +66,7 @@ class RecitorsProvider extends ChangeNotifier {
         recitersForFavorite = reciters;
 
         if (reciters.isNotEmpty) {
-          _repository.hiveManager.write(
-            key: '${quranRecitersKey}_$localeName',
-            value: reciters.map((e) => e.toMap()).toList(),
-          );
+          _repository.hiveManager.write(key: '${quranRecitersKey}_$localeName', value: reciters.map((e) => e.toMap()).toList());
         }
       }
 
@@ -113,10 +88,7 @@ class RecitorsProvider extends ChangeNotifier {
     if (!isSurahsLocalExist) {
       surahList = await QuranApi.getSurah(language: localeName);
       if (surahList.isNotEmpty) {
-        _repository.hiveManager.write(
-          key: '${chaptersKey}_$localeName',
-          value: surahList.map((e) => e.toMap()).toList(),
-        );
+        _repository.hiveManager.write(key: '${chaptersKey}_$localeName', value: surahList.map((e) => e.toMap()).toList());
       }
     }
     notifyListeners();
@@ -141,10 +113,17 @@ class RecitorsProvider extends ChangeNotifier {
 
   void cacheReciters() {
     Future.microtask(() async {
-      enReciters = await _repository.getReciters('en');
-      arReciters = await _repository.getReciters('ar');
-      frReciters = await _repository.getReciters('fr');
-      languageBasedAllReciters = [...enReciters, ...arReciters, ...frReciters];
+      try {
+        enReciters = await _repository.getReciters('en');
+
+        arReciters = await _repository.getReciters('ar');
+
+        frReciters = await _repository.getReciters('fr');
+
+        languageBasedAllReciters = [...enReciters, ...arReciters, ...frReciters];
+      } catch (e) {
+        debugPrint('RecitorsProvider: Error caching reciters: $e');
+      }
     });
     notifyListeners();
   }
@@ -179,9 +158,7 @@ class RecitorsProvider extends ChangeNotifier {
       }
     } else {
       reciters = [];
-      reciters.addAll(
-        originalReciters.where((element) => element.reciterName.toLowerCase().contains(word.toLowerCase())),
-      );
+      reciters.addAll(originalReciters.where((element) => element.reciterName.toLowerCase().contains(word.toLowerCase())));
     }
 
     notifyListeners();
@@ -214,9 +191,7 @@ class RecitorsProvider extends ChangeNotifier {
       }
     } else {
       recitersForFavorite = [];
-      recitersForFavorite.addAll(
-        originalReciters.where((element) => element.reciterName.toLowerCase().contains(word.toLowerCase())),
-      );
+      recitersForFavorite.addAll(originalReciters.where((element) => element.reciterName.toLowerCase().contains(word.toLowerCase())));
     }
     notifyListeners();
   }

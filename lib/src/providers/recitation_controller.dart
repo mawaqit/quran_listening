@@ -46,7 +46,6 @@ class RecitationsManager extends ChangeNotifier {
   }) async {
     try {
       if (recitations.containsKey(reciterId)) {
-        // Recitations already loaded, set success state immediately
         state = RecitationsScreenState.success;
         notifyListeners();
         return;
@@ -59,27 +58,30 @@ class RecitationsManager extends ChangeNotifier {
       );
 
       List<Recitation> list = [];
-      if (result != null && result.isNotEmpty) {
-        // Data exists in cache, load it
-        list =
-            json
-                .decode(result)
-                .map<Recitation>((e) => Recitation.fromMap(e))
-                .toList();
-        recitations.putIfAbsent(reciterId, () => list);
-        state = RecitationsScreenState.success;
-        notifyListeners();
-        return;
+      if (result != null && result.isNotEmpty && result != '[]') {
+        try {
+          list =
+              json
+                  .decode(result)
+                  .map<Recitation>((e) => Recitation.fromMap(e))
+                  .toList();
+          recitations.putIfAbsent(reciterId, () => list);
+          state = RecitationsScreenState.success;
+          notifyListeners();
+          return;
+        } catch (e) {
+          debugPrint('RecitationsManager: Error parsing cached data: $e');
+        }
       }
 
-      // No cached data, fetch from API
       if (retry) {
         state = RecitationsScreenState.loading;
         notifyListeners();
       }
 
       list = await QuranApi.chapterRecitations(reciterId: reciterId);
-      _hiveManager.write(
+
+      await _hiveManager.write(
         key: 'localRecitations_$reciterId',
         value: list.map((e) => e.toMap()).toList(),
       );
@@ -88,7 +90,7 @@ class RecitationsManager extends ChangeNotifier {
       state = RecitationsScreenState.success;
       notifyListeners();
     } on Exception catch (e) {
-      debugPrint(e.toString());
+      debugPrint('RecitationsManager: Error getting recitations for reciter ID $reciterId: $e');
       state = RecitationsScreenState.failed;
       notifyListeners();
     }
