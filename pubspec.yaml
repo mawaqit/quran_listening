@@ -43,7 +43,7 @@ dependencies:
   mawaqit_mobile_i18n:
     git:
       url: https://github.com/mawaqit/mawaqit-mobile-i18n.git
-      ref: main
+      ref: SameeHsn-patch-1
 
 #  # Main app dependencies for icons
 #  mawaqit:
