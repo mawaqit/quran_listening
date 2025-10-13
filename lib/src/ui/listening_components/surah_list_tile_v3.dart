@@ -80,12 +80,21 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
             ),
             builder: (context) => WatchPlaybackConfirmationBottomSheet(
               onPlayOnWatch: () {
-                // TODO: Implement watch playback functionality
-                // This is where you would send the audio to the watch
+                // Construct remote URL for the specific chapter
+                String audioUrl = '${widget.reciter.serverUrl}${widget.chapter.id.toString().padLeft(3, '0')}.mp3';
+                
                 Fluttertoast.showToast(
                   msg: "Playing on watch...",
                   toastLength: Toast.LENGTH_SHORT,
                 );
+
+                WearConnector.sendRecitorUrl({
+                  'reciterName': widget.reciter.reciterName,
+                  'mushaf': widget.reciter.mushaf,
+                  'style': widget.reciter.style,
+                  'totalSurah': widget.reciter.totalSurah,
+                  'url': audioUrl,
+                });
               },
               onPlayOnPhone: () {
                 // Play on phone - same logic as before
