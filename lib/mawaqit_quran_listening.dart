@@ -47,6 +47,13 @@ export 'src/ui/pages/tabs/all_recitators_tab.dart';
 export 'src/ui/pages/tabs/downloaded_tab.dart';
 export 'src/ui/pages/tabs/liked_tab.dart';
 
+// Components
+export 'src/ui/components/circular_button.dart';
+export 'src/ui/components/error_widget.dart';
+export 'src/ui/components/mawaqit_dialog.dart';
+export 'src/ui/components/svg_image_asset.dart';
+export 'src/ui/components/watch_playback_confirmation_bottom_sheet.dart';
+
 // Utils
 export 'src/utils/listening_utils/fake_recitors_list.dart';
 export 'src/utils/listening_utils/fake_recitors_list_data.dart';

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show MethodChannel;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icon_v3_cions.dart';
+import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import '../../extensions/theme_extension.dart';
@@ -11,6 +13,7 @@ import '../../providers/audio_provider.dart';
 import '../../providers/download_controller.dart';
 import '../../providers/play_pause_id_provider.dart';
 import '../../providers/player_screens_controller.dart';
+import '../components/watch_playback_confirmation_bottom_sheet.dart';
 
 class SurahListTileV3 extends StatefulWidget {
   final SurahModel chapter;
@@ -61,28 +64,76 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
 
     return GestureDetector(
       key: Key('surah_tile_key_${widget.index}'),
-      onTap: () {
+      onTap: () async {
         context.closeKeyboard();
-        FocusManager.instance.primaryFocus?.unfocus();
-        List<SurahModel> selectedChapters = [];
-        List<Reciter> selectedReciters = [];
-        int selectedIndex = widget.chapters.indexWhere(
-          (element) => element.id == widget.chapter.id,
-        );
-        selectedChapters.addAll(widget.chapters.sublist(selectedIndex));
-        selectedReciters.addAll([widget.reciter]);
+        bool connected = await WearConnector.isWatchConnected();
+        if (connected) {
+          // Show watch playback confirmation bottom sheet
+          showModalBottomSheet(
+            context: context,
+            backgroundColor: context.isDark ? const Color(0xff1C1B23) : Colors.white,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
+              ),
+            ),
+            builder: (context) => WatchPlaybackConfirmationBottomSheet(
+              onPlayOnWatch: () {
+                // TODO: Implement watch playback functionality
+                // This is where you would send the audio to the watch
+                Fluttertoast.showToast(
+                  msg: "Playing on watch...",
+                  toastLength: Toast.LENGTH_SHORT,
+                );
+              },
+              onPlayOnPhone: () {
+                // Play on phone - same logic as before
+                FocusManager.instance.primaryFocus?.unfocus();
+                List<SurahModel> selectedChapters = [];
+                List<Reciter> selectedReciters = [];
+                int selectedIndex = widget.chapters.indexWhere(
+                  (element) => element.id == widget.chapter.id,
+                );
+                selectedChapters.addAll(widget.chapters.sublist(selectedIndex));
+                selectedReciters.addAll([widget.reciter]);
 
-        /// ------------------------------------ open v3 bottom sheet for player ------------------------------------
-        context.read<AudioPlayerProvider>().disposePlayer();
-        context.read<AudioPlayerProvider>().setPlayingRecitor(widget.reciter);
-        context.read<PlayerScreensController>().navigateToPlayerScreenV3(
-          context,
-          selectedReciters,
-          widget.chapter,
-          selectedChapters,
-          widget.playerType,
-        );
-        FocusScope.of(context).unfocus();
+                /// ------------------------------------ open v3 bottom sheet for player ------------------------------------
+                context.read<AudioPlayerProvider>().disposePlayer();
+                context.read<AudioPlayerProvider>().setPlayingRecitor(widget.reciter);
+                context.read<PlayerScreensController>().navigateToPlayerScreenV3(
+                  context,
+                  selectedReciters,
+                  widget.chapter,
+                  selectedChapters,
+                  widget.playerType,
+                );
+                FocusScope.of(context).unfocus();
+              },
+            ),
+          );
+        } else {
+          FocusManager.instance.primaryFocus?.unfocus();
+          List<SurahModel> selectedChapters = [];
+          List<Reciter> selectedReciters = [];
+          int selectedIndex = widget.chapters.indexWhere(
+                (element) => element.id == widget.chapter.id,
+          );
+          selectedChapters.addAll(widget.chapters.sublist(selectedIndex));
+          selectedReciters.addAll([widget.reciter]);
+
+          /// ------------------------------------ open v3 bottom sheet for player ------------------------------------
+          context.read<AudioPlayerProvider>().disposePlayer();
+          context.read<AudioPlayerProvider>().setPlayingRecitor(widget.reciter);
+          context.read<PlayerScreensController>().navigateToPlayerScreenV3(
+            context,
+            selectedReciters,
+            widget.chapter,
+            selectedChapters,
+            widget.playerType,
+          );
+          FocusScope.of(context).unfocus();
+        }
       },
       child: Container(
         padding: const EdgeInsets.only(left: 5, top: 15, bottom: 15, right: 5),
