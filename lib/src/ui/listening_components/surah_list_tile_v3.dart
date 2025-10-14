@@ -88,7 +88,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                   toastLength: Toast.LENGTH_SHORT,
                 );
                 
-                WearConnector.sendRecitorUrl({
+                await WearConnector.sendRecitorUrl({
                   'reciterName': widget.reciter.reciterName,
                   'mushaf': widget.reciter.mainReciterId,
                   'style': widget.reciter.style,
