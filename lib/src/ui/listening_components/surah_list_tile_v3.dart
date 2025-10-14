@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show MethodChannel;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icon_v3_cions.dart';
@@ -82,11 +81,6 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
               onPlayOnWatch: () async {
                 // Construct remote URL for the specific chapter
                 String audioUrl = '${widget.reciter.serverUrl}${widget.chapter.id.toString().padLeft(3, '0')}.mp3';
-                
-                Fluttertoast.showToast(
-                  msg: audioUrl,
-                  toastLength: Toast.LENGTH_SHORT,
-                );
                 
                 await WearConnector.sendRecitorUrl({
                   'reciterName': widget.reciter.reciterName,
@@ -187,11 +181,6 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                             onPlayOnWatch: () async {
                               // Construct remote URL for the specific chapter
                               String audioUrl = '${widget.reciter.serverUrl}${widget.chapter.id.toString().padLeft(3, '0')}.mp3';
-
-                              Fluttertoast.showToast(
-                                msg: audioUrl,
-                                toastLength: Toast.LENGTH_SHORT,
-                              );
 
                               await WearConnector.sendRecitorUrl({
                                 'reciterName': widget.reciter.reciterName,
