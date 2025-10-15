@@ -447,12 +447,11 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                         'url': audioUrl,
                                       });
 
-                                      Navigator.of(context).pop();
+                                      FocusScope.of(context).unfocus();
+                                      audioManager.showHideFloatingPlayer(true, context: context);
+                                      Navigator.pop(context);
                                       // Capture root navigator context BEFORE popping the sheet
                                       final rootCtx = Navigator.of(context, rootNavigator: true).context;
-                                      if (Navigator.of(context).canPop()) {
-                                        Navigator.of(context).pop();
-                                      }
                                       // Defer showing dialog to next microtask to avoid using disposed context
                                       Future.delayed(const Duration(milliseconds: 120), () {
                                         showDialog(
