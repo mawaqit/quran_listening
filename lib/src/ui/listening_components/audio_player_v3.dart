@@ -449,6 +449,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
 
                                       showDialog(
                                         context: context,
+                                        useRootNavigator: true,
                                         builder: (ctx) =>
                                             AlertDialog(
                                               title: const Text('Sent'),
