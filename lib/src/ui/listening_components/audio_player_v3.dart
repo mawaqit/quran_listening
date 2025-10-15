@@ -447,22 +447,21 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                         'url': audioUrl,
                                       });
 
+                                      if (!mounted) return;
+                                      final rootCtx = Navigator.of(context, rootNavigator: true).context;
                                       showDialog(
-                                        context: context,
-                                        useRootNavigator: true,
-                                        builder: (ctx) =>
-                                            AlertDialog(
-                                              title: const Text('Sent'),
-                                              content: const Text(
-                                                  'Audio was sent to your smartwatch successfully.'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.of(ctx).pop(),
-                                                  child: const Text('OK'),
-                                                ),
-                                              ],
+                                        context: rootCtx,
+                                        barrierDismissible: true,
+                                        builder: (ctx) => AlertDialog(
+                                          title: const Text('Sent'),
+                                          content: const Text('Audio was sent to your smartwatch successfully.'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(ctx).pop(),
+                                              child: const Text('OK'),
                                             ),
+                                          ],
+                                        ),
                                       );
                                     },
                                   ),
