@@ -63,59 +63,9 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
 
     return GestureDetector(
       key: Key('surah_tile_key_${widget.index}'),
-      onTap: () async {
+      onTap: () {
         context.closeKeyboard();
-        bool connected = await WearConnector.isWatchConnected();
-        if (connected) {
-          // Show watch playback confirmation bottom sheet
-          showModalBottomSheet(
-            context: context,
-            backgroundColor: context.isDark ? const Color(0xff1C1B23) : Colors.white,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              ),
-            ),
-            builder: (context) => WatchPlaybackConfirmationBottomSheet(
-              onPlayOnWatch: () async {
-                // Construct remote URL for the specific chapter
-                String audioUrl = '${widget.reciter.serverUrl}${widget.chapter.id.toString().padLeft(3, '0')}.mp3';
-                
-                await WearConnector.sendRecitorUrl({
-                  'reciterName': widget.reciter.reciterName,
-                  'mushaf': widget.reciter.mainReciterId,
-                  'style': widget.reciter.style,
-                  'totalSurah': widget.reciter.totalSurah,
-                  'url': audioUrl,
-                });
-              },
-              onPlayOnPhone: () {
-                // Play on phone - same logic as before
-                FocusManager.instance.primaryFocus?.unfocus();
-                List<SurahModel> selectedChapters = [];
-                List<Reciter> selectedReciters = [];
-                int selectedIndex = widget.chapters.indexWhere(
-                  (element) => element.id == widget.chapter.id,
-                );
-                selectedChapters.addAll(widget.chapters.sublist(selectedIndex));
-                selectedReciters.addAll([widget.reciter]);
-
-                /// ------------------------------------ open v3 bottom sheet for player ------------------------------------
-                context.read<AudioPlayerProvider>().disposePlayer();
-                context.read<AudioPlayerProvider>().setPlayingRecitor(widget.reciter);
-                context.read<PlayerScreensController>().navigateToPlayerScreenV3(
-                  context,
-                  selectedReciters,
-                  widget.chapter,
-                  selectedChapters,
-                  widget.playerType,
-                );
-                FocusScope.of(context).unfocus();
-              },
-            ),
-          );
-        } else {
+        // bool connected = await WearConnector.isWatchConnected();
           FocusManager.instance.primaryFocus?.unfocus();
           List<SurahModel> selectedChapters = [];
           List<Reciter> selectedReciters = [];
@@ -136,7 +86,6 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
             widget.playerType,
           );
           FocusScope.of(context).unfocus();
-        }
       },
       child: Container(
         padding: const EdgeInsets.only(left: 5, top: 15, bottom: 15, right: 5),
@@ -166,65 +115,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                   onPressed: () async {
                     context.read<AudioPlayerProvider>().disposePlayer();
                     if (!isPlaying) {
-                      bool connected = await WearConnector.isWatchConnected();
-                      if (connected) {
-                        showModalBottomSheet(
-                          context: context,
-                          backgroundColor: context.isDark ? const Color(0xff1C1B23) : Colors.white,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10),
-                            ),
-                          ),
-                          builder: (context) => WatchPlaybackConfirmationBottomSheet(
-                            onPlayOnWatch: () async {
-                              // Construct remote URL for the specific chapter
-                              String audioUrl = '${widget.reciter.serverUrl}${widget.chapter.id.toString().padLeft(3, '0')}.mp3';
-
-                              await WearConnector.sendRecitorUrl({
-                                'reciterName': widget.reciter.reciterName,
-                                'mushaf': widget.reciter.mainReciterId,
-                                'style': widget.reciter.style,
-                                'totalSurah': widget.reciter.totalSurah,
-                                'url': audioUrl,
-                              });
-                            },
-                            onPlayOnPhone: () {
-                              List<SurahModel> selectedChapters = [];
-                              List<Reciter> selectedReciters = [];
-                              int selectedIndex = widget.chapters.indexWhere(
-                                    (element) => element.id == widget.chapter.id,
-                              );
-                              selectedChapters.addAll(
-                                widget.chapters.sublist(selectedIndex),
-                              );
-                              selectedReciters.addAll([widget.reciter]);
-                              context
-                                  .read<SurahPagePlayPauseIndexProvider>()
-                                  .setCurrentSurahIndex(widget.index);
-                              context
-                                  .read<SurahPagePlayPauseIndexProvider>()
-                                  .setCurrentRecitor(widget.reciter.id);
-
-                              /// ------------------------------------ open v3 bottom sheet for player ------------------------------------
-                              context.read<AudioPlayerProvider>().setPlayingRecitor(
-                                widget.reciter,
-                              );
-                              context
-                                  .read<PlayerScreensController>()
-                                  .navigateToPlayerScreenV3(
-                                context,
-                                selectedReciters,
-                                widget.chapter,
-                                selectedChapters,
-                                widget.playerType,
-                              );
-                              FocusScope.of(context).unfocus();
-                            },
-                          ),
-                        );
-                      } else {
+                      // bool connected = await WearConnector.isWatchConnected();
                         List<SurahModel> selectedChapters = [];
                         List<Reciter> selectedReciters = [];
                         int selectedIndex = widget.chapters.indexWhere(
@@ -255,7 +146,6 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                           widget.playerType,
                         );
                         FocusScope.of(context).unfocus();
-                      }
                     } else {
                       final audioManager = context.read<AudioPlayerProvider>();
                       final audioPlayer = audioManager.audioPlayer;

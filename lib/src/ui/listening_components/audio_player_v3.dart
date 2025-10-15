@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../../mawaqit_quran_listening.dart';
 import '../components/circular_button.dart';
 import '../components/svg_image_asset.dart';
+import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
 
 /// 1. Simple Audio Player (Slider updates audio position once)
 
@@ -54,11 +55,22 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
   bool isSliderDragged = false;
   late AudioPlayerProvider audioManager;
   double? _lastSliderValue;
+  bool _isWatchConnected = false;
 
   @override
   void initState() {
     super.initState();
     setAudio();
+    _checkWatchConnection();
+  }
+
+  Future<void> _checkWatchConnection() async {
+    final connected = await WearConnector.isWatchConnected();
+    if (mounted) {
+      setState(() {
+        _isWatchConnected = connected;
+      });
+    }
   }
 
   Future setAudio() async {
@@ -415,6 +427,32 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                             ],
                           ),
                         ),
+                        if (_isWatchConnected)
+                          Tooltip(
+                            message: 'Play on Watch',
+                            child: IconButton(
+                              key: const Key('watch_play_icon'),
+                              icon: Icon(
+                                Icons.watch,
+                                color: context.colorScheme.primaryFixed,
+                              ),
+                              onPressed: () async {
+                                // Build current audio URL like elsewhere
+                                final serverUrl = audioManager.reciter?.serverUrl ?? '';
+                                final chapterId = audioManager.playingChapter?.id;
+                                if (serverUrl.isEmpty || chapterId == null) return;
+                                final audioUrl = '$serverUrl${chapterId.toString().padLeft(3, '0')}.mp3';
+
+                                await WearConnector.sendRecitorUrl({
+                                  'reciterName': audioManager.playingRecitor?.reciterName,
+                                  'mushaf': audioManager.currentReciterDetail?.mainReciterId,
+                                  'style': audioManager.currentReciterDetail?.style,
+                                  'totalSurah': audioManager.currentReciterDetail?.totalSurah,
+                                  'url': audioUrl,
+                                });
+                              },
+                            ),
+                          ),
                       ],
                     ),
                   ),
