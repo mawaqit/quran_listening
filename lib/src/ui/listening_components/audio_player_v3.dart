@@ -448,21 +448,28 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                       });
 
                                       Navigator.of(context).pop();
+                                      // Capture root navigator context BEFORE popping the sheet
                                       final rootCtx = Navigator.of(context, rootNavigator: true).context;
-                                      showDialog(
-                                        context: rootCtx,
-                                        barrierDismissible: true,
-                                        builder: (ctx) => AlertDialog(
-                                          title: const Text('Sent'),
-                                          content: const Text('Audio was sent to your smartwatch successfully.'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.of(ctx).pop(),
-                                              child: const Text('OK'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
+                                      if (Navigator.of(context).canPop()) {
+                                        Navigator.of(context).pop();
+                                      }
+                                      // Defer showing dialog to next microtask to avoid using disposed context
+                                      Future.delayed(const Duration(milliseconds: 120), () {
+                                        showDialog(
+                                          context: rootCtx,
+                                          barrierDismissible: true,
+                                          builder: (ctx) => AlertDialog(
+                                            title: const Text('Sent'),
+                                            content: const Text('Audio was sent to your smartwatch successfully.'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.of(ctx).pop(),
+                                                child: const Text('OK'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      });
                                     },
                                   ),
                                 )
