@@ -399,6 +399,33 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (_isWatchConnected)
+                          Tooltip(
+                            message: 'Play on your connected smartwatch',
+                            child: IconButton(
+                              key: const Key('watch_play_icon'),
+                              icon: Icon(
+                                Icons.watch,
+                                color: context.colorScheme.primaryFixed,
+                              ),
+                              onPressed: () async {
+                                // Build current audio URL like elsewhere
+                                final serverUrl = audioManager.reciter?.serverUrl ?? '';
+                                final chapterId = audioManager.playingChapter?.id;
+                                if (serverUrl.isEmpty || chapterId == null) return;
+                                final audioUrl = '$serverUrl${chapterId.toString().padLeft(3, '0')}.mp3';
+
+                                await WearConnector.sendRecitorUrl({
+                                  'reciterName': audioManager.playingRecitor?.reciterName,
+                                  'mushaf': audioManager.currentReciterDetail?.mainReciterId,
+                                  'style': audioManager.currentReciterDetail?.style,
+                                  'totalSurah': audioManager.currentReciterDetail?.totalSurah,
+                                  'url': audioUrl,
+                                });
+                              },
+                            ),
+                          ),
+                        if (_isWatchConnected) const SizedBox(width: 8),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -427,32 +454,6 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                             ],
                           ),
                         ),
-                        if (_isWatchConnected)
-                          Tooltip(
-                            message: 'Play on Watch',
-                            child: IconButton(
-                              key: const Key('watch_play_icon'),
-                              icon: Icon(
-                                Icons.watch,
-                                color: context.colorScheme.primaryFixed,
-                              ),
-                              onPressed: () async {
-                                // Build current audio URL like elsewhere
-                                final serverUrl = audioManager.reciter?.serverUrl ?? '';
-                                final chapterId = audioManager.playingChapter?.id;
-                                if (serverUrl.isEmpty || chapterId == null) return;
-                                final audioUrl = '$serverUrl${chapterId.toString().padLeft(3, '0')}.mp3';
-
-                                await WearConnector.sendRecitorUrl({
-                                  'reciterName': audioManager.playingRecitor?.reciterName,
-                                  'mushaf': audioManager.currentReciterDetail?.mainReciterId,
-                                  'style': audioManager.currentReciterDetail?.style,
-                                  'totalSurah': audioManager.currentReciterDetail?.totalSurah,
-                                  'url': audioUrl,
-                                });
-                              },
-                            ),
-                          ),
                       ],
                     ),
                   ),
