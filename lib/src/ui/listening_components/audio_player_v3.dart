@@ -425,33 +425,44 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                     ),
                                     onPressed: () async {
                                       // Build current audio URL like elsewhere
-                                      final serverUrl = audioManager.reciter?.serverUrl ?? '';
-                                      final chapterId = audioManager.playingChapter?.id;
-                                      if (serverUrl.isEmpty || chapterId == null) return;
-                                      final audioUrl = '$serverUrl${chapterId.toString().padLeft(3, '0')}.mp3';
+                                      final serverUrl = audioManager.reciter
+                                          ?.serverUrl ?? '';
+                                      final chapterId = audioManager
+                                          .playingChapter?.id;
+                                      if (serverUrl.isEmpty ||
+                                          chapterId == null) return;
+                                      final audioUrl = '$serverUrl${chapterId
+                                          .toString().padLeft(3, '0')}.mp3';
 
                                       await WearConnector.sendRecitorUrl({
-                                        'reciterName': audioManager.playingRecitor?.reciterName,
-                                        'mushaf': audioManager.currentReciterDetail?.mainReciterId,
-                                        'style': audioManager.currentReciterDetail?.style,
-                                        'totalSurah': audioManager.currentReciterDetail?.totalSurah,
+                                        'reciterName': audioManager
+                                            .playingRecitor?.reciterName,
+                                        'mushaf': audioManager
+                                            .currentReciterDetail
+                                            ?.mainReciterId,
+                                        'style': audioManager
+                                            .currentReciterDetail?.style,
+                                        'totalSurah': audioManager
+                                            .currentReciterDetail?.totalSurah,
                                         'url': audioUrl,
                                       });
 
-                                if (!mounted) return;
-                                showDialog(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    title: const Text('Sent'),
-                                    content: const Text('Audio was sent to your smartwatch successfully.'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.of(ctx).pop(),
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  ),
-                                );
+                                      showDialog(
+                                        context: context,
+                                        builder: (ctx) =>
+                                            AlertDialog(
+                                              title: const Text('Sent'),
+                                              content: const Text(
+                                                  'Audio was sent to your smartwatch successfully.'),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.of(ctx).pop(),
+                                                  child: const Text('OK'),
+                                                ),
+                                              ],
+                                            ),
+                                      );
                                     },
                                   ),
                                 )
