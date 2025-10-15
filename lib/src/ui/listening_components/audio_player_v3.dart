@@ -447,7 +447,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                         'url': audioUrl,
                                       });
 
-                                      if (!mounted) return;
+                                      Navigator.of(context).pop();
                                       final rootCtx = Navigator.of(context, rootNavigator: true).context;
                                       showDialog(
                                         context: rootCtx,
