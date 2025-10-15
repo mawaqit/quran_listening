@@ -423,7 +423,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                       Icons.watch,
                                       color: context.colorScheme.primaryFixed,
                                     ),
-                                    onPressed: () async {
+                                    onPressed: () {
                                       // Build current audio URL like elsewhere
                                       final serverUrl = audioManager.reciter
                                           ?.serverUrl ?? '';
@@ -434,7 +434,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                       final audioUrl = '$serverUrl${chapterId
                                           .toString().padLeft(3, '0')}.mp3';
 
-                                      await WearConnector.sendRecitorUrl({
+                                      WearConnector.sendRecitorUrl({
                                         'reciterName': audioManager
                                             .playingRecitor?.reciterName,
                                         'mushaf': audioManager
