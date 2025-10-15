@@ -56,6 +56,8 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
   late AudioPlayerProvider audioManager;
   double? _lastSliderValue;
   bool _isWatchConnected = false;
+  static const double _headerActionWidth = 48;
+  final GlobalKey<TooltipState> _watchTooltipKey = GlobalKey<TooltipState>();
 
   @override
   void initState() {
@@ -70,6 +72,14 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
       setState(() {
         _isWatchConnected = connected;
       });
+      if (connected) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // Slight delay to ensure layout is ready before showing tooltip
+          Future.delayed(const Duration(milliseconds: 200), () {
+            _watchTooltipKey.currentState?.ensureTooltipVisible();
+          });
+        });
+      }
     }
   }
 
@@ -399,33 +409,39 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (_isWatchConnected)
-                          Tooltip(
-                            message: 'Play on your connected smartwatch',
-                            child: IconButton(
-                              key: const Key('watch_play_icon'),
-                              icon: Icon(
-                                Icons.watch,
-                                color: context.colorScheme.primaryFixed,
-                              ),
-                              onPressed: () async {
-                                // Build current audio URL like elsewhere
-                                final serverUrl = audioManager.reciter?.serverUrl ?? '';
-                                final chapterId = audioManager.playingChapter?.id;
-                                if (serverUrl.isEmpty || chapterId == null) return;
-                                final audioUrl = '$serverUrl${chapterId.toString().padLeft(3, '0')}.mp3';
+                        SizedBox(
+                          width: _headerActionWidth,
+                          child: _isWatchConnected
+                              ? Tooltip(
+                                  key: _watchTooltipKey,
+                                  message: 'Play on your connected smartwatch',
+                                  waitDuration: const Duration(milliseconds: 200),
+                                  showDuration: const Duration(seconds: 2),
+                                  child: IconButton(
+                                    key: const Key('watch_play_icon'),
+                                    icon: Icon(
+                                      Icons.watch,
+                                      color: context.colorScheme.primaryFixed,
+                                    ),
+                                    onPressed: () async {
+                                      // Build current audio URL like elsewhere
+                                      final serverUrl = audioManager.reciter?.serverUrl ?? '';
+                                      final chapterId = audioManager.playingChapter?.id;
+                                      if (serverUrl.isEmpty || chapterId == null) return;
+                                      final audioUrl = '$serverUrl${chapterId.toString().padLeft(3, '0')}.mp3';
 
-                                await WearConnector.sendRecitorUrl({
-                                  'reciterName': audioManager.playingRecitor?.reciterName,
-                                  'mushaf': audioManager.currentReciterDetail?.mainReciterId,
-                                  'style': audioManager.currentReciterDetail?.style,
-                                  'totalSurah': audioManager.currentReciterDetail?.totalSurah,
-                                  'url': audioUrl,
-                                });
-                              },
-                            ),
-                          ),
-                        if (_isWatchConnected) const SizedBox(width: 8),
+                                      await WearConnector.sendRecitorUrl({
+                                        'reciterName': audioManager.playingRecitor?.reciterName,
+                                        'mushaf': audioManager.currentReciterDetail?.mainReciterId,
+                                        'style': audioManager.currentReciterDetail?.style,
+                                        'totalSurah': audioManager.currentReciterDetail?.totalSurah,
+                                        'url': audioUrl,
+                                      });
+                                    },
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -452,6 +468,23 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: _headerActionWidth,
+                          child: Align(
+                            alignment: Alignment.topRight,
+                            child: CircularButton(
+                              icon: Icons.keyboard_arrow_down,
+                              iconColor: context.colorScheme.primaryFixed,
+                              size: 32,
+                              borderColor: context.colorScheme.primaryFixed,
+                              onTap: () {
+                                FocusScope.of(context).unfocus();
+                                audioManager.showHideFloatingPlayer(true, context: context);
+                                Navigator.pop(context);
+                              },
+                            ),
                           ),
                         ),
                       ],
