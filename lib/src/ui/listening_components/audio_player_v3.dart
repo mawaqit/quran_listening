@@ -425,12 +425,15 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                       Icons.watch,
                                       color: context.colorScheme.primaryFixed,
                                     ),
-                                    onPressed: () {
+                                    onPressed: () async {
                                       // Build current audio URL like elsewhere
                                       final serverUrl = audioManager.reciter?.serverUrl ?? '';
                                       final chapterId = audioManager.playingChapter?.id;
                                       if (serverUrl.isEmpty || chapterId == null) return;
                                       final audioUrl = '$serverUrl${chapterId.toString().padLeft(3, '0')}.mp3';
+
+                                      // Pause current playback while opening the sheet
+                                      await audioPlayer.pause();
 
                                       showModalBottomSheet(
                                         context: context,
