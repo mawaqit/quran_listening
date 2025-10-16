@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../../mawaqit_quran_listening.dart';
 import '../components/circular_button.dart';
 import '../components/svg_image_asset.dart';
+import '../components/watch_playback_confirmation_bottom_sheet.dart';
 import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
 
 /// 1. Simple Audio Player (Slider updates audio position once)
@@ -425,50 +426,36 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                     ),
                                     onPressed: () {
                                       // Build current audio URL like elsewhere
-                                      final serverUrl = audioManager.reciter
-                                          ?.serverUrl ?? '';
-                                      final chapterId = audioManager
-                                          .playingChapter?.id;
-                                      if (serverUrl.isEmpty ||
-                                          chapterId == null) return;
-                                      final audioUrl = '$serverUrl${chapterId
-                                          .toString().padLeft(3, '0')}.mp3';
+                                      final serverUrl = audioManager.reciter?.serverUrl ?? '';
+                                      final chapterId = audioManager.playingChapter?.id;
+                                      if (serverUrl.isEmpty || chapterId == null) return;
+                                      final audioUrl = '$serverUrl${chapterId.toString().padLeft(3, '0')}.mp3';
 
-                                      WearConnector.sendRecitorUrl({
-                                        'reciterName': audioManager
-                                            .playingRecitor?.reciterName,
-                                        'mushaf': audioManager
-                                            .currentReciterDetail
-                                            ?.mainReciterId,
-                                        'style': audioManager
-                                            .currentReciterDetail?.style,
-                                        'totalSurah': audioManager
-                                            .currentReciterDetail?.totalSurah,
-                                        'url': audioUrl,
-                                      });
-
-                                      FocusScope.of(context).unfocus();
-                                      audioManager.showHideFloatingPlayer(true, context: context);
-                                      Navigator.pop(context);
-                                      // Capture root navigator context BEFORE popping the sheet
-                                      final rootCtx = Navigator.of(context, rootNavigator: true).context;
-                                      // Defer showing dialog to next microtask to avoid using disposed context
-                                      Future.delayed(const Duration(milliseconds: 120), () {
-                                        showDialog(
-                                          context: rootCtx,
-                                          barrierDismissible: true,
-                                          builder: (ctx) => AlertDialog(
-                                            title: const Text('Sent'),
-                                            content: const Text('Audio was sent to your smartwatch successfully.'),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.of(ctx).pop(),
-                                                child: const Text('OK'),
-                                              ),
-                                            ],
+                                      showModalBottomSheet(
+                                        context: context,
+                                        backgroundColor: context.isDark ? const Color(0xff1C1B23) : Colors.white,
+                                        shape: const RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(10),
+                                            topRight: Radius.circular(10),
                                           ),
-                                        );
-                                      });
+                                        ),
+                                        builder: (ctx) => WatchPlaybackConfirmationBottomSheet(
+                                          onPlayOnWatch: () async {
+                                            await WearConnector.sendRecitorUrl({
+                                              'reciterName': audioManager.playingRecitor?.reciterName,
+                                              'mushaf': audioManager.currentReciterDetail?.mainReciterId,
+                                              'style': audioManager.currentReciterDetail?.style,
+                                              'totalSurah': audioManager.currentReciterDetail?.totalSurah,
+                                              'url': audioUrl,
+                                            });
+                                            Navigator.pop(ctx);
+                                          },
+                                          onPlayOnPhone: () {
+                                            Navigator.pop(ctx);
+                                          },
+                                        ),
+                                      );
                                     },
                                   ),
                                 )
