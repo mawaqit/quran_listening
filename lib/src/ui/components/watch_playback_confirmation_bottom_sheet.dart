@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:sizer/sizer.dart';
-import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
 import '../../extensions/theme_extension.dart';
 import '../components/circular_button.dart';
+import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
+
 
 class WatchPlaybackConfirmationBottomSheet extends StatefulWidget {
   final VoidCallback onPlayOnWatch;
   final VoidCallback onPlayOnPhone;
+  final String surahName;
 
   const WatchPlaybackConfirmationBottomSheet({
     super.key,
     required this.onPlayOnWatch,
     required this.onPlayOnPhone,
+    required this.surahName,
   });
 
   @override
@@ -20,10 +23,9 @@ class WatchPlaybackConfirmationBottomSheet extends StatefulWidget {
       _WatchPlaybackConfirmationBottomSheetState();
 }
 
-class _WatchPlaybackConfirmationBottomSheetState
-    extends State<WatchPlaybackConfirmationBottomSheet> {
-  String? _watchName;
+class _WatchPlaybackConfirmationBottomSheetState extends State<WatchPlaybackConfirmationBottomSheet> {
   bool _loading = true;
+  String? _watchName;
 
   @override
   void initState() {
@@ -33,9 +35,10 @@ class _WatchPlaybackConfirmationBottomSheetState
 
   Future<void> _loadWatchName() async {
     final watchInfo = await WearConnector.isWatchConnected();
+    if (!mounted) return;
     setState(() {
-      _watchName = watchInfo['connected'] ? watchInfo['deviceName'] : null;
       _loading = false;
+      _watchName = watchInfo['deviceName'] as String?;
     });
   }
 
@@ -98,7 +101,7 @@ class _WatchPlaybackConfirmationBottomSheetState
 
                     // Subtitle
                     Text(
-                      "We can play the surah fatiha on your watch",
+                      "We can play the surah ${widget.surahName} on your watch",
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: context.colorScheme.primaryFixed.withOpacity(

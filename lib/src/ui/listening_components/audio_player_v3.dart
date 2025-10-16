@@ -442,6 +442,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                           ),
                                         ),
                                         builder: (ctx) => WatchPlaybackConfirmationBottomSheet(
+                                          surahName: audioManager.playingChapter?.name ?? '',
                                           onPlayOnWatch: () async {
                                             await WearConnector.sendRecitorUrl({
                                               'reciterName': audioManager.playingRecitor?.reciterName,
