@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:sizer/sizer.dart';
+import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
 import '../../extensions/theme_extension.dart';
 import '../components/circular_button.dart';
 
-class WatchPlaybackConfirmationBottomSheet extends StatelessWidget {
+class WatchPlaybackConfirmationBottomSheet extends StatefulWidget {
   final VoidCallback onPlayOnWatch;
   final VoidCallback onPlayOnPhone;
 
@@ -13,6 +14,32 @@ class WatchPlaybackConfirmationBottomSheet extends StatelessWidget {
     required this.onPlayOnWatch,
     required this.onPlayOnPhone,
   });
+
+  @override
+  State<WatchPlaybackConfirmationBottomSheet> createState() => _WatchPlaybackConfirmationBottomSheetState();
+}
+
+class _WatchPlaybackConfirmationBottomSheetState extends State<WatchPlaybackConfirmationBottomSheet> {
+  String? _watchName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWatchName();
+  }
+
+  Future<void> _loadWatchName() async {
+    final watchInfo = await WearConnector.isWatchConnected();
+    final connected = watchInfo['connected'] as bool;
+    _watchName = watchInfo['deviceName'] as String?;
+
+    if (connected) {
+      print('Connected to $_watchName');
+    } else {
+      print('No watch connected');
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +80,9 @@ class WatchPlaybackConfirmationBottomSheet extends StatelessWidget {
                   
                   // Title
                   Text(
-                    "You have a watch connected",
+                    _watchName == null || _watchName!.isEmpty
+                        ? "We detected a smartwatch is connected"
+                        : "Connected watch: ${_watchName}",
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w700,
@@ -65,7 +94,7 @@ class WatchPlaybackConfirmationBottomSheet extends StatelessWidget {
                   
                   // Subtitle
                   Text(
-                    "Where would you like to play?",
+                    "We can play the surah fatiha on your watch",
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: context.colorScheme.primaryFixed.withOpacity(0.7),
@@ -83,9 +112,9 @@ class WatchPlaybackConfirmationBottomSheet extends StatelessWidget {
                         // Play on Watch Button
                         Expanded(
                           child: GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                              onPlayOnWatch();
+                          onTap: () {
+                            Navigator.pop(context);
+                            widget.onPlayOnWatch();
                             },
                             child: Container(
                               height: 50,
@@ -103,7 +132,7 @@ class WatchPlaybackConfirmationBottomSheet extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    "Play on watch",
+                                    "Play",
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 14.sp,
@@ -120,9 +149,9 @@ class WatchPlaybackConfirmationBottomSheet extends StatelessWidget {
                         // Play on Phone Button
                         Expanded(
                           child: GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                              onPlayOnPhone();
+                          onTap: () {
+                            Navigator.pop(context);
+                            widget.onPlayOnPhone();
                             },
                             child: Container(
                               height: 50,
@@ -144,7 +173,7 @@ class WatchPlaybackConfirmationBottomSheet extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    "Play on Phone",
+                                    "Cancel",
                                     style: TextStyle(
                                       color: context.colorScheme.primaryFixed,
                                       fontSize: 14.sp,

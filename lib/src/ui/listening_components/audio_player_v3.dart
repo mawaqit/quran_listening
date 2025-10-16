@@ -68,7 +68,8 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
   }
 
   Future<void> _checkWatchConnection() async {
-    final connected = await WearConnector.isWatchConnected();
+    final watchInfo = await WearConnector.isWatchConnected();
+    final connected = watchInfo['connected'] as bool;
     if (mounted) {
       setState(() {
         _isWatchConnected = connected;
