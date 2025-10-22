@@ -414,57 +414,63 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                         SizedBox(
                           width: _headerActionWidth,
                           child: _isWatchConnected
-                              ? Tooltip(
-                                  key: _watchTooltipKey,
-                                  message: 'Play on your connected smartwatch',
-                                  waitDuration: const Duration(milliseconds: 200),
-                                  showDuration: const Duration(seconds: 2),
-                                  child: IconButton(
-                                    key: const Key('watch_play_icon'),
-                                    icon: Icon(
-                                      Icons.watch,
-                                      color: context.colorScheme.primaryFixed,
-                                    ),
-                                    onPressed: () async {
-                                      // Build current audio URL like elsewhere
-                                      final serverUrl = audioManager.reciter?.serverUrl ?? '';
-                                      final chapterId = audioManager.playingChapter?.id;
-                                      if (serverUrl.isEmpty || chapterId == null) return;
-                                      final audioUrl = '$serverUrl${chapterId.toString().padLeft(3, '0')}.mp3';
+                              ? IconButton(
+                            key: const Key('watch_play_icon'),
+                            icon: Icon(
+                              Icons.watch,
+                              color: context.colorScheme.primaryFixed,
+                            ),
+                            onPressed: () async {
+                              // Build current audio URL like elsewhere
+                              final serverUrl = audioManager.reciter
+                                  ?.serverUrl ?? '';
+                              final chapterId = audioManager.playingChapter?.id;
+                              if (serverUrl.isEmpty || chapterId == null)
+                                return;
+                              final audioUrl = '$serverUrl${chapterId
+                                  .toString()
+                                  .padLeft(3, '0')}.mp3';
 
-                                      // Pause current playback while opening the sheet
-                                      await audioPlayer.pause();
+                              // Pause current playback while opening the sheet
+                              await audioPlayer.pause();
 
-                                      showModalBottomSheet(
-                                        context: context,
-                                        backgroundColor: context.isDark ? const Color(0xff1C1B23) : Colors.white,
-                                        shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(10),
-                                            topRight: Radius.circular(10),
-                                          ),
-                                        ),
-                                        builder: (ctx) => WatchPlaybackConfirmationBottomSheet(
-                                          surahName: audioManager.playingChapter?.name ?? '',
-                                          onPlayOnWatch: () async {
-                                            await WearConnector.sendRecitorUrl({
-                                              'reciterName': audioManager.playingRecitor?.reciterName,
-                                              'mushaf': audioManager.currentReciterDetail?.mainReciterId,
-                                              'style': audioManager.currentReciterDetail?.style,
-                                              'totalSurah': audioManager.currentReciterDetail?.totalSurah,
-                                              'url': audioUrl,
-                                              'id': audioManager.playingChapter?.id,
-                                            });
-                                            Navigator.pop(ctx);
-                                          },
-                                          onPlayOnPhone: () {
-                                            Navigator.pop(ctx);
-                                          },
-                                        ),
-                                      );
-                                    },
+                              showModalBottomSheet(
+                                context: context,
+                                backgroundColor: context.isDark ? const Color(
+                                    0xff1C1B23) : Colors.white,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(10),
+                                    topRight: Radius.circular(10),
                                   ),
-                                )
+                                ),
+                                builder: (ctx) =>
+                                    WatchPlaybackConfirmationBottomSheet(
+                                      surahName: audioManager.playingChapter
+                                          ?.name ?? '',
+                                      onPlayOnWatch: () async {
+                                        await WearConnector.sendRecitorUrl({
+                                          'reciterName': audioManager
+                                              .playingRecitor?.reciterName,
+                                          'mushaf': audioManager
+                                              .currentReciterDetail
+                                              ?.mainReciterId,
+                                          'style': audioManager
+                                              .currentReciterDetail?.style,
+                                          'totalSurah': audioManager
+                                              .currentReciterDetail?.totalSurah,
+                                          'url': audioUrl,
+                                          'id': audioManager.playingChapter?.id,
+                                        });
+                                        Navigator.pop(ctx);
+                                      },
+                                      onPlayOnPhone: () {
+                                        Navigator.pop(ctx);
+                                      },
+                                    ),
+                              );
+                            },
+                          )
                               : const SizedBox.shrink(),
                         ),
                         Expanded(
