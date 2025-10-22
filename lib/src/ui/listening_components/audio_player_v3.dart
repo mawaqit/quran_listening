@@ -453,6 +453,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                               'style': audioManager.currentReciterDetail?.style,
                                               'totalSurah': audioManager.currentReciterDetail?.totalSurah,
                                               'url': audioUrl,
+                                              'id': audioManager.playingChapter?.id,
                                             });
                                             Navigator.pop(ctx);
                                           },
