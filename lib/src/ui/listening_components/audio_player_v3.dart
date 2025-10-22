@@ -449,19 +449,20 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                       surahName: audioManager.playingChapter
                                           ?.name ?? '',
                                       onPlayOnWatch: () async {
-                                        await WearConnector.sendRecitorUrl({
-                                          'reciterName': audioManager
-                                              .playingRecitor?.reciterName,
-                                          'mushaf': audioManager
-                                              .currentReciterDetail
-                                              ?.mainReciterId,
-                                          'style': audioManager
-                                              .currentReciterDetail?.style,
-                                          'totalSurah': audioManager
-                                              .currentReciterDetail?.totalSurah,
-                                          'url': audioUrl,
-                                          'id': audioManager.playingChapter?.id,
-                                        });
+                                         await WearConnector.sendRecitorUrl({
+                                           'reciterName': audioManager
+                                               .playingRecitor?.reciterName,
+                                           'mushaf': audioManager
+                                               .currentReciterDetail
+                                               ?.mainReciterId,
+                                           'style': audioManager
+                                               .currentReciterDetail?.style,
+                                           'totalSurah': audioManager
+                                               .currentReciterDetail?.totalSurah,
+                                           'url': audioUrl,
+                                           'id': audioManager.playingChapter?.id,
+                                           'surahName': audioManager.playingChapter?.name,
+                                         });
                                         Navigator.pop(ctx);
                                       },
                                       onPlayOnPhone: () {
