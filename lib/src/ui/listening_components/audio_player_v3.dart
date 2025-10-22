@@ -467,6 +467,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                       },
                                       onPlayOnPhone: () {
                                         Navigator.pop(ctx);
+                                        audioPlayer.play();
                                       },
                                     ),
                               );
