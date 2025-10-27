@@ -521,51 +521,6 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           )
                               : const SizedBox.shrink(),
                         ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                '${audioManager.playingChapter?.id.toString()} - ${audioManager.playingChapter?.name ?? ''}',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                  color: context.colorScheme.primaryFixed,
-                                ),
-                              ),
-                              Text(
-                                audioManager.reciters.isNotEmpty
-                                    ? audioManager
-                                            .playingRecitor
-                                            ?.reciterName ??
-                                        ''
-                                    : '',
-                                style: TextStyle(
-                                  fontSize: 10.sp,
-                                  color: context.colorScheme.primaryFixed,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: _headerActionWidth,
-                          child: Align(
-                            alignment: AlignmentDirectional.topEnd,
-                            child: CircularButton(
-                              icon: Icons.keyboard_arrow_down,
-                              iconColor: context.colorScheme.primaryFixed,
-                              size: 32,
-                              borderColor: context.colorScheme.primaryFixed,
-                              onTap: () {
-                                FocusScope.of(context).unfocus();
-                                audioManager.showHideFloatingPlayer(true, context: context);
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
