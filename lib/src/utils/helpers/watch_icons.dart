@@ -19,7 +19,7 @@ class WatchIcons {
   WatchIcons._();
 
   static const _kFontFam = 'Watch';
-  static const String? _kFontPkg = null;
+  static const String? _kFontPkg = 'mawaqit_quran_listening';
 
   static const IconData apple_watch = IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData android_watch = IconData(0xe801, fontFamily: _kFontFam, fontPackage: _kFontPkg);
