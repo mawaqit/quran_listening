@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/watch_icons.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:io';
@@ -462,7 +463,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                               ? IconButton(
                             key: const Key('watch_play_icon'),
                             icon: Icon(
-                              Icons.watch,
+                              Platform.isIOS?WatchIcons.apple_watch:WatchIcons.android_watch,
                               color: context.colorScheme.primaryFixed,
                             ),
                             onPressed: () async {
