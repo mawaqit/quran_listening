@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:sizer/sizer.dart';
 import '../../extensions/theme_extension.dart';
+import '../../utils/helpers/watch_icons.dart';
 import '../components/circular_button.dart';
 import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
 
@@ -78,7 +81,7 @@ class _WatchPlaybackConfirmationBottomSheetState extends State<WatchPlaybackConf
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.watch,
+                        Platform.isIOS?WatchIcons.apple_watch:WatchIcons.android_watch,
                         size: 40,
                         color: context.colorScheme.primaryFixed,
                       ),
@@ -135,13 +138,13 @@ class _WatchPlaybackConfirmationBottomSheetState extends State<WatchPlaybackConf
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      Icons.watch,
+                                        Platform.isIOS?WatchIcons.apple_watch:WatchIcons.android_watch,
                                       color: Colors.white,
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      "Play",
+                                      context.tr.play,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 14.sp,
@@ -177,13 +180,13 @@ class _WatchPlaybackConfirmationBottomSheetState extends State<WatchPlaybackConf
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      Icons.phone_android,
+                                      Platform.isIOS?Icons.phone_iphone:Icons.phone_android,
                                       color: context.colorScheme.primaryFixed,
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      "Cancel",
+                                      context.tr.cancel,
                                       style: TextStyle(
                                         color: context.colorScheme.primaryFixed,
                                         fontSize: 14.sp,
