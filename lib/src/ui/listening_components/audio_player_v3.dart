@@ -1,18 +1,17 @@
 import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:mawaqit_quran_listening/src/utils/helpers/watch_icons.dart';
-import 'package:sizer/sizer.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../mawaqit_quran_listening.dart';
-import '../components/circular_button.dart';
-import '../components/svg_image_asset.dart';
-import '../components/watch_playback_confirmation_bottom_sheet.dart';
 import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
+
+import '../../../mawaqit_quran_listening.dart';
 
 /// 1. Simple Audio Player (Slider updates audio position once)
 
@@ -395,75 +394,83 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                 ? Colors.transparent
                 : context.colorScheme.primary.withOpacity(0.04),
       ),
-      child: Stack(
-        alignment: Alignment.topRight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: _headerActionWidth,
-                          child: _isWatchConnected
-                              ? IconButton(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: _headerActionWidth,
+                  child:
+                      _isWatchConnected
+                          ? InkWell(
                             key: const Key('watch_play_icon'),
-                            icon: Icon(
-                              Platform.isIOS?WatchIcons.apple_watch:WatchIcons.android_watch,
+                            child: Icon(
+                              Platform.isIOS
+                                  ? WatchIcons.apple_watch
+                                  : WatchIcons.android_watch,
                               color: context.colorScheme.primaryFixed,
                             ),
-                            onPressed: () async {
+                            onTap: () async {
                               // Build current audio URL like elsewhere
-                              final serverUrl = audioManager.reciter
-                                  ?.serverUrl ?? '';
+                              final serverUrl =
+                                  audioManager.reciter?.serverUrl ?? '';
                               final chapterId = audioManager.playingChapter?.id;
                               if (serverUrl.isEmpty || chapterId == null)
                                 return;
-                              final audioUrl = '$serverUrl${chapterId
-                                  .toString()
-                                  .padLeft(3, '0')}.mp3';
+                              final audioUrl =
+                                  '$serverUrl${chapterId.toString().padLeft(3, '0')}.mp3';
 
                               // Pause current playback while opening the sheet
                               await audioPlayer.pause();
 
                               showModalBottomSheet(
                                 context: context,
-                                backgroundColor: context.isDark ? const Color(
-                                    0xff1C1B23) : Colors.white,
+                                backgroundColor:
+                                    context.isDark
+                                        ? const Color(0xff1C1B23)
+                                        : Colors.white,
                                 shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(10),
                                     topRight: Radius.circular(10),
                                   ),
                                 ),
-                                builder: (ctx) =>
-                                    WatchPlaybackConfirmationBottomSheet(
-                                      surahName: audioManager.playingChapter
-                                          ?.name ?? '',
+                                builder:
+                                    (
+                                      ctx,
+                                    ) => WatchPlaybackConfirmationBottomSheet(
+                                      surahName:
+                                          audioManager.playingChapter?.name ??
+                                          '',
                                       onPlayOnWatch: () async {
-                                         await WearConnector.sendRecitorUrl({
-                                           'reciterName': audioManager
-                                               .playingRecitor?.reciterName,
-                                           'mushaf': audioManager
-                                               .currentReciterDetail
-                                               ?.mainReciterId,
-                                           'style': audioManager
-                                               .currentReciterDetail?.style,
-                                           'totalSurah': audioManager
-                                               .currentReciterDetail?.totalSurah,
-                                           'url': audioUrl,
-                                           'id': audioManager.playingChapter?.id,
-                                           'surahName': audioManager.playingChapter?.name,
-                                         });
+                                        await WearConnector.sendRecitorUrl({
+                                          'reciterName':
+                                              audioManager
+                                                  .playingRecitor
+                                                  ?.reciterName,
+                                          'mushaf':
+                                              audioManager
+                                                  .currentReciterDetail
+                                                  ?.mainReciterId,
+                                          'style':
+                                              audioManager
+                                                  .currentReciterDetail
+                                                  ?.style,
+                                          'totalSurah':
+                                              audioManager
+                                                  .currentReciterDetail
+                                                  ?.totalSurah,
+                                          'url': audioUrl,
+                                          'id': audioManager.playingChapter?.id,
+                                          'surahName':
+                                              audioManager.playingChapter?.name,
+                                        });
                                         Navigator.pop(ctx);
                                       },
                                       onPlayOnPhone: () {
@@ -474,244 +481,233 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                               );
                             },
                           )
-                              : const SizedBox.shrink(),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                '${audioManager.playingChapter?.id.toString()} - ${audioManager.playingChapter?.name ?? ''}',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                  color: context.colorScheme.primaryFixed,
-                                ),
-                              ),
-                              Text(
-                                audioManager.reciters.isNotEmpty
-                                    ? audioManager
-                                            .playingRecitor
-                                            ?.reciterName ??
-                                        ''
-                                    : '',
-                                style: TextStyle(
-                                  fontSize: 10.sp,
-                                  color: context.colorScheme.primaryFixed,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: _headerActionWidth,
-                          child: Align(
-                            alignment: AlignmentDirectional.topEnd,
-                            child: CircularButton(
-                              icon: Icons.keyboard_arrow_down,
-                              iconColor: context.colorScheme.primaryFixed,
-                              size: 32,
-                              borderColor: context.colorScheme.primaryFixed,
-                              onTap: () {
-                                FocusScope.of(context).unfocus();
-                                audioManager.showHideFloatingPlayer(true, context: context);
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: SliderTheme(
-                      data: SliderThemeData(
-                        overlayShape: SliderComponentShape.noThumb,
-                        trackShape: CustomTrackShape(),
-                        thumbShape: const RoundSliderThumbShape(
-                          enabledThumbRadius: 8,
-                        ),
-                      ),
-                      child: Slider(
-                        min: 0,
-                        max: audioManager.duration.inSeconds.toDouble(),
-                        value:
-                            _lastSliderValue ??
-                            (audioManager.position.inSeconds.toDouble() <
-                                    audioManager.duration.inSeconds.toDouble()
-                                ? audioManager.position.inSeconds.toDouble()
-                                : audioManager.duration.inSeconds.toDouble()),
-                        activeColor: context.colorScheme.primaryFixed,
-                        inactiveColor: context.colorScheme.primaryFixed
-                            .withOpacity(0.1),
-                        onChanged: (value) {
-                          final position = Duration(seconds: value.toInt());
-                          setState(() {
-                            isSliderDragged = true;
-                            audioManager.position = position;
-                            _lastSliderValue = value;
-                          });
-                        },
-                        onChangeEnd: (value) async {
-                          final position = Duration(seconds: value.toInt());
-                          await audioPlayer.seek(position);
-                          isSliderDragged = false;
-                          _lastSliderValue = null;
-                        },
-                      ),
-                    ),
-                  ),
-                  Column(
+                          : const SizedBox.shrink(),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    formatTime(audioManager.position),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: context.colorScheme.primaryFixed,
-                                    ),
-                                  ),
-                                  Text(
-                                    formatTime(
-                                      audioManager.duration -
-                                          audioManager.position,
-                                    ),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: context.colorScheme.primaryFixed,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                      Text(
+                        '${audioManager.playingChapter?.id.toString()} - ${audioManager.playingChapter?.name ?? ''}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: context.colorScheme.primaryFixed,
                         ),
                       ),
-                      const SizedBox(height: 15),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            /// Shuffle playlist order (true|false)
-                            IconButton(
-                              splashRadius: iconSplashSize,
-                              icon: SvgImageAsset(
-                                'assets/icons/shuffle.svg',
-                                color: context.colorScheme.primaryFixed,
-                                width: audioPlayer.shuffleModeEnabled ? 30 : 20,
-                              ),
-                              onPressed: () async {
-                                await audioPlayer.setShuffleModeEnabled(
-                                  !audioPlayer.shuffleModeEnabled,
-                                );
-                              },
-                            ),
-
-                            /// Skip to the next item
-                            Visibility(
-                              visible: audioManager.playingChapterIndex != 0,
-                              maintainState: true,
-                              maintainAnimation: true,
-                              maintainSize: true,
-                              child: IconButton(
-                                splashRadius: iconSplashSize,
-                                icon: SvgImageAsset(
-                                  context.isArabicLanguage
-                                      ? 'assets/icons/ic_next_round.svg'
-                                      : 'assets/icons/ic_previous_round.svg',
-                                  color: context.colorScheme.primaryFixed,
-                                ),
-                                onPressed: () async {
-                                  await audioPlayer.seekToPrevious();
-                                },
-                              ),
-                            ),
-
-                            ///Play/Pause/RePlay
-                            CircularButton(
-                              icon:
-                                  audioPlayer.processingState ==
-                                          ProcessingState.completed
-                                      ? Icons.replay_rounded
-                                      : audioManager.isPlaying
-                                      ? Icons.pause_rounded
-                                      : Icons.play_arrow_rounded,
-                              iconColor: context.colorScheme.primaryFixed,
-                              size: 62,
-                              iconSize: 40,
-                              color: context.colorScheme.primaryFixed
-                                  .withOpacity(0.09),
-                              borderColor: Colors.transparent,
-                              onTap: () async {
-                                if (audioPlayer.processingState ==
-                                    ProcessingState.completed) {
-                                  audioPlayer.seek(Duration.zero, index: 0);
-                                } else if (audioManager.isPlaying) {
-                                  await audioPlayer.pause();
-                                } else {
-                                  await audioPlayer.play();
-                                }
-                              },
-                            ),
-
-                            /// Skip to the next item
-                            Visibility(
-                              visible: audioManager.nextChapter != null,
-                              maintainState: true,
-                              maintainAnimation: true,
-                              maintainSize: true,
-                              child: IconButton(
-                                splashRadius: iconSplashSize,
-                                icon: SvgImageAsset(
-                                  context.isArabicLanguage
-                                      ? 'assets/icons/ic_previous_round.svg'
-                                      : 'assets/icons/ic_next_round.svg',
-                                  color: context.colorScheme.primaryFixed,
-                                ),
-                                onPressed: () async {
-                                  await audioPlayer.seekToNext();
-                                },
-                              ),
-                            ),
-
-                            /// Set playlist to loop (off|all|one)
-                            IconButton(
-                              splashRadius: iconSplashSize,
-                              icon: SvgImageAsset(
-                                'assets/icons/loop.svg',
-                                color: context.colorScheme.primaryFixed,
-                                width:
-                                    audioPlayer.loopMode == LoopMode.one
-                                        ? 30
-                                        : 20,
-                              ),
-                              onPressed: () async {
-                                await audioPlayer.setLoopMode(
-                                  audioPlayer.loopMode == LoopMode.one
-                                      ? LoopMode.off
-                                      : LoopMode.one,
-                                );
-                              },
-                            ),
-                          ],
+                      Text(
+                        audioManager.reciters.isNotEmpty
+                            ? audioManager.playingRecitor?.reciterName ?? ''
+                            : '',
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          color: context.colorScheme.primaryFixed,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
-                ],
+                ),
+                SizedBox(
+                  width: _headerActionWidth,
+                  child: Align(
+                    alignment: AlignmentDirectional.topStart,
+                    child: CircularButton(
+                      icon: Icons.keyboard_arrow_down,
+                      iconColor: context.colorScheme.primaryFixed,
+                      size: 32,
+                      borderColor: context.colorScheme.primaryFixed,
+                      onTap: () {
+                        FocusScope.of(context).unfocus();
+                        audioManager.showHideFloatingPlayer(
+                          true,
+                          context: context,
+                        );
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 15),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: SliderTheme(
+              data: SliderThemeData(
+                overlayShape: SliderComponentShape.noThumb,
+                trackShape: CustomTrackShape(),
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+              ),
+              child: Slider(
+                min: 0,
+                max: audioManager.duration.inSeconds.toDouble(),
+                value:
+                    _lastSliderValue ??
+                    (audioManager.position.inSeconds.toDouble() <
+                            audioManager.duration.inSeconds.toDouble()
+                        ? audioManager.position.inSeconds.toDouble()
+                        : audioManager.duration.inSeconds.toDouble()),
+                activeColor: context.colorScheme.primaryFixed,
+                inactiveColor: context.colorScheme.primaryFixed.withOpacity(
+                  0.1,
+                ),
+                onChanged: (value) {
+                  final position = Duration(seconds: value.toInt());
+                  setState(() {
+                    isSliderDragged = true;
+                    audioManager.position = position;
+                    _lastSliderValue = value;
+                  });
+                },
+                onChangeEnd: (value) async {
+                  final position = Duration(seconds: value.toInt());
+                  await audioPlayer.seek(position);
+                  isSliderDragged = false;
+                  _lastSliderValue = null;
+                },
+              ),
+            ),
+          ),
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            formatTime(audioManager.position),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: context.colorScheme.primaryFixed,
+                            ),
+                          ),
+                          Text(
+                            formatTime(
+                              audioManager.duration - audioManager.position,
+                            ),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: context.colorScheme.primaryFixed,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 15),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    /// Shuffle playlist order (true|false)
+                    IconButton(
+                      splashRadius: iconSplashSize,
+                      icon: SvgImageAsset(
+                        'assets/icons/shuffle.svg',
+                        color: context.colorScheme.primaryFixed,
+                        width: audioPlayer.shuffleModeEnabled ? 30 : 20,
+                      ),
+                      onPressed: () async {
+                        await audioPlayer.setShuffleModeEnabled(
+                          !audioPlayer.shuffleModeEnabled,
+                        );
+                      },
+                    ),
+
+                    /// Skip to the next item
+                    Visibility(
+                      visible: audioManager.playingChapterIndex != 0,
+                      maintainState: true,
+                      maintainAnimation: true,
+                      maintainSize: true,
+                      child: IconButton(
+                        splashRadius: iconSplashSize,
+                        icon: SvgImageAsset(
+                          context.isArabicLanguage
+                              ? 'assets/icons/ic_next_round.svg'
+                              : 'assets/icons/ic_previous_round.svg',
+                          color: context.colorScheme.primaryFixed,
+                        ),
+                        onPressed: () async {
+                          await audioPlayer.seekToPrevious();
+                        },
+                      ),
+                    ),
+
+                    ///Play/Pause/RePlay
+                    CircularButton(
+                      icon:
+                          audioPlayer.processingState ==
+                                  ProcessingState.completed
+                              ? Icons.replay_rounded
+                              : audioManager.isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                      iconColor: context.colorScheme.primaryFixed,
+                      size: 62,
+                      iconSize: 40,
+                      color: context.colorScheme.primaryFixed.withOpacity(0.09),
+                      borderColor: Colors.transparent,
+                      onTap: () async {
+                        if (audioPlayer.processingState ==
+                            ProcessingState.completed) {
+                          audioPlayer.seek(Duration.zero, index: 0);
+                        } else if (audioManager.isPlaying) {
+                          await audioPlayer.pause();
+                        } else {
+                          await audioPlayer.play();
+                        }
+                      },
+                    ),
+
+                    /// Skip to the next item
+                    Visibility(
+                      visible: audioManager.nextChapter != null,
+                      maintainState: true,
+                      maintainAnimation: true,
+                      maintainSize: true,
+                      child: IconButton(
+                        splashRadius: iconSplashSize,
+                        icon: SvgImageAsset(
+                          context.isArabicLanguage
+                              ? 'assets/icons/ic_previous_round.svg'
+                              : 'assets/icons/ic_next_round.svg',
+                          color: context.colorScheme.primaryFixed,
+                        ),
+                        onPressed: () async {
+                          await audioPlayer.seekToNext();
+                        },
+                      ),
+                    ),
+
+                    /// Set playlist to loop (off|all|one)
+                    IconButton(
+                      splashRadius: iconSplashSize,
+                      icon: SvgImageAsset(
+                        'assets/icons/loop.svg',
+                        color: context.colorScheme.primaryFixed,
+                        width: audioPlayer.loopMode == LoopMode.one ? 30 : 20,
+                      ),
+                      onPressed: () async {
+                        await audioPlayer.setLoopMode(
+                          audioPlayer.loopMode == LoopMode.one
+                              ? LoopMode.off
+                              : LoopMode.one,
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
