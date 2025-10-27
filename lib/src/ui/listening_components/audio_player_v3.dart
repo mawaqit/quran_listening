@@ -506,7 +506,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                         SizedBox(
                           width: _headerActionWidth,
                           child: Align(
-                            alignment: Alignment.topRight,
+                            alignment: AlignmentDirectional.topEnd,
                             child: CircularButton(
                               icon: Icons.keyboard_arrow_down,
                               iconColor: context.colorScheme.primaryFixed,
