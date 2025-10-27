@@ -84,6 +84,9 @@ flutter:
     - family: MawaqitIcons
       fonts:
         - asset: assets/fonts/MawaqitIcons.ttf
+    - family: watch
+      fonts:
+        - asset: assets/fonts/watch_icons.ttf
   # fonts:
   #   - family: Schyler
   #     fonts:
