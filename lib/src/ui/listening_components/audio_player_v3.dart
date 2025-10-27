@@ -715,21 +715,6 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
               ),
             ],
           ),
-          Padding(
-            key: const Key('player_bottom_sheet_arrow_down'),
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: CircularButton(
-              icon: Icons.keyboard_arrow_down,
-              iconColor: context.colorScheme.primaryFixed,
-              size: 32,
-              borderColor: context.colorScheme.primaryFixed,
-              onTap: () {
-                FocusScope.of(context).unfocus();
-                audioManager.showHideFloatingPlayer(true, context: context);
-                Navigator.pop(context);
-              },
-            ),
-          ),
         ],
       ),
     );
