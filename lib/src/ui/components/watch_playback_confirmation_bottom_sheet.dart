@@ -1,10 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
-import 'package:sizer/sizer.dart';
-import '../../extensions/theme_extension.dart';
-import '../components/circular_button.dart';
 import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
+import 'package:sizer/sizer.dart';
 
+import '../../extensions/theme_extension.dart';
+import '../../utils/helpers/watch_icons.dart';
+import '../components/circular_button.dart';
 
 class WatchPlaybackConfirmationBottomSheet extends StatefulWidget {
   final VoidCallback onPlayOnWatch;
@@ -23,7 +26,8 @@ class WatchPlaybackConfirmationBottomSheet extends StatefulWidget {
       _WatchPlaybackConfirmationBottomSheetState();
 }
 
-class _WatchPlaybackConfirmationBottomSheetState extends State<WatchPlaybackConfirmationBottomSheet> {
+class _WatchPlaybackConfirmationBottomSheetState
+    extends State<WatchPlaybackConfirmationBottomSheet> {
   bool _loading = true;
   String? _watchName;
 
@@ -78,7 +82,9 @@ class _WatchPlaybackConfirmationBottomSheetState extends State<WatchPlaybackConf
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.watch,
+                        Platform.isIOS
+                            ? WatchIcons.apple_watch
+                            : WatchIcons.android_watch,
                         size: 40,
                         color: context.colorScheme.primaryFixed,
                       ),
@@ -87,9 +93,7 @@ class _WatchPlaybackConfirmationBottomSheetState extends State<WatchPlaybackConf
 
                     // Title
                     Text(
-                      _watchName == null || _watchName!.isEmpty
-                          ? "We detected a smartwatch is connected"
-                          : "Connected watch: ${_watchName}",
+                      "${context.tr.connected_watch}: ${_watchName == null || _watchName!.isEmpty ? context.tr.unknown_smartwatch : _watchName}",
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
@@ -101,7 +105,7 @@ class _WatchPlaybackConfirmationBottomSheetState extends State<WatchPlaybackConf
 
                     // Subtitle
                     Text(
-                      "We can play the surah ${widget.surahName} on your watch",
+                      "${context.tr.chapter}${widget.surahName} ${context.tr.ready_play_watch}",
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: context.colorScheme.primaryFixed.withOpacity(
@@ -135,13 +139,15 @@ class _WatchPlaybackConfirmationBottomSheetState extends State<WatchPlaybackConf
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      Icons.watch,
+                                      Platform.isIOS
+                                          ? WatchIcons.apple_watch
+                                          : WatchIcons.android_watch,
                                       color: Colors.white,
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      "Play",
+                                      context.tr.play,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 14.sp,
@@ -177,13 +183,15 @@ class _WatchPlaybackConfirmationBottomSheetState extends State<WatchPlaybackConf
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      Icons.phone_android,
+                                      Platform.isIOS
+                                          ? Icons.phone_iphone
+                                          : Icons.phone_android,
                                       color: context.colorScheme.primaryFixed,
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      "Cancel",
+                                      context.tr.cancel,
                                       style: TextStyle(
                                         color: context.colorScheme.primaryFixed,
                                         fontSize: 14.sp,
