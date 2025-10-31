@@ -98,12 +98,14 @@ class PlayerScreensController extends ChangeNotifier {
         borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
       ),
       builder:
-          (context) => QuranAudioPlayerV3(
-            reciters: reciters,
-            chapter: chapter,
-            chapters: chapters,
-            playerType: playerType,
-            reciterFromAllSaved: reciterFromAllSaved,
+          (context) => SafeArea(
+            child: QuranAudioPlayerV3(
+              reciters: reciters,
+              chapter: chapter,
+              chapters: chapters,
+              playerType: playerType,
+              reciterFromAllSaved: reciterFromAllSaved,
+            ),
           ),
     ).then((_) {
       audioPlayerProvider.showHideFloatingPlayer(true, context: context);
