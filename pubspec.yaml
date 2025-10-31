@@ -31,7 +31,7 @@ dependencies:
   # UI
   sizer: ^2.0.15
   flutter_svg: ^2.0.3
-  fluttertoast: ^8.0.9
+  fluttertoast: ^9.0.0
   modal_bottom_sheet: ^3.0.0-pre
   skeletonizer:
 
