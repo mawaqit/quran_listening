@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
-import '../core/api/quran_api.dart';
-import '../core/repository/quran_listening_repository.dart';
-import '../models/reciter.dart';
-import '../models/surah_model.dart';
+import 'package:provider/provider.dart';
+
+import '../../mawaqit_quran_listening.dart';
 
 enum RecitersScreenState { loading, success, failed }
 
@@ -39,7 +39,29 @@ class RecitorsProvider extends ChangeNotifier {
 
   Future<void> getReciters(BuildContext context, {String? language}) async {
     String? localeName = language ?? context.tr.localeName;
-    List<String> availableLocales = ['ar', 'en', 'fr', 'ru', 'de', 'es', 'tr', 'cn', 'th', 'ur', 'bn', 'bs', 'ug', 'fa', 'tg', 'ml', 'tl', 'id', 'pt', 'ha', 'sw'];
+    List<String> availableLocales = [
+      'ar',
+      'en',
+      'fr',
+      'ru',
+      'de',
+      'es',
+      'tr',
+      'cn',
+      'th',
+      'ur',
+      'bn',
+      'bs',
+      'ug',
+      'fa',
+      'tg',
+      'ml',
+      'tl',
+      'id',
+      'pt',
+      'ha',
+      'sw',
+    ];
     if (!availableLocales.contains(localeName)) {
       localeName = 'eng';
     }
@@ -59,14 +81,19 @@ class RecitorsProvider extends ChangeNotifier {
         state = RecitersScreenState.failed;
       }
 
-      bool isReciterLocalExist = await _repository.isReciterLocalExist(localeName);
+      bool isReciterLocalExist = await _repository.isReciterLocalExist(
+        localeName,
+      );
       if (!isReciterLocalExist) {
         reciters = await QuranApi.reciters(language: localeName);
         originalReciters = reciters;
         recitersForFavorite = reciters;
 
         if (reciters.isNotEmpty) {
-          _repository.hiveManager.write(key: '${quranRecitersKey}_$localeName', value: reciters.map((e) => e.toMap()).toList());
+          _repository.hiveManager.write(
+            key: '${quranRecitersKey}_$localeName',
+            value: reciters.map((e) => e.toMap()).toList(),
+          );
         }
       }
 
@@ -78,17 +105,35 @@ class RecitorsProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> checkLocalSurahs({required BuildContext context, required String locale}) async {
+  Future<void> checkLocalSurahs({
+    required BuildContext context,
+    required String locale,
+  }) async {
+    final recitationManager = context.read<RecitationsManager>();
     final localeName = locale;
-    final data = await _repository.hiveManager.read(key: '${chaptersKey}_$localeName', defaultValue: '[]');
+    final data = await _repository.hiveManager.read(
+      key: '${chaptersKey}_$localeName',
+      defaultValue: '[]',
+    );
     if (data != null && data.isNotEmpty) {
-      surahList = json.decode(data).map<SurahModel>((e) => SurahModel.fromMap(e)).toList();
+      surahList =
+          json
+              .decode(data)
+              .map<SurahModel>((e) => SurahModel.fromMap(e))
+              .toList();
+      recitationManager.surahs = surahList;
     }
-    bool isSurahsLocalExist = await _repository.hiveManager.isKeyExist('${chaptersKey}_$localeName');
+    bool isSurahsLocalExist = await _repository.hiveManager.isKeyExist(
+      '${chaptersKey}_$localeName',
+    );
     if (!isSurahsLocalExist) {
       surahList = await QuranApi.getSurah(language: localeName);
       if (surahList.isNotEmpty) {
-        _repository.hiveManager.write(key: '${chaptersKey}_$localeName', value: surahList.map((e) => e.toMap()).toList());
+        recitationManager.surahs = surahList;
+        _repository.hiveManager.write(
+          key: '${chaptersKey}_$localeName',
+          value: surahList.map((e) => e.toMap()).toList(),
+        );
       }
     }
     notifyListeners();
@@ -104,8 +149,15 @@ class RecitorsProvider extends ChangeNotifier {
         return Container(
           height: height ?? 40,
           width: width ?? 40,
-          decoration: BoxDecoration(color: Colors.grey[300], shape: BoxShape.circle),
-          child: Icon(Icons.person, color: Colors.grey[600], size: (height ?? 40) * 0.6),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.person,
+            color: Colors.grey[600],
+            size: (height ?? 40) * 0.6,
+          ),
         );
       },
     );
@@ -120,7 +172,11 @@ class RecitorsProvider extends ChangeNotifier {
 
         frReciters = await _repository.getReciters('fr');
 
-        languageBasedAllReciters = [...enReciters, ...arReciters, ...frReciters];
+        languageBasedAllReciters = [
+          ...enReciters,
+          ...arReciters,
+          ...frReciters,
+        ];
       } catch (e) {
         debugPrint('RecitorsProvider: Error caching reciters: $e');
       }
@@ -158,7 +214,12 @@ class RecitorsProvider extends ChangeNotifier {
       }
     } else {
       reciters = [];
-      reciters.addAll(originalReciters.where((element) => element.reciterName.toLowerCase().contains(word.toLowerCase())));
+      reciters.addAll(
+        originalReciters.where(
+          (element) =>
+              element.reciterName.toLowerCase().contains(word.toLowerCase()),
+        ),
+      );
     }
 
     notifyListeners();
@@ -191,7 +252,12 @@ class RecitorsProvider extends ChangeNotifier {
       }
     } else {
       recitersForFavorite = [];
-      recitersForFavorite.addAll(originalReciters.where((element) => element.reciterName.toLowerCase().contains(word.toLowerCase())));
+      recitersForFavorite.addAll(
+        originalReciters.where(
+          (element) =>
+              element.reciterName.toLowerCase().contains(word.toLowerCase()),
+        ),
+      );
     }
     notifyListeners();
   }
