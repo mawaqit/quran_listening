@@ -16,16 +16,7 @@ class RecitationsManager extends ChangeNotifier {
   Map<int, List<Recitation>> recitations = {};
   List<SurahModel> surahs = [];
 
-  Future<void> initializeSurahs() async {
-    if (surahs.isEmpty) {
-      try {
-        surahs = await QuranApi.getSurah(language: 'en');
-        notifyListeners();
-      } catch (e) {
-        debugPrint('Error initializing surahs: $e');
-      }
-    }
-  }
+
 
   void cacheSurahs() {
     Future.microtask(() async {

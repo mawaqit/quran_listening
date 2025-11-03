@@ -36,9 +36,9 @@ class _SurahPageState extends State<SurahPage> {
 
       // Initialize surahs and load recitations for current reciter
       final recitationsManager = context.read<RecitationsManager>();
-      if (recitationsManager.surahs.isEmpty) {
-        await recitationsManager.initializeSurahs();
-      }
+      // if (recitationsManager.surahs.isEmpty) {
+      //   await recitationsManager.initializeSurahs();
+      // }
       
       // Ensure we have a valid currentReciterId before loading recitations
       if (audioPlayerProvider.currentReciterId != null) {
@@ -71,9 +71,9 @@ class _SurahPageState extends State<SurahPage> {
       // Initialize surahs and load recitations when reciter changes
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         final recitationsManager = context.read<RecitationsManager>();
-        if (recitationsManager.surahs.isEmpty) {
-          await recitationsManager.initializeSurahs();
-        }
+        // if (recitationsManager.surahs.isEmpty) {
+        //   await recitationsManager.initializeSurahs();
+        // }
         // Load recitations for the current reciter
         if (audioPlayerProvider.currentReciterId != null) {
           await recitationsManager.getRecitations(reciterId: audioPlayerProvider.currentReciterId!);

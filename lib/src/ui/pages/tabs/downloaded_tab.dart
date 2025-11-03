@@ -86,7 +86,7 @@ class _DownloadedTabState extends State<DownloadedTab> {
       // Load downloaded recitations first
       await downloadController.loadDownloadedRecitations();
       // Initialize surahs
-      await recitationsManager.initializeSurahs();
+      // await recitationsManager.initializeSurahs();
       // Then get reciters
       await recitorsProviderRef.getReciters(currentContext, language: localeName);
       // Finally populate the lists
