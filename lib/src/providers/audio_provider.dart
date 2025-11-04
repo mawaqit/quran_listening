@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -17,6 +19,13 @@ enum PlayerType {
 
 class AudioPlayerProvider extends ChangeNotifier {
   AudioPlayer _audioPlayer = AudioPlayer();
+  StreamSubscription<PlayerState>? _playerStateSub;
+  StreamSubscription<Duration?>? _durationSub;
+  StreamSubscription<Duration>? _positionSub;
+  StreamSubscription<int?>? _indexSub;
+  StreamSubscription<LoopMode>? _loopModeSub;
+  StreamSubscription<bool>? _shuffleSub;
+
   OverlayEntry? floatingPlayer;
   PlayerType? playerType;
 
@@ -186,27 +195,29 @@ class AudioPlayerProvider extends ChangeNotifier {
       preload: true,
     );
   }
+  Duration _lastNotifiedPosition = Duration.zero;
 
   void subscribeToStreams() {
-    /// Listen to states: playing, paused, stopped
-    audioPlayer.playerStateStream.listen((state) {
-      _isPlaying = audioPlayer.playerState.playing;
+    // prevent double subscription
+    if (_playerStateSub != null) return;
+
+    _playerStateSub = _audioPlayer.playerStateStream.listen((state) {
+      _isPlaying = state.playing;
       notifyListeners();
     });
 
-    /// Listen to audio duration
-    audioPlayer.durationStream.listen((newDuration) {
+    _durationSub = _audioPlayer.durationStream.listen((newDuration) {
       _duration = newDuration ?? Duration.zero;
       notifyListeners();
     });
-
-    /// Listen to audio position
-    audioPlayer.positionStream.listen((newPosition) {
+    _positionSub = _audioPlayer.positionStream.listen((newPosition) {
       _position = newPosition;
-      notifyListeners();
+      if (_position.inSeconds != _lastNotifiedPosition.inSeconds) {
+        _lastNotifiedPosition = _position;
+      }
     });
 
-    audioPlayer.currentIndexStream.listen((event) {
+    _indexSub = _audioPlayer.currentIndexStream.listen((event) {
       if (event != null) {
         playingChapterIndex = event;
         playingChapter = chapters[event];
@@ -220,16 +231,17 @@ class AudioPlayerProvider extends ChangeNotifier {
       }
     });
 
-    audioPlayer.loopModeStream.listen((event) {
+    _loopModeSub = _audioPlayer.loopModeStream.listen((event) {
       _loopMode = event;
       notifyListeners();
     });
 
-    audioPlayer.shuffleModeEnabledStream.listen((event) {
+    _shuffleSub = _audioPlayer.shuffleModeEnabledStream.listen((event) {
       _isShuffled = event;
       notifyListeners();
     });
   }
+
 
   getCurrentPlayingSurah({required BuildContext context}) {
     final reciterController = Provider.of<RecitorsProvider>(
@@ -253,11 +265,30 @@ class AudioPlayerProvider extends ChangeNotifier {
     _isPlaying = false;
     _isLooping = false;
     _isShuffled = false;
-    audioPlayer.dispose();
-    playerType = null;
+
+    // cancel stream subs
+    _playerStateSub?.cancel();
+    _durationSub?.cancel();
+    _positionSub?.cancel();
+    _indexSub?.cancel();
+    _loopModeSub?.cancel();
+    _shuffleSub?.cancel();
+
+    _playerStateSub = null;
+    _durationSub = null;
+    _positionSub = null;
+    _indexSub = null;
+    _loopModeSub = null;
+    _shuffleSub = null;
+
+    _audioPlayer.dispose();
+
+    // create a fresh player
     _audioPlayer = AudioPlayer();
+
     if (notify) notifyListeners();
   }
+
 
   void toggleIsPlay() {
     _isPlaying = !_isPlaying;

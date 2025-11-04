@@ -351,9 +351,9 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
 
   @override
   void dispose() {
-    if (!audioManager.isFloating) {
-      audioManager.disposePlayer(notify: false);
-    }
+    // if (!audioManager.isFloating) {
+    //   audioManager.disposePlayer(notify: false);
+    // }
     super.dispose();
   }
 
