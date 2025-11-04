@@ -203,7 +203,6 @@ class AudioPlayerProvider extends ChangeNotifier {
   Duration _lastNotifiedPosition = Duration.zero;
 
   void subscribeToStreams() {
-    // prevent double subscription
     if (_playerStateSub != null) return;
 
     _playerStateSub = _audioPlayer.playerStateStream.listen((state) {
@@ -215,6 +214,8 @@ class AudioPlayerProvider extends ChangeNotifier {
       _duration = newDuration ?? Duration.zero;
       notifyListeners();
     });
+
+    // high-frequency → no notify
     _positionSub = _audioPlayer.positionStream.listen((newPosition) {
       _position = newPosition;
       if (_position.inSeconds != _lastNotifiedPosition.inSeconds) {
@@ -225,13 +226,24 @@ class AudioPlayerProvider extends ChangeNotifier {
     _indexSub = _audioPlayer.currentIndexStream.listen((event) {
       if (event != null) {
         playingChapterIndex = event;
-        playingChapter = chapters[event];
-        playingChapterId = playingChapter!.id;
-        if (event >= 0 && event < reciters.length) {
-          playingRecitor = reciters[event];
+        if (chapters.isNotEmpty && event < chapters.length) {
+          playingChapter = chapters[event];
+          playingChapterId = playingChapter!.id;
         } else {
-          playingRecitor = reciters.first;
+          playingChapter = null;
+          playingChapterId = null;
         }
+
+        if (reciters.isNotEmpty) {
+          if (event >= 0 && event < reciters.length) {
+            playingRecitor = reciters[event];
+          } else {
+            playingRecitor = reciters.first;
+          }
+        } else {
+          playingRecitor = null;
+        }
+
         notifyListeners();
       }
     });
@@ -261,16 +273,14 @@ class AudioPlayerProvider extends ChangeNotifier {
 
   void disposePlayer({bool notify = true}) {
     showHideFloatingPlayer(false, notify: false);
-    reciters = [];
-    chapters = [];
-    playingChapter = null;
-    playingChapterId = null;
-    playingChapterIndex = null;
+
+    // we DO NOT clear reciters/chapters here anymore,
+    // because the UI may still read them in the same frame.
+
     _isPlaying = false;
     _isLooping = false;
     _isShuffled = false;
 
-    // cancel stream subs
     _playerStateSub?.cancel();
     _durationSub?.cancel();
     _positionSub?.cancel();
@@ -286,8 +296,6 @@ class AudioPlayerProvider extends ChangeNotifier {
     _shuffleSub = null;
 
     _audioPlayer.dispose();
-
-    // create a fresh player
     _audioPlayer = AudioPlayer();
 
     if (notify) notifyListeners();

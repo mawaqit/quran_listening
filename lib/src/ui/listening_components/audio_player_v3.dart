@@ -142,12 +142,17 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
             }
           }
         } else {
+          // this is the "not allSavedSurahs" branch
           final reciter = widget.reciters.first;
-          final reciterFromManager = audioManager.reciters.first;
-          if (reciter.id == reciterFromManager.id) {
-            ///When Player Screen is already playing for this reciter
+          final Reciter? reciterFromManager =
+              audioManager.reciters.isNotEmpty
+                  ? audioManager.reciters.first
+                  : null;
+
+          if (reciterFromManager != null &&
+              reciter.id == reciterFromManager.id) {
+            // same reciter as current player
             if (audioManager.playingChapter?.id == widget.chapter.id) {
-              ///Already Playing the same Chapter from Same Section
               audioManager.audioPlayer.play();
               audioManager.showHideFloatingPlayer(
                 context: context,
@@ -156,13 +161,11 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
               );
               return;
             } else {
-              ///Playing Other Chapter
-              int chapterIndex = audioManager.chapters.indexWhere(
+              final chapterIndex = audioManager.chapters.indexWhere(
                 (element) => element.id == widget.chapter.id,
               );
               if (chapterIndex != -1) {
-                ///Playing Other Surah/Chapter from same sectoin
-                audioManager.playIndex(index: chapterIndex);
+                await audioManager.playIndex(index: chapterIndex);
                 audioManager.showHideFloatingPlayer(
                   context: context,
                   false,
@@ -170,12 +173,12 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                 );
                 return;
               } else {
-                ///Play other section
+                // play other section
                 audioManager.disposePlayer(notify: false);
               }
             }
           } else {
-            ///Play other section
+            // reciters list was empty OR different reciter → reset
             audioManager.disposePlayer(notify: false);
           }
         }
