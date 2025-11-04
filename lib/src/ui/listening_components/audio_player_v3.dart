@@ -359,7 +359,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                '${audioManager.playingChapter?.id.toString()} - ${audioManager.playingChapter?.name ?? ''}',
+                                '${audioManager.playingChapter?.id??""} - ${audioManager.playingChapter?.name ?? ''}',
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w700,
