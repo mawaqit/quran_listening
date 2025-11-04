@@ -2,12 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
 
 import '../models/reciter.dart';
 import '../models/surah_model.dart';
-
-import 'package:provider/provider.dart';
-
 import 'reciters_controller.dart';
 
 enum PlayerType {
@@ -132,10 +130,16 @@ class AudioPlayerProvider extends ChangeNotifier {
           ? chapters[playingChapterIndex! + 1]
           : null;
 
-  Reciter? get currentReciterDetail =>
-      playingChapterIndex != null && reciters.length != 1
-          ? reciters[playingChapterIndex!]
-          : reciters[0];
+  Reciter? get currentReciterDetail {
+    if (reciters.isEmpty) return null;
+    if (playingChapterIndex != null &&
+        playingChapterIndex! >= 0 &&
+        playingChapterIndex! < reciters.length &&
+        reciters.length != 1) {
+      return reciters[playingChapterIndex!];
+    }
+    return reciters.first;
+  }
 
   // Reciter? get reciter => reciters.isEmpty || playingChapterIndex == null
   //     ? null
@@ -195,6 +199,7 @@ class AudioPlayerProvider extends ChangeNotifier {
       preload: true,
     );
   }
+
   Duration _lastNotifiedPosition = Duration.zero;
 
   void subscribeToStreams() {
@@ -242,7 +247,6 @@ class AudioPlayerProvider extends ChangeNotifier {
     });
   }
 
-
   getCurrentPlayingSurah({required BuildContext context}) {
     final reciterController = Provider.of<RecitorsProvider>(
       context,
@@ -288,7 +292,6 @@ class AudioPlayerProvider extends ChangeNotifier {
 
     if (notify) notifyListeners();
   }
-
 
   void toggleIsPlay() {
     _isPlaying = !_isPlaying;
