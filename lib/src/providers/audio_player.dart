@@ -318,9 +318,9 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
 
   @override
   void dispose() {
-    if (!audioManager.isFloating) {
-      audioManager.disposePlayer(notify: false);
-    }
+    // if (!audioManager.isFloating) {
+    //   audioManager.disposePlayer(notify: false);
+    // }
     super.dispose();
   }
 
