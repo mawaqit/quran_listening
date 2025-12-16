@@ -122,7 +122,7 @@ class DownloadedSurahTileV3 extends StatelessWidget {
             ),
             margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              color: context.colorScheme.surfaceContainer,
+              color: context.colorScheme.surfaceContainerLow,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -248,7 +248,7 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13.sp,
-                          color: context.colorScheme.surfaceContainerHighest,
+                          color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
                         ),
                       ),
                       const SizedBox(height: 2),
