@@ -330,7 +330,6 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
     final audioPlayer = audioManager.audioPlayer;
     Color whiteColor = Colors.white;
     final reciterController = context.watch<RecitorsProvider>();
-    final isRTL = context.isArabicLanguage;
     final isSpanish =
         context.tr.localeName == 'es' ||
         context.tr.localeName == 'tr' ||
@@ -406,7 +405,7 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                                 fontSize: 12,
                                 fontWeight: FontWeight.w400,
                                 color: whiteColor,
-                                height: isRTL || isSpanish ? 0.8 : null,
+                                height: context.isRtl || isSpanish ? 0.8 : null,
                                 fontFamily: 'Mulish',
                               ),
                             ),
@@ -587,7 +586,7 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                               child: IconButton(
                                 splashRadius: iconSplashSize,
                                 icon: Icon(
-                                  context.isArabicLanguage
+                                  context.isRtl
                                       ? Icons.skip_next_rounded
                                       : Icons.skip_previous_rounded,
                                   color: whiteColor,
@@ -633,7 +632,7 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                               child: IconButton(
                                 splashRadius: iconSplashSize,
                                 icon: Icon(
-                                  context.isArabicLanguage
+                                  context.isRtl
                                       ? Icons.skip_previous_rounded
                                       : Icons.skip_next_rounded,
                                   color: whiteColor,
@@ -797,7 +796,7 @@ class FloatingQuranPlayer extends StatelessWidget {
                         child: IconButton(
                           splashRadius: kSplashRadius,
                           icon: Icon(
-                            context.isArabicLanguage
+                            context.isRtl
                                 ? Icons.skip_next_rounded
                                 : Icons.skip_previous_rounded,
                             color: whiteColor,
@@ -841,7 +840,7 @@ class FloatingQuranPlayer extends StatelessWidget {
                         child: IconButton(
                           splashRadius: kSplashRadius,
                           icon: Icon(
-                            context.isArabicLanguage
+                            context.isRtl
                                 ? Icons.skip_previous_rounded
                                 : Icons.skip_next_rounded,
                             color: whiteColor,

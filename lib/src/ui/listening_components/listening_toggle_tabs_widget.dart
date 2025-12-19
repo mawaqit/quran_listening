@@ -24,7 +24,7 @@ class _ListeningToggleTabsWidgetState extends State<ListeningToggleTabsWidget> {
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: Align(
-            alignment: context.isArabicLanguage ? Alignment.centerRight : Alignment.centerLeft,
+            alignment: context.isRtl ? Alignment.centerRight : Alignment.centerLeft,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
