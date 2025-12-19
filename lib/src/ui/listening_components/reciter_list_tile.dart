@@ -35,6 +35,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
 
   @override
   Widget build(BuildContext context) {
+    final isRTL = context.isArabicLanguage;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -42,7 +43,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
         color: context.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
       ),
-      padding: EdgeInsetsDirectional.only(start: 19, top: 15, bottom: 15),
+      padding: EdgeInsets.only(left: isRTL ? 0 : 19, top: 15, bottom: 15, right: isRTL ? 19 : 0),
       child: Row(
         children: [
           Expanded(
@@ -77,7 +78,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
           (widget.listeningTab == ListeningTab.allRecitator)
               ? Padding(
             key: Key('add_favorite_key_${widget.index}'),
-            padding: EdgeInsetsDirectional.only(start: 7.0, end: 3,),
+            padding: EdgeInsets.only(right: isRTL ? 3 : 7.0, left: isRTL ? 7.0 : 3.0),
             child: IconButton(
               constraints: const BoxConstraints(),
               padding: EdgeInsets.zero,
@@ -96,7 +97,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
             ),
           )
               : Padding(
-            padding: EdgeInsetsDirectional.only(start: 7.0, end: 3,),
+            padding: EdgeInsets.only(right: isRTL ? 3 : 7.0, left: isRTL ? 7.0 : 3.0),
             child: IconButton(
               constraints: const BoxConstraints(),
               padding: EdgeInsets.zero,
