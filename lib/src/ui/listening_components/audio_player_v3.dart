@@ -510,7 +510,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           child: IconButton(
                             splashRadius: iconSplashSize,
                             icon: SvgImageAsset(
-                              context.isArabicLanguage
+                              context.isRtl
                                   ? 'assets/icons/ic_next_round.svg'
                                   : 'assets/icons/ic_previous_round.svg',
                               color: context.colorScheme.primaryFixed,
@@ -554,7 +554,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           child: IconButton(
                             splashRadius: iconSplashSize,
                             icon: SvgImageAsset(
-                              context.isArabicLanguage
+                              context.isRtl
                                   ? 'assets/icons/ic_previous_round.svg'
                                   : 'assets/icons/ic_next_round.svg',
                               color: context.colorScheme.primaryFixed,
