@@ -62,8 +62,11 @@ class RecitorsProvider extends ChangeNotifier {
       'ha',
       'sw',
     ];
-    if (!availableLocales.contains(localeName)) {
-      localeName = 'eng';
+
+    if (localeName == "ku"){
+      localeName = 'ar';
+    } else if (!availableLocales.contains(localeName)) {
+      localeName = 'en';
     }
 
     try {

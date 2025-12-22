@@ -115,7 +115,6 @@ class _DownloadedTabState extends State<DownloadedTab> {
   Widget build(BuildContext context) {
     context.watch<DownloadController>();
     recitorsProvider = context.watch<RecitorsProvider>();
-    final isRTL = context.isArabicLanguage;
     // Show skeleton loading while data is being loaded
     if (downloadController.isLoading) {
       return Expanded(
@@ -126,7 +125,7 @@ class _DownloadedTabState extends State<DownloadedTab> {
             itemBuilder: (context, index) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 10),
-                padding: EdgeInsets.only(left: isRTL ? 0 : 19, top: 15, bottom: 15, right: isRTL ? 19 : 0),
+                padding: EdgeInsetsDirectional.only(start: 19, top: 15, bottom: 15),
                 decoration: BoxDecoration(
                   color: context.colorScheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(12),
@@ -165,7 +164,7 @@ class _DownloadedTabState extends State<DownloadedTab> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(right: isRTL ? 3 : 7.0, left: isRTL ? 7.0 : 3.0),
+                      padding: EdgeInsetsDirectional.only(start: 7.0, end: 3,),
                       child: IconButton(
                         constraints: const BoxConstraints(),
                         padding: EdgeInsets.zero,
