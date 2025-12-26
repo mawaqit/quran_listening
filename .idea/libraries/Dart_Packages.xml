@@ -198,13 +198,6 @@
             </list>
           </value>
         </entry>
-        <entry key="get_it">
-          <value>
-            <list>
-              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/get_it-9.2.0/lib" />
-            </list>
-          </value>
-        </entry>
         <entry key="hive">
           <value>
             <list>
@@ -320,8 +313,8 @@
         <entry key="mawaqit_mobile_i18n">
           <value>
             <list>
-              <option value="$USER_HOME$/.pub-cache/git/mawaqit-mobile-i18n-fde1925f2c34d2fe0b56595288c28167321d28b7//lib" />
               <option value="$USER_HOME$/.pub-cache/git/mawaqit-mobile-i18n-a2080c63eb194f5fe08ad360537546dc1bf2d66a//lib" />
+              <option value="$USER_HOME$/.pub-cache/git/mawaqit-mobile-i18n-fde1925f2c34d2fe0b56595288c28167321d28b7//lib" />
             </list>
           </value>
         </entry>
@@ -711,7 +704,6 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_lints-5.0.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_svg-2.2.3/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/fluttertoast-9.0.0/lib" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/get_it-9.2.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/hive-2.2.3/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/hive_flutter-1.1.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/http-1.6.0/lib" />

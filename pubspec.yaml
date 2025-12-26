@@ -33,7 +33,7 @@ dependencies:
   flutter_svg: ^2.0.3
   fluttertoast: ^9.0.0
   modal_bottom_sheet: ^3.0.0-pre
-  skeletonizer:
+  skeletonizer: ^2.1.0+1
 
   # Utilities
   super_converter: ^1.1.0
