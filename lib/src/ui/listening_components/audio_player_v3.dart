@@ -497,13 +497,17 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                             width: audioPlayer.shuffleModeEnabled ? 30 : 20,
                           ),
                           onPressed: () async {
-                            await audioPlayer.setShuffleModeEnabled(
-                              !audioPlayer.shuffleModeEnabled,
-                            );
+                            final newShuffleState = !audioPlayer.shuffleModeEnabled;
+                            await audioPlayer.setShuffleModeEnabled(newShuffleState);
+                            // When enabling shuffle, ensure the sequence is actually shuffled
+                            if (newShuffleState) {
+                              await audioPlayer.shuffle();
+                            }
                           },
                         ),
                         Visibility(
-                          visible: audioManager.playingChapterIndex != 0,
+                          visible: audioPlayer.shuffleModeEnabled ||
+                              audioManager.playingChapterIndex != 0,
                           maintainState: true,
                           maintainAnimation: true,
                           maintainSize: true,
@@ -516,7 +520,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                               color: context.colorScheme.primaryFixed,
                             ),
                             onPressed: () async {
-                              await audioPlayer.seekToPrevious();
+                              await audioManager.seekToPreviousSafe();
                             },
                           ),
                         ),
@@ -547,7 +551,8 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           },
                         ),
                         Visibility(
-                          visible: audioManager.nextChapter != null,
+                          visible: audioPlayer.shuffleModeEnabled ||
+                              audioManager.nextChapter != null,
                           maintainState: true,
                           maintainAnimation: true,
                           maintainSize: true,
@@ -560,7 +565,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                               color: context.colorScheme.primaryFixed,
                             ),
                             onPressed: () async {
-                              await audioPlayer.seekToNext();
+                              await audioManager.seekToNextSafe();
                             },
                           ),
                         ),
@@ -634,7 +639,8 @@ class CustomTrackShape extends RoundedRectSliderTrackShape {
 }
 
 Future<Uri> _loadAssetIconAsUri() async {
-  final byteData = await rootBundle.load('assets/icons/media_logo.png');
+  // Load asset from package - use package path format
+  final byteData = await rootBundle.load('packages/mawaqit_quran_listening/assets/icons/media_logo.png');
   final tempDir = await getTemporaryDirectory();
   final file = File('${tempDir.path}/audio_icon.png');
   await file.writeAsBytes(byteData.buffer.asUint8List());

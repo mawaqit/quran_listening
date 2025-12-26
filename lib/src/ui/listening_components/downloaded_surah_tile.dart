@@ -57,23 +57,8 @@ class DownloadedSurahTileV3 extends StatelessWidget {
               reciters = downloadController.recitersForDownloadedRecitations;
               audioManager.setPlayingRecitor(reciter!);
 
-              int subListBasesOnReciter = reciters.indexOf(reciter!);
-              selectedChaptersByReciter.addAll(
-                chapters.sublist(subListBasesOnReciter),
-              );
-              selectedRecitersByReciter.addAll(
-                reciters.sublist(subListBasesOnReciter),
-              );
-
-              int subListBasesOnChapter = selectedChaptersByReciter.indexWhere(
-                (element) => element.id == chapter.id,
-              );
-              selectedChaptersByChapter.addAll(
-                selectedChaptersByReciter.sublist(subListBasesOnChapter),
-              );
-              selectedRecitersChapter.addAll(
-                selectedRecitersByReciter.sublist(subListBasesOnChapter),
-              );
+              selectedChaptersByChapter = List.from(chapters);
+              selectedRecitersChapter = List.from(reciters);
 
               navigateToPlayer(
                 context: context,
@@ -161,30 +146,9 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                                 downloadController
                                     .recitersForDownloadedRecitations;
                             audioManager.setPlayingRecitor(reciter!);
-                            int subListBasesOnReciter = reciters.indexOf(
-                              reciter!,
-                            );
-                            selectedChaptersByReciter.addAll(
-                              chapters.sublist(subListBasesOnReciter),
-                            );
-                            selectedRecitersByReciter.addAll(
-                              reciters.sublist(subListBasesOnReciter),
-                            );
 
-                            int subListBasesOnChapter =
-                                selectedChaptersByReciter.indexWhere(
-                                  (element) => element.id == chapter.id,
-                                );
-                            selectedChaptersByChapter.addAll(
-                              selectedChaptersByReciter.sublist(
-                                subListBasesOnChapter,
-                              ),
-                            );
-                            selectedRecitersChapter.addAll(
-                              selectedRecitersByReciter.sublist(
-                                subListBasesOnChapter,
-                              ),
-                            );
+                            selectedChaptersByChapter = List.from(chapters);
+                            selectedRecitersChapter = List.from(reciters);
 
                             navigateToPlayer(
                               context: context,
@@ -206,13 +170,8 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                                   );
                                 });
 
-                            int selectedIndex = chapters.indexWhere(
-                              (element) => element.id == chapter.id,
-                            );
-                            selectedChaptersByReciter.addAll(
-                              chapters.sublist(selectedIndex),
-                            );
-                            selectedRecitersByReciter.addAll(reciters);
+                            selectedChaptersByReciter = List.from(chapters);
+                            selectedRecitersByReciter = List.from(reciters);
                             audioManager.setPlayingRecitor(reciter!);
                             navigateToPlayer(
                               context: context,
@@ -335,12 +294,12 @@ class DownloadedSurahTileV3 extends StatelessWidget {
         final audioManager = context.read<AudioPlayerProvider>();
         final downloadController = context.read<DownloadController>();
 
-        // Set up the playlist for downloaded surahs
         List<AudioSource> playlist = [];
         for (int ind = 0; ind < chapters.length; ind++) {
           final chap = chapters[ind];
+          final chapterReciter = ind < reciters.length ? reciters[ind] : reciter;
           String? path = downloadController.singleSavedRecitation(
-            reciterId: reciter.id,
+            reciterId: chapterReciter.id,
             recitationId: chap.id,
           );
           if (path != null) {
@@ -350,33 +309,29 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                 tag: MediaItem(
                   id: chap.id.toString(),
                   title: chap.name ?? '',
-                  album: reciter.reciterName,
+                  album: chapterReciter.reciterName,
                 ),
               ),
             );
           }
         }
 
-        // Find the index of the current chapter
         int chapterIndex = chapters.indexWhere(
           (element) => element.id == chapter.id,
         );
 
-        // Set up and start playback
         audioManager.setPlaylist(
           playlist,
           chapters,
-          [reciter],
+          reciters,
           playerType,
           index: chapterIndex,
         );
-        // Subscribe to audio state changes to keep UI in sync
         audioManager.subscribeToStreams();
 
-        // Show full player sheet first, then floating player after user closes it
         context.read<PlayerScreensController>().navigateToPlayerScreenV3(
           context,
-          [reciter],
+          reciters,
           chapter,
           chapters,
           playerType,
