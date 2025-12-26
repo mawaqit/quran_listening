@@ -15,7 +15,7 @@ enum PlayerType {
 }
 
 class AudioPlayerProvider extends ChangeNotifier {
-  AudioPlayer _audioPlayer = AudioPlayer();
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   // stream subs
   StreamSubscription<PlayerState>? _playerStateSub;
@@ -336,6 +336,73 @@ class AudioPlayerProvider extends ChangeNotifier {
       _audioPlayer.shuffle();
     }
     _audioPlayer.play();
+  }
+
+  /// Safely seek to next track, handling shuffle mode
+  Future<void> seekToNextSafe() async {
+    try {
+      final sequenceState = _audioPlayer.sequenceState;
+      if (sequenceState == null) return;
+
+      final currentIndex = sequenceState.currentIndex;
+      final sequenceLength = sequenceState.sequence.length;
+      final indexBefore = currentIndex;
+
+      if (_audioPlayer.shuffleModeEnabled) {
+        await _audioPlayer.seekToNext();
+        
+        final newSequenceState = _audioPlayer.sequenceState;
+        final indexAfter = newSequenceState.currentIndex;
+        
+        if (indexAfter == indexBefore) {
+          await _audioPlayer.shuffle();
+          await _audioPlayer.seekToNext();
+        }
+      } else {
+        if (currentIndex != null && currentIndex < sequenceLength - 1) {
+          await _audioPlayer.seekToNext();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error seeking to next: $e');
+    }
+  }
+
+  /// Safely seek to previous track, handling shuffle mode
+  Future<void> seekToPreviousSafe() async {
+    try {
+      final sequenceState = _audioPlayer.sequenceState;
+      if (sequenceState == null) return;
+
+      final currentIndex = sequenceState.currentIndex;
+      final indexBefore = currentIndex;
+
+      if (_audioPlayer.shuffleModeEnabled) {
+        if (currentIndex == 0) {
+          await _audioPlayer.shuffle();
+          final sequenceLength = sequenceState.sequence.length;
+          if (sequenceLength > 1) {
+            await _audioPlayer.seek(Duration.zero, index: sequenceLength - 1);
+          }
+        } else {
+          await _audioPlayer.seekToPrevious();
+          
+          final newSequenceState = _audioPlayer.sequenceState;
+          final indexAfter = newSequenceState.currentIndex;
+          
+          if (indexAfter == indexBefore) {
+            await _audioPlayer.shuffle();
+            await _audioPlayer.seekToPrevious();
+          }
+        }
+      } else {
+        if (currentIndex != null && currentIndex > 0) {
+          await _audioPlayer.seekToPrevious();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error seeking to previous: $e');
+    }
   }
 
   @override
