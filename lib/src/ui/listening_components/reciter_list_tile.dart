@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:sizer/sizer.dart';
 import '../../../mawaqit_quran_listening.dart';
 import 'package:provider/provider.dart';
@@ -53,7 +54,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
                   widget.recitor.reciterName.trim(),
                   maxLines: 2,
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: (context.isFoldable ? 9 : 13).sp,
                     color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
                   ),
                 ),
@@ -61,7 +62,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
                 DefaultTextStyle(
                   style: TextStyle(
                       color: context.colorScheme.secondary.withOpacity(.70),
-                      fontSize: 10.sp,
+                      fontSize: (context.isFoldable ? 7 : 9).sp,
                       fontFamily: context.getFontFamily()),
                   child: Row(
                     children: [

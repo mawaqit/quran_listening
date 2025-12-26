@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:sizer/sizer.dart';
 import '../../../mawaqit_quran_listening.dart';
 import 'package:provider/provider.dart';
@@ -206,7 +207,7 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 13.sp,
+                          fontSize: (context.isFoldable ? 9 : 13).sp,
                           color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
                         ),
                       ),
@@ -238,7 +239,7 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: greyColor,
-                                fontSize: 10.sp,
+                                fontSize: (context.isFoldable ? 7 : 10).sp,
                                 decoration: TextDecoration.underline,
                                 decorationColor: greyColor,
                               ),
@@ -394,7 +395,7 @@ class DownloadedSurahTile extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13.sp,
+                      fontSize: (context.isFoldable ? 9 : 13).sp,
                       color: context.colorScheme.surfaceContainerHighest,
                     ),
                   ),
@@ -411,7 +412,7 @@ class DownloadedSurahTile extends StatelessWidget {
                         'Downloaded',
                         style: TextStyle(
                           color: Colors.green,
-                          fontSize: 10.sp,
+                          fontSize: (context.isFoldable ? 7 : 9).sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),

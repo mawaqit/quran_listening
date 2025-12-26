@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import '../../../../mawaqit_quran_listening.dart';
 import '../../../../mawaqit_quran_listening.dart' as recitor_controller;
@@ -17,7 +18,8 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero).then((value) {
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
       context.read<RecitorsProvider>().getReciters(context);
     });
   }
