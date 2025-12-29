@@ -15,7 +15,8 @@ enum PlayerType {
 }
 
 class AudioPlayerProvider extends ChangeNotifier {
-  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  AudioPlayer _audioPlayer = AudioPlayer();
 
   // stream subs
   StreamSubscription<PlayerState>? _playerStateSub;
