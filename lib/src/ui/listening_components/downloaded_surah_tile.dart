@@ -316,9 +316,21 @@ class DownloadedSurahTileV3 extends StatelessWidget {
           }
         }
 
-        int chapterIndex = chapters.indexWhere(
-          (element) => element.id == chapter.id,
-        );
+        int chapterIndex = -1;
+        for (int i = 0; i < chapters.length; i++) {
+          final chap = chapters[i];
+          final chapterReciter = i < reciters.length ? reciters[i] : reciter;
+          if (chap.id == chapter.id && chapterReciter.id == reciter.id) {
+            chapterIndex = i;
+            break;
+          }
+        }
+        if (chapterIndex == -1) {
+          // Fallback to original behavior if no match found
+          chapterIndex = chapters.indexWhere(
+            (element) => element.id == chapter.id,
+          );
+        }
 
         audioManager.setPlaylist(
           playlist,

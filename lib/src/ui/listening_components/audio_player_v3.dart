@@ -125,12 +125,35 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                   }
                 }
               }
+              
+              // Find the correct index in the new playlist matching both chapter and reciter
+              int newPlaylistIndex = -1;
+              if (widget.reciterFromAllSaved != null) {
+                for (int i = 0; i < widget.chapters.length; i++) {
+                  if (widget.chapters[i].id == widget.chapter.id &&
+                      i < widget.reciters.length &&
+                      widget.reciters[i].id == widget.reciterFromAllSaved!.id) {
+                    newPlaylistIndex = i;
+                    break;
+                  }
+                }
+              }
+              // Fallback to chapter ID only if reciter match not found
+              if (newPlaylistIndex == -1) {
+                newPlaylistIndex = widget.chapters.indexWhere(
+                  (element) => element.id == widget.chapter.id,
+                );
+              }
+              if (newPlaylistIndex == -1) {
+                newPlaylistIndex = 0;
+              }
+              
               audioManager.setPlaylist(
                 playlist,
                 widget.chapters,
                 widget.reciters,
                 widget.playerType,
-                index: 0,
+                index: newPlaylistIndex,
               );
               audioManager.audioPlayer.setLoopMode(LoopMode.off);
               audioManager.showHideFloatingPlayer(
