@@ -330,7 +330,6 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
     final audioPlayer = audioManager.audioPlayer;
     Color whiteColor = Colors.white;
     final reciterController = context.watch<RecitorsProvider>();
-    final isRTL = context.isArabicLanguage;
     final isSpanish =
         context.tr.localeName == 'es' ||
         context.tr.localeName == 'tr' ||
@@ -382,7 +381,10 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                     //     Navigator.pop(context);
                     //   },
                     // ),
-                    if (audioManager.nextChapter != null)
+                    // Only show explicit "Next: ..." when NOT shuffled,
+                    // otherwise the displayed next may not match shuffled order.
+                    if (!audioManager.audioPlayer.shuffleModeEnabled &&
+                        audioManager.nextChapter != null)
                       Container(
                         decoration: BoxDecoration(
                           color: const Color(0xff6E4BA1),
@@ -406,7 +408,7 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                                 fontSize: 12,
                                 fontWeight: FontWeight.w400,
                                 color: whiteColor,
-                                height: isRTL || isSpanish ? 0.8 : null,
+                                height: context.isRtl || isSpanish ? 0.8 : null,
                                 fontFamily: 'Mulish',
                               ),
                             ),
@@ -571,30 +573,33 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                                 color: whiteColor,
                                 width: audioPlayer.shuffleModeEnabled ? 30 : 20,
                               ),
-                              onPressed: () {
-                                audioPlayer.setShuffleModeEnabled(
-                                  !audioPlayer.shuffleModeEnabled,
-                                );
+                              onPressed: () async {
+                                final newShuffleState = !audioPlayer.shuffleModeEnabled;
+                                await audioPlayer.setShuffleModeEnabled(newShuffleState);
+                                // When enabling shuffle, ensure the sequence is actually shuffled
+                                if (newShuffleState) {
+                                  await audioPlayer.shuffle();
+                                }
                               },
                             ),
 
-                            /// Skip to the next item
                             Visibility(
-                              visible: audioManager.playingChapterIndex != 0,
+                              visible: audioPlayer.shuffleModeEnabled ||
+                                  audioManager.playingChapterIndex != 0,
                               maintainState: true,
                               maintainAnimation: true,
                               maintainSize: true,
                               child: IconButton(
                                 splashRadius: iconSplashSize,
                                 icon: Icon(
-                                  context.isArabicLanguage
+                                  context.isRtl
                                       ? Icons.skip_next_rounded
                                       : Icons.skip_previous_rounded,
                                   color: whiteColor,
                                   size: 34,
                                 ),
                                 onPressed: () {
-                                  audioPlayer.seekToPrevious();
+                                  audioManager.seekToPreviousSafe();
                                 },
                               ),
                             ),
@@ -624,23 +629,23 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                               },
                             ),
 
-                            /// Skip to the next item
                             Visibility(
-                              visible: audioManager.nextChapter != null,
+                              visible: audioPlayer.shuffleModeEnabled ||
+                                  audioManager.nextChapter != null,
                               maintainState: true,
                               maintainAnimation: true,
                               maintainSize: true,
                               child: IconButton(
                                 splashRadius: iconSplashSize,
                                 icon: Icon(
-                                  context.isArabicLanguage
+                                  context.isRtl
                                       ? Icons.skip_previous_rounded
                                       : Icons.skip_next_rounded,
                                   color: whiteColor,
                                   size: 34,
                                 ),
                                 onPressed: () {
-                                  audioPlayer.seekToNext();
+                                  audioManager.seekToNextSafe();
                                 },
                               ),
                             ),
@@ -797,13 +802,13 @@ class FloatingQuranPlayer extends StatelessWidget {
                         child: IconButton(
                           splashRadius: kSplashRadius,
                           icon: Icon(
-                            context.isArabicLanguage
+                            context.isRtl
                                 ? Icons.skip_next_rounded
                                 : Icons.skip_previous_rounded,
                             color: whiteColor,
                           ),
                           onPressed: () {
-                            audioPlayer.seekToPrevious();
+                            audioManager.seekToPreviousSafe();
                           },
                         ),
                       ),
@@ -832,22 +837,22 @@ class FloatingQuranPlayer extends StatelessWidget {
                         },
                       ),
 
-                      /// Skip to the next item
-                      Visibility(
-                        visible: audioManager.nextChapter != null,
+                            Visibility(
+                              visible: audioPlayer.shuffleModeEnabled ||
+                                  audioManager.nextChapter != null,
                         maintainState: true,
                         maintainAnimation: true,
                         maintainSize: true,
                         child: IconButton(
                           splashRadius: kSplashRadius,
                           icon: Icon(
-                            context.isArabicLanguage
+                            context.isRtl
                                 ? Icons.skip_previous_rounded
                                 : Icons.skip_next_rounded,
                             color: whiteColor,
                           ),
                           onPressed: () {
-                            audioPlayer.seekToNext();
+                            audioManager.seekToNextSafe();
                           },
                         ),
                       ),

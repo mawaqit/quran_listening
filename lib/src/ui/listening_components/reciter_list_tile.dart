@@ -35,15 +35,14 @@ class _RecitorListTileState extends State<RecitorListTile> {
 
   @override
   Widget build(BuildContext context) {
-    final isRTL = context.isArabicLanguage;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainer,
+        color: context.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
       ),
-      padding: EdgeInsets.only(left: isRTL ? 0 : 19, top: 15, bottom: 15, right: isRTL ? 19 : 0),
+      padding: EdgeInsetsDirectional.only(start: 19, top: 15, bottom: 15),
       child: Row(
         children: [
           Expanded(
@@ -55,7 +54,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
                   maxLines: 2,
                   style: TextStyle(
                     fontSize: 13.sp,
-                    color: context.colorScheme.surfaceContainerHighest,
+                    color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -78,7 +77,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
           (widget.listeningTab == ListeningTab.allRecitator)
               ? Padding(
             key: Key('add_favorite_key_${widget.index}'),
-            padding: EdgeInsets.only(right: isRTL ? 3 : 7.0, left: isRTL ? 7.0 : 3.0),
+            padding: EdgeInsetsDirectional.only(start: 7.0, end: 3,),
             child: IconButton(
               constraints: const BoxConstraints(),
               padding: EdgeInsets.zero,
@@ -97,7 +96,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
             ),
           )
               : Padding(
-            padding: EdgeInsets.only(right: isRTL ? 3 : 7.0, left: isRTL ? 7.0 : 3.0),
+            padding: EdgeInsetsDirectional.only(start: 7.0, end: 3,),
             child: IconButton(
               constraints: const BoxConstraints(),
               padding: EdgeInsets.zero,
@@ -153,7 +152,7 @@ class ReciterListTile extends StatelessWidget {
         padding: const EdgeInsets.only(left: 5, top: 15, bottom: 15, right: 5),
         margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
-          color: context.colorScheme.surfaceContainer,
+          color: context.colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -194,7 +193,7 @@ class ReciterListTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 13.sp,
-                      color: context.colorScheme.surfaceContainerHighest,
+                      color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
                       fontWeight: FontWeight.w600,
                     ),
                   ),

@@ -91,7 +91,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
         padding: const EdgeInsets.only(left: 5, top: 15, bottom: 15, right: 5),
         margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
-          color: context.colorScheme.surfaceContainer,
+          color: context.colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -170,7 +170,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 13.sp,
-                      color: context.colorScheme.surfaceContainerHighest,
+                      color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
                     ),
                   ),
                   Text(

@@ -17,6 +17,11 @@ extension QuranThemeDataX on BuildContext {
     return Localizations.localeOf(this).languageCode == 'ar';
   }
 
+  /// check the local direction
+  bool get isRtl {
+    return Directionality.of(this) == TextDirection.rtl;
+  }
+
   /// Get appropriate font family based on language
   String get fontFamily => isArabicLanguage ? 'Tajawal' : 'Figtree';
 
