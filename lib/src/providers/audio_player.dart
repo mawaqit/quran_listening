@@ -19,6 +19,7 @@ import 'dart:async';
 /// 1. Simple Audio Player (Slider updates audio position once)
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
@@ -68,7 +69,8 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
   Future setAudio() async {
     // Repeat song when completed
     print('audio starts now');
-    Future.delayed(const Duration(milliseconds: 900), () async {
+
+    SchedulerBinding.instance.addPostFrameCallback((duration){
       if (!mounted) return;
       audioManager = context.read<AudioPlayerProvider>();
       final audioPlayer = audioManager.audioPlayer;
@@ -76,7 +78,7 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
       if (widget.playerType == audioManager.playerType) {
         if (widget.playerType == PlayerType.allSavedSurahs) {
           if (widget.reciterFromAllSaved?.id ==
-                  audioManager.currentReciterDetail?.id &&
+              audioManager.currentReciterDetail?.id &&
               widget.chapter.id == audioManager.playingChapter?.id) {
             ///Already Playing the same Chapter from Same Section
             audioPlayer.play();
@@ -89,7 +91,7 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
           } else {
             ///Playing Other Chapter
             int chapterIndex = audioManager.chapters.indexWhere(
-              (element) => element.id == widget.chapter.id,
+                  (element) => element.id == widget.chapter.id,
             );
             if (chapterIndex != -1) {
               final downloadedManager = context.read<DownloadController>();
@@ -162,7 +164,7 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
             } else {
               ///Playing Other Chapter
               int chapterIndex = audioManager.chapters.indexWhere(
-                (element) => element.id == widget.chapter.id,
+                    (element) => element.id == widget.chapter.id,
               );
               if (chapterIndex != -1) {
                 ///Playing Other Surah/Chapter from same sectoin

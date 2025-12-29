@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -51,16 +52,18 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
 
   Future setAudio() async {
     print('audio starts now');
-    Future.delayed(const Duration(milliseconds: 900), () async {
-      if (!mounted) return;
+
+    SchedulerBinding.instance.addPostFrameCallback((callback) async {
       final artUri = await _loadAssetIconAsUri();
+
+      if (!mounted) return;
       audioManager = context.read<AudioPlayerProvider>();
 
       // ===== your existing logic starts =====
       if (widget.playerType == audioManager.playerType) {
         if (widget.playerType == PlayerType.allSavedSurahs) {
           if (widget.reciterFromAllSaved?.id ==
-                  audioManager.currentReciterDetail?.id &&
+              audioManager.currentReciterDetail?.id &&
               widget.chapter.id == audioManager.playingChapter?.id) {
             ///Already Playing the same Chapter from Same Section
             audioManager.audioPlayer.play();
@@ -73,7 +76,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
           } else {
             ///Playing Other Chapter
             int chapterIndex = audioManager.chapters.indexWhere(
-              (element) => element.id == widget.chapter.id,
+                  (element) => element.id == widget.chapter.id,
             );
             if (chapterIndex != -1) {
               final downloadedManager = context.read<DownloadController>();
@@ -105,7 +108,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                   final serverUrl = audioManager.reciter?.serverUrl ?? '';
                   if (serverUrl.isNotEmpty) {
                     final audioUrl =
-                        '${serverUrl}${chap.id.toString().padLeft(3, '0')}.mp3';
+                        '$serverUrl${chap.id.toString().padLeft(3, '0')}.mp3';
                     playlist.add(
                       AudioSource.uri(
                         Uri.parse(audioUrl),
@@ -145,9 +148,9 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
           // this is the "not allSavedSurahs" branch
           final reciter = widget.reciters.first;
           final Reciter? reciterFromManager =
-              audioManager.reciters.isNotEmpty
-                  ? audioManager.reciters.first
-                  : null;
+          audioManager.reciters.isNotEmpty
+              ? audioManager.reciters.first
+              : null;
 
           if (reciterFromManager != null &&
               reciter.id == reciterFromManager.id) {
@@ -162,7 +165,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
               return;
             } else {
               final chapterIndex = audioManager.chapters.indexWhere(
-                (element) => element.id == widget.chapter.id,
+                    (element) => element.id == widget.chapter.id,
               );
               if (chapterIndex != -1) {
                 await audioManager.playIndex(index: chapterIndex);

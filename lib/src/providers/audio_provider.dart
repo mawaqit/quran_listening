@@ -342,8 +342,6 @@ class AudioPlayerProvider extends ChangeNotifier {
   Future<void> seekToNextSafe() async {
     try {
       final sequenceState = _audioPlayer.sequenceState;
-      if (sequenceState == null) return;
-
       final currentIndex = sequenceState.currentIndex;
       final sequenceLength = sequenceState.sequence.length;
       final indexBefore = currentIndex;
@@ -372,8 +370,6 @@ class AudioPlayerProvider extends ChangeNotifier {
   Future<void> seekToPreviousSafe() async {
     try {
       final sequenceState = _audioPlayer.sequenceState;
-      if (sequenceState == null) return;
-
       final currentIndex = sequenceState.currentIndex;
       final indexBefore = currentIndex;
 
