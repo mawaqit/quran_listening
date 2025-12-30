@@ -66,10 +66,8 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
         FocusManager.instance.primaryFocus?.unfocus();
         List<SurahModel> selectedChapters = [];
         List<Reciter> selectedReciters = [];
-        int selectedIndex = widget.chapters.indexWhere(
-          (element) => element.id == widget.chapter.id,
-        );
-        selectedChapters.addAll(widget.chapters.sublist(selectedIndex));
+        // For Liked/All Recitators tabs: pass ALL 114 surahs from selected reciter
+        selectedChapters.addAll(widget.chapters);
         selectedReciters.addAll([widget.reciter]);
 
         /// ------------------------------------ open v3 bottom sheet for player ------------------------------------
@@ -114,12 +112,8 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                     if (!isPlaying) {
                       List<SurahModel> selectedChapters = [];
                       List<Reciter> selectedReciters = [];
-                      int selectedIndex = widget.chapters.indexWhere(
-                        (element) => element.id == widget.chapter.id,
-                      );
-                      selectedChapters.addAll(
-                        widget.chapters.sublist(selectedIndex),
-                      );
+                      // For Liked/All Recitators tabs: pass ALL 114 surahs from selected reciter
+                      selectedChapters.addAll(widget.chapters);
                       selectedReciters.addAll([widget.reciter]);
                       context
                           .read<SurahPagePlayPauseIndexProvider>()
