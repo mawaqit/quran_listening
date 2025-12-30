@@ -158,6 +158,22 @@ class AudioPlayerProvider extends ChangeNotifier {
     playingChapterIndex = index ?? 0;
     playingChapter = chapters[playingChapterIndex!];
     playingChapterId = playingChapter!.id;
+    
+    // Immediately set playingRecitor for single reciter playlists (Liked/All Recitators tabs)
+    if (reciters.isNotEmpty) {
+      if (reciters.length == 1) {
+        // Single reciter playlist - set immediately
+        playingRecitor = reciters.first;
+      } else if (playingChapterIndex != null && 
+                 playingChapterIndex! >= 0 && 
+                 playingChapterIndex! < reciters.length) {
+        // Multiple reciters - set based on current index
+        playingRecitor = reciters[playingChapterIndex!];
+      } else {
+        playingRecitor = reciters.first;
+      }
+    }
+    
     notifyListeners();
 
     _playlist = ConcatenatingAudioSource(children: playlist);
@@ -256,6 +272,10 @@ class AudioPlayerProvider extends ChangeNotifier {
     _isLooping = false;
     _isShuffled = false;
 
+    // Clear playingRecitor to ensure next check doesn't use stale value
+    // This is especially important when switching between reciters
+    playingRecitor = null;
+
     // just stop current audio, keep player and streams
     _audioPlayer.stop();
 
@@ -343,8 +363,6 @@ class AudioPlayerProvider extends ChangeNotifier {
   Future<void> seekToNextSafe() async {
     try {
       final sequenceState = _audioPlayer.sequenceState;
-      if (sequenceState == null) return;
-
       final currentIndex = sequenceState.currentIndex;
       final sequenceLength = sequenceState.sequence.length;
       final indexBefore = currentIndex;
@@ -373,8 +391,6 @@ class AudioPlayerProvider extends ChangeNotifier {
   Future<void> seekToPreviousSafe() async {
     try {
       final sequenceState = _audioPlayer.sequenceState;
-      if (sequenceState == null) return;
-
       final currentIndex = sequenceState.currentIndex;
       final indexBefore = currentIndex;
 
