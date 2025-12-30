@@ -63,6 +63,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
       key: Key('surah_tile_key_${widget.index}'),
       onTap: () {
         context.closeKeyboard();
+        // bool connected = await WearConnector.isWatchConnected();
         FocusManager.instance.primaryFocus?.unfocus();
         List<SurahModel> selectedChapters = [];
         List<Reciter> selectedReciters = [];
