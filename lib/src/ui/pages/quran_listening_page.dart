@@ -104,7 +104,7 @@ class _QuranListeningPageState extends State<QuranListeningPage> {
                   ),
                   SizedBox(width: 16,),
                   Expanded(child: Visibility(
-                    visible: context.read<FavoriteReciter>().favoriteReciterUuids.isNotEmpty,
+                    visible: context.watch<FavoriteReciter>().favoriteReciterUuids.isNotEmpty,
                     child: SurahPage(key: const Key("foldable_liked_tab")),
                   )),
                 ],
