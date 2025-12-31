@@ -7,7 +7,7 @@ import '../components/svg_image_asset.dart';
 
 
 class RecitorListTile extends StatefulWidget {
-  const RecitorListTile({super.key, required this.recitor, required this.listeningTab, required this.index});
+  const RecitorListTile({super.key, required this.recitor, required this.listeningTab, required this.index,});
 
   final Reciter recitor;
   final ListeningTab listeningTab;
@@ -37,10 +37,15 @@ class _RecitorListTileState extends State<RecitorListTile> {
   @override
   Widget build(BuildContext context) {
 
+    Color tileBackgroundColor = context.colorScheme.surfaceContainerLow;
+    if (context.isFoldable && context.watch<AudioPlayerProvider>().reciter == widget.recitor){
+      tileBackgroundColor = context.colorScheme.surfaceContainerHigh;
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainerLow,
+        color: tileBackgroundColor,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: EdgeInsetsDirectional.only(start: 19, top: 15, bottom: 15),

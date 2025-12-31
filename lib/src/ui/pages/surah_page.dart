@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
+import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:provider/provider.dart';
 import '../../../mawaqit_quran_listening.dart';
 import '../components/error_widget.dart';
@@ -22,6 +24,9 @@ class _SurahPageState extends State<SurahPage> {
   TextEditingController searchController = TextEditingController();
   bool inTextSearch = false;
   bool isDownloaded = false;
+  bool _isInitialized = false;
+  bool _listenerAttached = false;
+  int? _lastLoadedReciterId;
 
   @override
   void initState() {
@@ -32,6 +37,9 @@ class _SurahPageState extends State<SurahPage> {
 
     // Use WidgetsBinding to ensure this runs after the build phase
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || _isInitialized) return;
+      _isInitialized = true;
+
       await downloadController.fetchDownloadedRecitation(reciterId: audioPlayerProvider.currentReciterId.toString());
 
       // Initialize surahs and load recitations for current reciter
@@ -42,16 +50,20 @@ class _SurahPageState extends State<SurahPage> {
       
       // Ensure we have a valid currentReciterId before loading recitations
       if (audioPlayerProvider.currentReciterId != null) {
-        debugPrint('Loading recitations for reciter ID: ${audioPlayerProvider.currentReciterId}');
-        await recitationsManager.getRecitations(reciterId: audioPlayerProvider.currentReciterId!);
+        final reciterId = audioPlayerProvider.currentReciterId!;
+        if (_lastLoadedReciterId != reciterId) {
+          _lastLoadedReciterId = reciterId;
+          await recitationsManager.getRecitations(reciterId: reciterId);
+        }
       } else {
-        debugPrint('Warning: currentReciterId is null - cannot load recitations');
-        // Try to get the first available reciter if none is selected
         final recitorsProvider = context.read<RecitorsProvider>();
         if (recitorsProvider.reciters.isNotEmpty) {
           final firstReciter = recitorsProvider.reciters.first;
           audioPlayerProvider.changeReciter(firstReciter);
-          await recitationsManager.getRecitations(reciterId: firstReciter.id);
+          if (_lastLoadedReciterId != firstReciter.id) {
+            _lastLoadedReciterId = firstReciter.id;
+            await recitationsManager.getRecitations(reciterId: firstReciter.id);
+          }
         }
       }
     });
@@ -60,28 +72,38 @@ class _SurahPageState extends State<SurahPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    
+    // Only fetch favorite surahs once or when reciter changes
     Provider.of<FavoriteSurah>(context).fetchFavoriteSurahs(audioPlayerProvider.currentReciterId.toString()).then((listFavoriteSurahs) => likedSurahsIds = listFavoriteSurahs);
 
-    // Listen to reciter changes and initialize surahs
-    audioPlayerProvider.addListener(_onReciterChanged);
+    // Only attach listener once to prevent multiple calls
+    if (!_listenerAttached) {
+      _listenerAttached = true;
+      audioPlayerProvider.addListener(_onReciterChanged);
+    }
   }
 
   void _onReciterChanged() {
-    if (mounted) {
-      // Initialize surahs and load recitations when reciter changes
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final recitationsManager = context.read<RecitationsManager>();
-        if (recitationsManager.surahs.isEmpty) {
-          await recitationsManager.initializeSurahs();
+    if (!mounted) return;
+    
+    // Initialize surahs and load recitations when reciter changes
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      
+      final recitationsManager = context.read<RecitationsManager>();
+      if (recitationsManager.surahs.isEmpty) {
+        await recitationsManager.initializeSurahs();
+      }
+      
+      // Load recitations for the current reciter only if it's different from last loaded
+      if (audioPlayerProvider.currentReciterId != null) {
+        final reciterId = audioPlayerProvider.currentReciterId!;
+        if (_lastLoadedReciterId != reciterId) {
+          _lastLoadedReciterId = reciterId;
+          await recitationsManager.getRecitations(reciterId: reciterId);
         }
-        // Load recitations for the current reciter
-        if (audioPlayerProvider.currentReciterId != null) {
-          await recitationsManager.getRecitations(reciterId: audioPlayerProvider.currentReciterId!);
-        } else {
-          debugPrint('Warning: currentReciterId is null after reciter change');
-        }
-      });
-    }
+      }
+    });
   }
 
   @override

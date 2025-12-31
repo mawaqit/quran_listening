@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
+import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:provider/provider.dart';
 
 import '../../../mawaqit_quran_listening.dart';
@@ -59,85 +60,158 @@ class _QuranListeningPageState extends State<QuranListeningPage> {
                   }),
             ),
             const SizedBox(height: 16),
-            if (selectedTab == ListeningTab.allRecitator)
-              ListeningSearchTextField(
-                hasSuffix: inputOne.isNotEmpty,
-                hint: context.tr.search_for_recitator,
-                controller: textEditingControllerOne,
-                onSubmittedPressed: (value) {},
-                onChanged: (value) {
-                  if (value.length > 3) {
-                    setState(() {
-                      inputOne = value;
-                    });
-                    context.read<RecitorsProvider>().searchReciters(value);
-                  }
-                  if (value.isEmpty) {
-                    context.read<RecitorsProvider>().resetReciters();
-                  }
-                },
-                onSuffixPressed: () {
-                  textEditingControllerOne.clear();
-                  setState(() {
-                    inputOne = '';
-                  });
-                  context.read<RecitorsProvider>().resetReciters();
-                },
-              ),
-            if (selectedTab == ListeningTab.liked)
-              ListeningSearchTextField(
-                hasSuffix: inputTwo.isNotEmpty,
-                hint: context.tr.search_for_fav_recitator,
-                controller: textEditingControllerTwo,
-                onSubmittedPressed: (value) {},
-                onChanged: (value) {
-                  if (value.length > 3) {
-                    setState(() {
-                      inputTwo = value;
-                    });
-                    context.read<RecitorsProvider>().searchFavoriteReciters(value);
-                  }
-
-                  if (value.isEmpty) {
-                    context.read<RecitorsProvider>().resetFavoriteReciters();
-                  }
-                },
-                onSuffixPressed: () {
-                  textEditingControllerTwo.clear();
-                  setState(() {
-                    inputTwo = '';
-                  });
-                  context.read<RecitorsProvider>().resetFavoriteReciters();
-                },
-              ),
-            if (selectedTab == ListeningTab.downloaded)
-              ListeningSearchTextField(
-                hasSuffix: inputThree.isNotEmpty,
-                hint: context.tr.search_for_surah,
-                controller: textEditingControllerThree,
-                onSubmittedPressed: (value) {},
-                onChanged: (value) {
-                  setState(() {
-                    inputThree = value;
-                  });
-                  context.read<DownloadController>().searchDownloadedSurah(value);
-                },
-                onSuffixPressed: () {
-                  textEditingControllerThree.clear();
-                  setState(() {
-                    inputThree = '';
-                  });
-                  context.read<DownloadController>().resetDownloadedSurahs();
-                },
-              ),
-            if (selectedTab != ListeningTab.downloaded) const SizedBox(height: 16),
-            selectedTab == ListeningTab.allRecitator
-                ? const AllRecitatorsTab()
-                : selectedTab == ListeningTab.downloaded
-                ? const DownloadedTab()
-                : const LikedTab(),
+            Expanded(child: handleView()),
           ],
         );
+      },
+    );
+  }
+
+  Widget handleView() {
+    if (context.isFoldable) {
+      return Column(
+        children: [
+          if (ListeningTab.allRecitator == selectedTab)
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        allReciterSearchField(),
+                        SizedBox(height: 16,),
+                        AllRecitatorsTab(),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 16,),
+                  Expanded(child: SurahPage(key: const Key("foldable_all_reciters"))),
+                ],
+              ),
+            ),
+          if (ListeningTab.liked == selectedTab)
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        likedSearchField(),
+                        SizedBox(height: 16,),
+                        LikedTab(),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 16,),
+                  Expanded(child: Visibility(
+                    visible: context.read<FavoriteReciter>().favoriteReciterUuids.isNotEmpty,
+                    child: SurahPage(key: const Key("foldable_liked_tab")),
+                  )),
+                ],
+              ),
+            ),
+          if (ListeningTab.downloaded == selectedTab)
+            Expanded(
+              child: Column(
+                children: [
+                  downloadSearchField(),
+                  SizedBox(height: 16,),
+                  DownloadedTab(),
+                ],
+              ),
+            ),
+        ],
+      );
+    }
+
+    return Column(
+      children: [
+        if (selectedTab == ListeningTab.allRecitator) allReciterSearchField(),
+        if (selectedTab == ListeningTab.liked) likedSearchField(),
+        if (selectedTab == ListeningTab.downloaded) downloadSearchField(),
+        if (selectedTab != ListeningTab.downloaded) const SizedBox(height: 16),
+        selectedTab == ListeningTab.allRecitator
+            ? const AllRecitatorsTab()
+            : selectedTab == ListeningTab.downloaded
+            ? const DownloadedTab()
+            : const LikedTab(),
+      ],
+    );
+  }
+
+  Widget allReciterSearchField() {
+    return ListeningSearchTextField(
+      hasSuffix: inputOne.isNotEmpty,
+      hint: context.tr.search_for_recitator,
+      controller: textEditingControllerOne,
+      onSubmittedPressed: (value) {},
+      onChanged: (value) {
+        if (value.length > 3) {
+          setState(() {
+            inputOne = value;
+          });
+          context.read<RecitorsProvider>().searchReciters(value);
+        }
+        if (value.isEmpty) {
+          context.read<RecitorsProvider>().resetReciters();
+        }
+      },
+      onSuffixPressed: () {
+        textEditingControllerOne.clear();
+        setState(() {
+          inputOne = '';
+        });
+        context.read<RecitorsProvider>().resetReciters();
+      },
+    );
+  }
+
+  Widget likedSearchField() {
+    return ListeningSearchTextField(
+      hasSuffix: inputTwo.isNotEmpty,
+      hint: context.tr.search_for_fav_recitator,
+      controller: textEditingControllerTwo,
+      onSubmittedPressed: (value) {},
+      onChanged: (value) {
+        if (value.length > 3) {
+          setState(() {
+            inputTwo = value;
+          });
+          context.read<RecitorsProvider>().searchFavoriteReciters(value);
+        }
+
+        if (value.isEmpty) {
+          context.read<RecitorsProvider>().resetFavoriteReciters();
+        }
+      },
+      onSuffixPressed: () {
+        textEditingControllerTwo.clear();
+        setState(() {
+          inputTwo = '';
+        });
+        context.read<RecitorsProvider>().resetFavoriteReciters();
+      },
+    );
+  }
+
+  Widget downloadSearchField() {
+    return ListeningSearchTextField(
+      hasSuffix: inputThree.isNotEmpty,
+      hint: context.tr.search_for_surah,
+      controller: textEditingControllerThree,
+      onSubmittedPressed: (value) {},
+      onChanged: (value) {
+        setState(() {
+          inputThree = value;
+        });
+        context.read<DownloadController>().searchDownloadedSurah(value);
+      },
+      onSuffixPressed: () {
+        textEditingControllerThree.clear();
+        setState(() {
+          inputThree = '';
+        });
+        context.read<DownloadController>().resetDownloadedSurahs();
       },
     );
   }

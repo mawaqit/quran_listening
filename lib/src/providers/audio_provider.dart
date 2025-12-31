@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
@@ -135,13 +136,10 @@ class AudioPlayerProvider extends ChangeNotifier {
   }
 
   getCurrentReciterV3({required BuildContext context}) {
-    reciter =
-    context.read<RecitorsProvider>().reciters.isNotEmpty
-        ? context
+    reciter = context
         .read<RecitorsProvider>()
         .reciters
-        .firstWhere((element) => element.id == currentReciterId)
-        : null;
+        .firstWhereOrNull((element) => element.id == currentReciterId);
     return reciter;
   }
 
