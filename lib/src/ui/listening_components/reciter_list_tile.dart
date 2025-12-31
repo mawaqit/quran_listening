@@ -64,7 +64,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
                 const SizedBox(height: 2),
                 DefaultTextStyle(
                   style: TextStyle(
-                      color: isSelected ? context.colorScheme.onSecondary : context.colorScheme.secondary.withOpacity(.70),
+                      color: context.colorScheme.secondary.withOpacity(.70),
                       fontSize: (context.isFoldable ? 7 : 9).sp,
                       fontFamily: context.getFontFamily()),
                   child: Row(
