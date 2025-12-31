@@ -161,14 +161,14 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: (context.isFoldable ? 9 : 13).sp,
+                      fontSize: (context.isFoldable ? 8 : 13).sp,
                       color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
                     ),
                   ),
                   Text(
                     widget.reciter.reciterName,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: greyColor, fontSize: (context.isFoldable ? 7 : 10).sp),
+                    style: TextStyle(color: greyColor, fontSize: (context.isFoldable ? 6 : 10).sp),
                   ),
                 ],
               ),
