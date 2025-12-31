@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import '../../../../mawaqit_quran_listening.dart';
 import '../../../../mawaqit_quran_listening.dart' as recitor_controller;
@@ -21,7 +22,8 @@ class _LikedTabState extends State<LikedTab> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero).then((value) {
+
+    SchedulerBinding.instance.addPostFrameCallback((callback){
       context.read<RecitorsProvider>().getReciters(context);
     });
     favoriteReciter = context.read<FavoriteReciter>();
