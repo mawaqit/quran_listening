@@ -37,15 +37,13 @@ class _RecitorListTileState extends State<RecitorListTile> {
   @override
   Widget build(BuildContext context) {
 
-    Color tileBackgroundColor = context.colorScheme.surfaceContainerLow;
-    if (context.isFoldable && context.watch<AudioPlayerProvider>().reciter == widget.recitor){
-      tileBackgroundColor = context.colorScheme.surfaceContainerHigh;
-    }
+    // this will work only for foldable
+    final bool isSelected = context.isFoldable && context.watch<AudioPlayerProvider>().reciter == widget.recitor;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: tileBackgroundColor,
+        color: isSelected ? context.colorScheme.primaryContainer : context.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: EdgeInsetsDirectional.only(start: 19, top: 15, bottom: 15),
@@ -60,13 +58,13 @@ class _RecitorListTileState extends State<RecitorListTile> {
                   maxLines: 2,
                   style: TextStyle(
                     fontSize: (context.isFoldable ? 9 : 13).sp,
-                    color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
+                    color: isSelected ? context.colorScheme.onPrimaryContainer : context.colorScheme.onPrimaryContainer.withOpacity(.9),
                   ),
                 ),
                 const SizedBox(height: 2),
                 DefaultTextStyle(
                   style: TextStyle(
-                      color: context.colorScheme.secondary.withOpacity(.70),
+                      color: isSelected ? context.colorScheme.onSecondary : context.colorScheme.secondary.withOpacity(.70),
                       fontSize: (context.isFoldable ? 7 : 9).sp,
                       fontFamily: context.getFontFamily()),
                   child: Row(
