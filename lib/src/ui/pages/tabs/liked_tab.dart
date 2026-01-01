@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import '../../../../mawaqit_quran_listening.dart';
@@ -68,9 +69,11 @@ class _LikedTabState extends State<LikedTab> {
                         context.read<PlayerScreensController>().setRecitor(
                           provider.reciters[index],
                         );
-                        context.read<NavigationControllerV3>().navigateToPage(
-                          pageIndex: 1,
-                        );
+                        if (!context.isFoldable){
+                          context.read<NavigationControllerV3>().navigateToPage(
+                            pageIndex: 1,
+                          );
+                        }
                       },
                       child: RecitorListTile(
                         recitor: recitorsProvider.recitersForFavorite[index],

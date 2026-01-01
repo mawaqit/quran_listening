@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:provider/provider.dart';
 import '../../../../mawaqit_quran_listening.dart';
 import '../../../../mawaqit_quran_listening.dart' as recitor_controller;
@@ -18,9 +19,9 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance.addPostFrameCallback((callback){
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
       context.read<RecitorsProvider>().getReciters(context);
-
     });
   }
 
@@ -75,9 +76,7 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
                       
                       // Set reciters list in audio provider
                       context.read<AudioPlayerProvider>().reciters =
-                          context
-                              .read<recitor_controller.RecitorsProvider>()
-                              .reciters;
+                          context.read<recitor_controller.RecitorsProvider>().reciters;
                       
                       // Change reciter (this sets currentReciterId)
                       context.read<AudioPlayerProvider>().changeReciter(
@@ -90,9 +89,11 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
                       );
                       
                       // Navigate to page 1 (Surah page)
-                      context.read<NavigationControllerV3>().navigateToPage(
-                        pageIndex: 1,
-                      );
+                      if (!context.isFoldable){
+                        context.read<NavigationControllerV3>().navigateToPage(
+                          pageIndex: 1,
+                        );
+                      }
                     },
                     child: RecitorListTile(
                       recitor: provider.reciters[index],

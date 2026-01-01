@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
+import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icon_v3_cions.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
@@ -160,14 +161,14 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13.sp,
+                      fontSize: (context.isFoldable ? 8 : 13).sp,
                       color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
                     ),
                   ),
                   Text(
                     widget.reciter.reciterName,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: greyColor, fontSize: 10.sp),
+                    style: TextStyle(color: greyColor, fontSize: (context.isFoldable ? 6 : 10).sp),
                   ),
                 ],
               ),

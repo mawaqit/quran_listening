@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:sizer/sizer.dart';
 import '../../../mawaqit_quran_listening.dart';
 import 'package:provider/provider.dart';
@@ -6,7 +7,7 @@ import '../components/svg_image_asset.dart';
 
 
 class RecitorListTile extends StatefulWidget {
-  const RecitorListTile({super.key, required this.recitor, required this.listeningTab, required this.index});
+  const RecitorListTile({super.key, required this.recitor, required this.listeningTab, required this.index,});
 
   final Reciter recitor;
   final ListeningTab listeningTab;
@@ -36,10 +37,13 @@ class _RecitorListTileState extends State<RecitorListTile> {
   @override
   Widget build(BuildContext context) {
 
+    // this will work only for foldable
+    final bool isSelected = context.isFoldable && context.watch<AudioPlayerProvider>().reciter == widget.recitor;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainerLow,
+        color: isSelected ? context.colorScheme.primaryContainer : context.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: EdgeInsetsDirectional.only(start: 19, top: 15, bottom: 15),
@@ -53,15 +57,15 @@ class _RecitorListTileState extends State<RecitorListTile> {
                   widget.recitor.reciterName.trim(),
                   maxLines: 2,
                   style: TextStyle(
-                    fontSize: 13.sp,
-                    color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
+                    fontSize: (context.isFoldable ? 8 : 13).sp,
+                    color: isSelected ? context.colorScheme.onPrimaryContainer : context.colorScheme.onPrimaryContainer.withOpacity(.9),
                   ),
                 ),
                 const SizedBox(height: 2),
                 DefaultTextStyle(
                   style: TextStyle(
                       color: context.colorScheme.secondary.withOpacity(.70),
-                      fontSize: 10.sp,
+                      fontSize: (context.isFoldable ? 6 : 9).sp,
                       fontFamily: context.getFontFamily()),
                   child: Row(
                     children: [

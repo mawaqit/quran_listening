@@ -15,6 +15,7 @@ class RecitationsManager extends ChangeNotifier {
   bool get isLoading => state == RecitationsScreenState.loading;
   Map<int, List<Recitation>> recitations = {};
   List<SurahModel> surahs = [];
+  final Set<int> _loadingReciterIds = {}; // Track reciters currently being loaded
 
   Future<void> initializeSurahs() async {
     if (surahs.isEmpty) {
@@ -45,9 +46,16 @@ class RecitationsManager extends ChangeNotifier {
     bool retry = false,
   }) async {
     try {
+      // If already loaded, return immediately
       if (recitations.containsKey(reciterId)) {
         state = RecitationsScreenState.success;
         notifyListeners();
+        return;
+      }
+
+      // If already loading for this reciter, skip duplicate call
+      if (_loadingReciterIds.contains(reciterId)) {
+        debugPrint('RecitationsManager: Already loading recitations for reciter ID $reciterId, skipping duplicate call');
         return;
       }
 
@@ -74,24 +82,33 @@ class RecitationsManager extends ChangeNotifier {
         }
       }
 
+      // Mark as loading to prevent concurrent calls
+      _loadingReciterIds.add(reciterId);
+      
       if (retry) {
         state = RecitationsScreenState.loading;
         notifyListeners();
       }
 
-      list = await QuranApi.chapterRecitations(reciterId: reciterId);
+      try {
+        list = await QuranApi.chapterRecitations(reciterId: reciterId);
 
-      await _hiveManager.write(
-        key: 'localRecitations_$reciterId',
-        value: list.map((e) => e.toMap()).toList(),
-      );
-      recitations.putIfAbsent(reciterId, () => list);
+        await _hiveManager.write(
+          key: 'localRecitations_$reciterId',
+          value: list.map((e) => e.toMap()).toList(),
+        );
+        recitations.putIfAbsent(reciterId, () => list);
 
-      state = RecitationsScreenState.success;
-      notifyListeners();
+        state = RecitationsScreenState.success;
+        notifyListeners();
+      } finally {
+        // Always remove from loading set, even if there's an error
+        _loadingReciterIds.remove(reciterId);
+      }
     } on Exception catch (e) {
       debugPrint('RecitationsManager: Error getting recitations for reciter ID $reciterId: $e');
       state = RecitationsScreenState.failed;
+      _loadingReciterIds.remove(reciterId); // Ensure it's removed on error
       notifyListeners();
     }
   }

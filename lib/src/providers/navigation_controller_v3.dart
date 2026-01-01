@@ -26,7 +26,7 @@ class NavigationControllerV3 extends ChangeNotifier {
 
 
   void navigateToPage({int? pageIndex}) {
-    _currentPage = pageIndex??1;
+    _currentPage = pageIndex ?? 1;
     pageController.animateToPage(
       _currentPage,
       duration: const Duration(milliseconds: 400),

@@ -17,19 +17,22 @@ class HomePage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: SafeArea(
-        child: PageView.builder(
-          controller: pageController,
-          physics: const NeverScrollableScrollPhysics(),
-          onPageChanged: (int page) {},
-          itemCount: 3,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return const QuranListeningPage();
-            } else if (index == 1 && context.read<PlayerScreensController>().reciter != null) {
-              return const SurahPage();
-            }
-            return const SizedBox.shrink();
-          },
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: PageView.builder(
+            controller: pageController,
+            physics: const NeverScrollableScrollPhysics(),
+            onPageChanged: (int page) {},
+            itemCount: 3,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return const QuranListeningPage();
+              } else if (index == 1 && context.read<PlayerScreensController>().reciter != null) {
+                return const SurahPage();
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
