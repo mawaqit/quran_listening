@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
-import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:provider/provider.dart';
 import '../../../mawaqit_quran_listening.dart';
-import '../components/error_widget.dart';
 import '../listening_components/surah_list_tile_v3.dart';
 
 class SurahPage extends StatefulWidget {
@@ -163,94 +159,6 @@ class _SurahPageState extends State<SurahPage> {
                       },
                     ),
           ),
-          if (context.watch<AudioPlayerProvider>().isFloating)
-            Builder(builder: (context) {
-              final audioManager = context.watch<AudioPlayerProvider>();
-              final audioPlayer = audioManager.audioPlayer;
-
-              final surah = audioManager.getCurrentPlayingSurah(context: context);
-              if (surah == null) {
-                return const SizedBox.shrink();
-              }
-              return GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
-                  context.read<PlayerScreensController>().navigateToPlayerScreenV3(
-                    context,
-                    audioManager.reciters ?? [],
-                    audioManager.playingChapter!,
-                    audioManager.chapters,
-                    audioManager.playerType!,
-                    reciterFromAllSaved: audioManager.currentReciterDetail,
-                  );
-                },
-                child: Container(
-                  key: const Key('bottom_sticky_player'),
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: context.isDark ? context.colorScheme.primary : context.colorScheme.primary,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 10.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.tr.listen_to_quran,
-                                style:
-                                TextStyle(color: Colors.white, fontSize: 8),
-                              ),
-                              Text(
-                                '${surah.id}. ${surah.name}- ${audioManager.playingRecitor?.reciterName}',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      ///Play/Pause/RePlay
-                      IconButton(
-                        splashRadius: 20,
-                        icon: Icon(
-                          audioPlayer.processingState == ProcessingState.completed
-                              ? Icons.replay_rounded
-                              : audioManager.isPlaying
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
-                          color: Colors.white,
-                        ),
-                        onPressed: () async {
-                          if (audioPlayer.processingState == ProcessingState.completed) {
-                            audioPlayer.seek(Duration.zero, index: 0);
-                          } else if (audioManager.isPlaying) {
-                            await audioPlayer.pause();
-                          } else {
-                            await audioPlayer.play();
-                          }
-                        },
-                      ),
-                      IconButton(
-                        key: const Key('close_sticky_player'),
-                        splashRadius: 20,
-                        icon: const Icon(
-                          Icons.clear,
-                          color: Colors.white,
-                          size: 22,
-                        ),
-                        onPressed: audioManager.disposePlayer,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
         ],
       ),
     );
