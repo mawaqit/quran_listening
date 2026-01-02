@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
-import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:provider/provider.dart';
 import '../../../mawaqit_quran_listening.dart';
-import '../components/error_widget.dart';
 import '../listening_components/surah_list_tile_v3.dart';
 
 class SurahPage extends StatefulWidget {

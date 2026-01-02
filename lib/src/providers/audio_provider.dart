@@ -17,7 +17,7 @@ enum PlayerType {
 
 class AudioPlayerProvider extends ChangeNotifier {
 
-  AudioPlayer _audioPlayer = AudioPlayer();
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   // stream subs
   StreamSubscription<PlayerState>? _playerStateSub;
@@ -35,7 +35,6 @@ class AudioPlayerProvider extends ChangeNotifier {
   Reciter? playingRecitor;
   int? currentReciterId;
   late List<SurahModel> chapters;
-  late ConcatenatingAudioSource _playlist;
 
   SurahModel? playingChapter;
   int? playingChapterIndex;
@@ -174,9 +173,13 @@ class AudioPlayerProvider extends ChangeNotifier {
     
     notifyListeners();
 
-    _playlist = ConcatenatingAudioSource(children: playlist);
-    await _audioPlayer.setAudioSource(_playlist, initialIndex: index);
-    await _audioPlayer.play();
+    try {
+      await _waitForSafeState();
+      await _audioPlayer.setAudioSources([]);
+      await Future.delayed(const Duration(milliseconds: 50));
+      await _audioPlayer.setAudioSources(playlist, initialIndex: index);
+      await _audioPlayer.play();
+    } catch (_){}
   }
 
   Future<void> playIndex({int? index}) async {
@@ -260,6 +263,48 @@ class AudioPlayerProvider extends ChangeNotifier {
     final currentSurah = reciterController.surahList
         .firstWhere((element) => element.id == playingChapter!.id);
     return currentSurah;
+  }
+
+  /// Wait for the player to be in a safe state (not loading) before operations
+  /// Returns true if safe, false if timeout
+  Future<bool> _waitForSafeState({Duration timeout = const Duration(seconds: 2)}) async {
+    // Check current state immediately - if already safe, return early
+    final currentState = _audioPlayer.playerState;
+    if (currentState.processingState == ProcessingState.idle ||
+        currentState.processingState == ProcessingState.ready ||
+        currentState.processingState == ProcessingState.completed) {
+      return true;
+    }
+
+    final completer = Completer<bool>();
+    Timer? timeoutTimer;
+    StreamSubscription<PlayerState>? stateSub;
+
+    void cleanup() {
+      stateSub?.cancel();
+      timeoutTimer?.cancel();
+    }
+
+    timeoutTimer = Timer(timeout, () {
+      cleanup();
+      if (!completer.isCompleted) {
+        completer.complete(false);
+      }
+    });
+
+    stateSub = _audioPlayer.playerStateStream.listen((state) {
+      // Safe states: idle, ready, or completed (not loading or buffering)
+      if (state.processingState == ProcessingState.idle ||
+          state.processingState == ProcessingState.ready ||
+          state.processingState == ProcessingState.completed) {
+        cleanup();
+        if (!completer.isCompleted) {
+          completer.complete(true);
+        }
+      }
+    });
+
+    return completer.future;
   }
 
   // 🔹 SOFT dispose: what your UI calls when switching surahs

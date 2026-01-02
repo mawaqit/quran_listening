@@ -8,16 +8,10 @@ import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:mawaqit_quran_listening/src/utils/helpers/watch_icons.dart';
 import 'package:sizer/sizer.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:sizer/sizer.dart';
 
 import '../../../mawaqit_quran_listening.dart';
-import '../components/circular_button.dart';
-import '../components/svg_image_asset.dart';
-import '../components/watch_playback_confirmation_bottom_sheet.dart';
 import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
 
 enum QuranPlayerType { surah, ayah }
