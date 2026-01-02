@@ -105,7 +105,7 @@ class _WatchPlaybackConfirmationBottomSheetState
 
                     // Subtitle
                     Text(
-                      "${context.tr.chapter}${widget.surahName} ${context.tr.ready_play_watch}",
+                      "${context.tr.chapter} ${widget.surahName} ${context.tr.ready_play_watch}",
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: context.colorScheme.primaryFixed.withOpacity(
@@ -131,7 +131,7 @@ class _WatchPlaybackConfirmationBottomSheetState
                           const SizedBox(width: 4),
                           Flexible(
                             child: Text(
-                              "It may take a few seconds to appear on your watch.",
+                              context.tr.take_time_appear_watch,
                               style: TextStyle(
                                 fontSize: 10.sp,
                                 color: context.colorScheme.primaryFixed.withOpacity(0.6),
