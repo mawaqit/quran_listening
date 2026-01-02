@@ -208,7 +208,6 @@ class _DownloadedTabState extends State<DownloadedTab> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // TODO
                   TextButton(
                     onPressed: () {
                       showDialog(
