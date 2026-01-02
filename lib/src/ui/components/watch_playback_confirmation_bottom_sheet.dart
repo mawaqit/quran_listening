@@ -115,8 +115,35 @@ class _WatchPlaybackConfirmationBottomSheetState
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 30),
 
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: context.colorScheme.primaryFixed.withOpacity(0.6),
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              "It may take a few seconds to appear on your watch.",
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                color: context.colorScheme.primaryFixed.withOpacity(0.6),
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     // Buttons Row
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -132,7 +159,7 @@ class _WatchPlaybackConfirmationBottomSheetState
                               child: Container(
                                 height: 50,
                                 decoration: BoxDecoration(
-                                  color: context.colorScheme.primaryFixed,
+                                  color: context.colorScheme.primary,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
