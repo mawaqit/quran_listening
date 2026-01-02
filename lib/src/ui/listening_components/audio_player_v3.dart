@@ -438,8 +438,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
 
                               showModalBottomSheet(
                                 context: context,
-                                backgroundColor: context.isDark ? const Color(
-                                    0xff1C1B23) : Colors.white,
+                                backgroundColor: context.colorScheme.surface,
                                 shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(10),
