@@ -9,7 +9,8 @@ import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:sizer/sizer.dart';
 
 class DownloadedTab extends StatefulWidget {
-  const DownloadedTab({super.key});
+  const DownloadedTab({super.key, required this.listPadding});
+  final EdgeInsetsGeometry? listPadding;
 
   @override
   State<DownloadedTab> createState() => _DownloadedTabState();
@@ -122,6 +123,7 @@ class _DownloadedTabState extends State<DownloadedTab> {
           enabled: true,
           child: ListView.builder(
             itemCount: 5, // Show 5 skeleton items
+            padding: widget.listPadding,
             itemBuilder: (context, index) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 10),
@@ -203,6 +205,7 @@ class _DownloadedTabState extends State<DownloadedTab> {
         )
         : Expanded(
           child: ListView(
+            padding: widget.listPadding,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,

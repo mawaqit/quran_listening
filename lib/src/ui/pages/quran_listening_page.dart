@@ -10,7 +10,9 @@ import '../listening_components/listening_toggle_tabs_widget.dart';
 enum ListeningTab { liked, allRecitator, downloaded }
 
 class QuranListeningPage extends StatefulWidget {
-  const QuranListeningPage({super.key});
+  const QuranListeningPage({super.key, this.listPadding,});
+
+  final EdgeInsetsGeometry? listPadding;
 
   @override
   State<QuranListeningPage> createState() => _QuranListeningPageState();
@@ -80,7 +82,7 @@ class _QuranListeningPageState extends State<QuranListeningPage> {
                       children: [
                         allReciterSearchField(),
                         SizedBox(height: 16,),
-                        AllRecitatorsTab(),
+                        AllRecitatorsTab(listPadding: widget.listPadding,),
                       ],
                     ),
                   ),
@@ -98,7 +100,7 @@ class _QuranListeningPageState extends State<QuranListeningPage> {
                       children: [
                         likedSearchField(),
                         SizedBox(height: 16,),
-                        LikedTab(),
+                        LikedTab(listPadding: widget.listPadding,),
                       ],
                     ),
                   ),
@@ -116,7 +118,7 @@ class _QuranListeningPageState extends State<QuranListeningPage> {
                 children: [
                   downloadSearchField(),
                   SizedBox(height: 16,),
-                  DownloadedTab(),
+                  DownloadedTab(listPadding: widget.listPadding,),
                 ],
               ),
             ),
@@ -131,10 +133,10 @@ class _QuranListeningPageState extends State<QuranListeningPage> {
         if (selectedTab == ListeningTab.downloaded) downloadSearchField(),
         if (selectedTab != ListeningTab.downloaded) const SizedBox(height: 16),
         selectedTab == ListeningTab.allRecitator
-            ? const AllRecitatorsTab()
+            ? AllRecitatorsTab(listPadding: widget.listPadding,)
             : selectedTab == ListeningTab.downloaded
-            ? const DownloadedTab()
-            : const LikedTab(),
+            ? DownloadedTab(listPadding: widget.listPadding,)
+            : LikedTab(listPadding: widget.listPadding,),
       ],
     );
   }

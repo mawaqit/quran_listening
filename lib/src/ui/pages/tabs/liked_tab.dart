@@ -10,7 +10,8 @@ import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 /// Liked/Favorite Recitators
 
 class LikedTab extends StatefulWidget {
-  const LikedTab({super.key});
+  const LikedTab({super.key, required this.listPadding});
+  final EdgeInsetsGeometry? listPadding;
 
   @override
   State<LikedTab> createState() => _LikedTabState();
@@ -48,6 +49,7 @@ class _LikedTabState extends State<LikedTab> {
               child: ListView.builder(
                 key: const Key('favorite_tab_listview'),
                 itemCount: recitorsProvider.recitersForFavorite.length,
+                padding: widget.listPadding,
                 shrinkWrap: true,
                 itemBuilder: (context, index) {
                   if (favoriteReciter.favoriteReciterUuids.contains(

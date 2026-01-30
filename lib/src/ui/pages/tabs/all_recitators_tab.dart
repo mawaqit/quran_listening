@@ -9,7 +9,9 @@ import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:sizer/sizer.dart';
 
 class AllRecitatorsTab extends StatefulWidget {
-  const AllRecitatorsTab({super.key});
+  const AllRecitatorsTab({super.key, required this.listPadding});
+
+  final EdgeInsetsGeometry? listPadding;
 
   @override
   State<AllRecitatorsTab> createState() => _AllRecitatorsTabState();
@@ -30,7 +32,7 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
     return Consumer<RecitorsProvider>(
       builder: (context, provider, child) {
         if (provider.state == RecitersScreenState.loading) {
-          return const FakeRecitorsList();
+          return FakeRecitorsList(listPadding: widget.listPadding,);
         }
         if (provider.reciters.isEmpty && provider.originalReciters.isNotEmpty) {
           return Expanded(
@@ -64,6 +66,7 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
               child: ListView.builder(
                 key: const Key('recitors_tab_listview'),
                 itemCount: provider.reciters.length,
+                padding: widget.listPadding,
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     key: Key('recitor_tile_key_$index'),

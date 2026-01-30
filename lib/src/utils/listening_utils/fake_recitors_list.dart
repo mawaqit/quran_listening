@@ -6,7 +6,9 @@ import '../../ui/listening_components/reciter_list_tile.dart';
 import 'package:provider/provider.dart';
 
 class FakeRecitorsList extends StatelessWidget {
-  const FakeRecitorsList({super.key});
+  const FakeRecitorsList({super.key, this.listPadding});
+
+  final EdgeInsetsGeometry? listPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +18,7 @@ class FakeRecitorsList extends StatelessWidget {
         child: ListView.builder(
           key: const Key('recitors_tab_listview'),
           itemCount: fakeReciters.length,
+          padding: listPadding,
           itemBuilder: (context, index) {
             return GestureDetector(
               key: Key('recitor_tile_key_$index'),
