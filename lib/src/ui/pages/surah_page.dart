@@ -4,7 +4,8 @@ import '../../../mawaqit_quran_listening.dart';
 import '../listening_components/surah_list_tile_v3.dart';
 
 class SurahPage extends StatefulWidget {
-  const SurahPage({super.key});
+  const SurahPage({super.key, this.listPadding});
+  final EdgeInsetsGeometry? listPadding;
 
   @override
   State<SurahPage> createState() => _SurahPageState();
@@ -146,7 +147,7 @@ class _SurahPageState extends State<SurahPage> {
                     ? ApiErrorWidget(callback: () => recitationsManager.getRecitations(reciterId: audioPlayerProvider.currentReciterId ?? 1, retry: true))
                     : ListView.builder(
                       key: const Key('surah_page_listview'),
-                      padding: const EdgeInsets.only(bottom: 30),
+                      padding: widget.listPadding,
                       itemCount: surahs.length,
                       itemBuilder: (context, index) {
                         return SurahListTileV3(

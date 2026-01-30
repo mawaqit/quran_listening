@@ -31,7 +31,7 @@ class HomePage extends StatelessWidget {
                   itemCount: 3,
                   itemBuilder: (context, index) {
                     if (index == 0) {
-                      return const QuranListeningPage();
+                      return QuranListeningPage();
                     } else if (index == 1 && context.read<PlayerScreensController>().reciter != null) {
                       return const SurahPage();
                     }
