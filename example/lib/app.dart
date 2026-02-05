@@ -50,9 +50,6 @@ class QuranListeningExampleApp extends StatelessWidget {
                   create: (context) => NavigationControllerV3(),
                 ),
                 ChangeNotifierProvider(
-                  create: (context) => SurahPagePlayPauseIndexProvider(),
-                ),
-                ChangeNotifierProvider(
                   create: (context) => DownloadedPagePlayPauseIndexProvider(),
                 ),
               ],
