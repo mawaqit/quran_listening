@@ -118,12 +118,9 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                 Builder(
                   builder: (context) {
                     var audioManager = context.watch<AudioPlayerProvider>();
-                    var playPauseIndexProvider =
-                        context.watch<DownloadedPagePlayPauseIndexProvider>();
                     bool isPlaying =
                         audioManager.isPlaying &&
-                        (index ==
-                            playPauseIndexProvider.currentPlayingSurahIndex);
+                        index == audioManager.playingChapterIndex && reciter?.id == audioManager.playingRecitor?.id;
                     return IconButton(
                       onPressed: () {
                         if (!isPlaying) {
@@ -192,7 +189,7 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                         }
                       },
                       icon: Icon(
-                        isPlaying ? ReciterIconV3.pause : ReciterIconV3.play,
+                        isPlaying ? Icons.pause : Icons.play_arrow_rounded,
                         color: context.colorScheme.primaryFixed,
                       ),
                     );

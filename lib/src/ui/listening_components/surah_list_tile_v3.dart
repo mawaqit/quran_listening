@@ -60,6 +60,11 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
         0.0;
     const greyColor = Colors.grey;
 
+    bool isPlaying =
+        audioManager.isPlaying && (widget.index == audioManager.playingChapterIndex) &&
+            widget.reciter.id == audioManager.playingRecitor?.id;
+
+
     return GestureDetector(
       key: Key('surah_tile_key_${widget.index}'),
       onTap: () {
@@ -95,61 +100,41 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Builder(
-              builder: (context) {
-                audioManager = context.watch<AudioPlayerProvider>();
-                var playPauseIndexProvider =
-                    context.watch<SurahPagePlayPauseIndexProvider>();
-                bool isPlaying =
-                    audioManager.isPlaying &&
-                    (widget.index ==
-                        playPauseIndexProvider.currentPlayingSurahIndex) &&
-                    widget.reciter.id ==
-                        playPauseIndexProvider.currentRecitorId;
+            IconButton(
+              key: Key('play_button_key_${widget.index}'),
+              onPressed: () {
+                context.read<AudioPlayerProvider>().disposePlayer();
+                if (!isPlaying) {
+                  List<SurahModel> selectedChapters = [];
+                  List<Reciter> selectedReciters = [];
+                  // For Liked/All Recitators tabs: pass ALL 114 surahs from selected reciter
+                  selectedChapters.addAll(widget.chapters);
+                  selectedReciters.addAll([widget.reciter]);
 
-                return IconButton(
-                  key: Key('play_button_key_${widget.index}'),
-                  onPressed: () {
-                    context.read<AudioPlayerProvider>().disposePlayer();
-                    if (!isPlaying) {
-                      List<SurahModel> selectedChapters = [];
-                      List<Reciter> selectedReciters = [];
-                      // For Liked/All Recitators tabs: pass ALL 114 surahs from selected reciter
-                      selectedChapters.addAll(widget.chapters);
-                      selectedReciters.addAll([widget.reciter]);
-                      context
-                          .read<SurahPagePlayPauseIndexProvider>()
-                          .setCurrentSurahIndex(widget.index);
-                      context
-                          .read<SurahPagePlayPauseIndexProvider>()
-                          .setCurrentRecitor(widget.reciter.id);
-
-                      /// ------------------------------------ open v3 bottom sheet for player ------------------------------------
-                      context.read<AudioPlayerProvider>().setPlayingRecitor(
-                        widget.reciter,
-                      );
-                      context
-                          .read<PlayerScreensController>()
-                          .navigateToPlayerScreenV3(
-                            context,
-                            selectedReciters,
-                            widget.chapter,
-                            selectedChapters,
-                            widget.playerType,
-                          );
-                      FocusScope.of(context).unfocus();
-                    } else {
-                      final audioManager = context.read<AudioPlayerProvider>();
-                      final audioPlayer = audioManager.audioPlayer;
-                      audioPlayer.pause();
-                    }
-                  },
-                  icon: Icon(
-                    isPlaying ? ReciterIconV3.pause : ReciterIconV3.play,
-                    color: context.colorScheme.primaryFixed,
-                  ),
-                );
+                  /// ------------------------------------ open v3 bottom sheet for player ------------------------------------
+                  context.read<AudioPlayerProvider>().setPlayingRecitor(
+                    widget.reciter,
+                  );
+                  context
+                      .read<PlayerScreensController>()
+                      .navigateToPlayerScreenV3(
+                    context,
+                    selectedReciters,
+                    widget.chapter,
+                    selectedChapters,
+                    widget.playerType,
+                  );
+                  FocusScope.of(context).unfocus();
+                } else {
+                  final audioManager = context.read<AudioPlayerProvider>();
+                  final audioPlayer = audioManager.audioPlayer;
+                  audioPlayer.pause();
+                }
               },
+              icon: Icon(
+                isPlaying ? Icons.pause : Icons.play_arrow_rounded,
+                color: context.colorScheme.primaryFixed,
+              ),
             ),
             Expanded(
               child: Column(
