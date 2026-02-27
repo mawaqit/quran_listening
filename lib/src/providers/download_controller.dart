@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:path_provider/path_provider.dart';
 import '../core/database/hive_manager.dart';
@@ -179,7 +180,7 @@ class DownloadController extends ChangeNotifier {
       // Check if the download was cancelled by user
       if (e is DioException && e.type == DioExceptionType.cancel) {
         // Download was cancelled by user, don't show error toast
-        debugPrint('Download cancelled by user: $downloadKey');
+        Log.i('Download cancelled by user: $downloadKey');
       } else {
         // Actual download failure, show error toast
         Fluttertoast.showToast(
@@ -297,11 +298,11 @@ class DownloadController extends ChangeNotifier {
         _inProgressSurahs[reciterId]?.remove(chapterId);
         notifyListeners();
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Download failed, remove from progress
       _inProgressSurahs[reciterId]?.remove(chapterId);
       notifyListeners();
-      debugPrint('Download error: $e');
+      Log.e('Download error: $e', error: e, stackTrace: stackTrace);
     }
   }
 
@@ -341,13 +342,12 @@ class DownloadController extends ChangeNotifier {
       originalSurahRecitorList = [];
       surahRecitorList = [];
       notifyListeners();
-      // TODO
       Fluttertoast.showToast(
         msg: deletedSuccessfullyMsg,
         toastLength: Toast.LENGTH_SHORT,
       );
-    } catch (error) {
-      debugPrint('Error while deleting all recitations: $error');
+    } catch (error, stackTrace) {
+      Log.e('Error while deleting all recitations: $error', error: error, stackTrace: stackTrace);
       Fluttertoast.showToast(
         msg: failedDeleteMsg,
         toastLength: Toast.LENGTH_SHORT,

@@ -5,8 +5,6 @@ import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:sizer/sizer.dart';
 import '../../../mawaqit_quran_listening.dart';
 import 'package:provider/provider.dart';
-import '../../providers/player_screens_controller.dart';
-
 import '../../utils/helpers/mawaqit_icon_v3_cions.dart';
 
 class DownloadedSurahTileV3 extends StatelessWidget {
@@ -371,7 +369,7 @@ class DownloadedSurahTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      key: Key('downloaded_surah_tile_key_${index}'),
+      key: Key('downloaded_surah_tile_key_$index'),
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.only(left: 5, top: 15, bottom: 15, right: 5),
@@ -386,7 +384,7 @@ class DownloadedSurahTile extends StatelessWidget {
           children: [
             // Play button
             IconButton(
-              key: Key('play_button_key_${index}'),
+              key: Key('play_button_key_$index'),
               onPressed: onTap,
               icon: Icon(
                 isPlaying ? ReciterIconV3.pause : ReciterIconV3.play,
@@ -433,7 +431,7 @@ class DownloadedSurahTile extends StatelessWidget {
 
             if (onDelete != null)
               IconButton(
-                key: Key('delete_button_key_${index}'),
+                key: Key('delete_button_key_$index'),
                 constraints: const BoxConstraints(),
                 padding: EdgeInsets.zero,
                 icon: Icon(Icons.delete, color: Colors.red, size: 22),

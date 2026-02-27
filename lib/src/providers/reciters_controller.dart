@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:provider/provider.dart';
 
@@ -180,8 +181,8 @@ class RecitorsProvider extends ChangeNotifier {
           ...arReciters,
           ...frReciters,
         ];
-      } catch (e) {
-        debugPrint('RecitorsProvider: Error caching reciters: $e');
+      } catch (e, stackTrace) {
+        Log.e("Error caching reciters: $e", error: e, stackTrace: stackTrace);
       }
     });
     notifyListeners();

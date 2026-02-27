@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icon_v3_cions.dart';
@@ -10,7 +11,6 @@ import '../../models/reciter.dart';
 import '../../models/surah_model.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/download_controller.dart';
-import '../../providers/play_pause_id_provider.dart';
 import '../../providers/player_screens_controller.dart';
 
 class SurahListTileV3 extends StatefulWidget {
@@ -229,7 +229,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                         reciterId: widget.reciter.id.toString(),
                       );
 
-                      debugPrint('Deleted : $result');
+                      Log.i('Deleted : $result');
                     } else if (downloadController.canDownload()) {
                       await downloadController.downloadRecite(
                         context: context,

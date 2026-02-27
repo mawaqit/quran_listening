@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:mawaqit_quran_listening/src/core/database/reciter_db.dart';
 
 class FavoriteSurah extends ChangeNotifier {
@@ -22,8 +23,8 @@ class FavoriteSurah extends ChangeNotifier {
         fetchFavoriteSurahs(reciterUuid);
       }
       return res;
-    } catch (error) {
-      debugPrint(error.toString());
+    } catch (error, stackTrace) {
+      Log.e("Error adding reciter to favorite: $error", error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -35,8 +36,8 @@ class FavoriteSurah extends ChangeNotifier {
         fetchFavoriteSurahs(reciterUuid);
       }
       return res;
-    } catch (error) {
-      debugPrint(error.toString());
+    } catch (error, stackTrace) {
+      Log.e("Error removing reciter from favorite: $error", error: error, stackTrace: stackTrace);
       return false;
     }
   }

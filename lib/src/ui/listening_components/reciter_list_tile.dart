@@ -3,7 +3,6 @@ import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:sizer/sizer.dart';
 import '../../../mawaqit_quran_listening.dart';
 import 'package:provider/provider.dart';
-import '../components/svg_image_asset.dart';
 
 
 class RecitorListTile extends StatefulWidget {
@@ -150,7 +149,7 @@ class ReciterListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      key: Key('reciter_tile_key_${index}'),
+      key: Key('reciter_tile_key_$index'),
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.only(left: 5, top: 15, bottom: 15, right: 5),
@@ -216,7 +215,7 @@ class ReciterListTile extends StatelessWidget {
               children: [
                 if (onFavoriteToggle != null)
                   IconButton(
-                    key: Key('favorite_button_key_${index}'),
+                    key: Key('favorite_button_key_$index'),
                     constraints: const BoxConstraints(),
                     padding: EdgeInsets.zero,
                     icon: Icon(

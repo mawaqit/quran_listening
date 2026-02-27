@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../mawaqit_quran_listening.dart';
-import '../../components/mawaqit_dialog.dart';
 import '../../listening_components/downloaded_surah_tile.dart';
 import 'package:collection/collection.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';

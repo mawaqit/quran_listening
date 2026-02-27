@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:provider/provider.dart';
 
 import '../models/reciter.dart';
@@ -353,8 +354,8 @@ class AudioPlayerProvider extends ChangeNotifier {
     try {
       await _audioPlayer.play();
       notifyListeners();
-    } catch (e) {
-      debugPrint('Error playing audio: $e');
+    } catch (e, stackTrace) {
+      Log.e("Error playing audio: $e", error: e, stackTrace: stackTrace);
     }
   }
 
@@ -362,8 +363,8 @@ class AudioPlayerProvider extends ChangeNotifier {
     try {
       await _audioPlayer.pause();
       notifyListeners();
-    } catch (e) {
-      debugPrint('Error pausing audio: $e');
+    } catch (e, stackTrace) {
+      Log.e("Error pausing audio: $e", error: e, stackTrace: stackTrace);
     }
   }
 
@@ -371,8 +372,8 @@ class AudioPlayerProvider extends ChangeNotifier {
     try {
       await _audioPlayer.stop();
       notifyListeners();
-    } catch (e) {
-      debugPrint('Error stopping audio: $e');
+    } catch (e, stackTrace) {
+      Log.e("Error stopping audio: $e", error: e, stackTrace: stackTrace);
     }
   }
 
@@ -381,8 +382,8 @@ class AudioPlayerProvider extends ChangeNotifier {
       await _audioPlayer.seek(_audioPlayer.position);
       await _audioPlayer.play();
       notifyListeners();
-    } catch (e) {
-      debugPrint('Error resuming audio: $e');
+    } catch (e, stackTrace) {
+      Log.e("Error resuming audio: $e", error: e, stackTrace: stackTrace);
     }
   }
 
@@ -425,8 +426,9 @@ class AudioPlayerProvider extends ChangeNotifier {
           await _audioPlayer.seekToNext();
         }
       }
-    } catch (e) {
-      debugPrint('Error seeking to next: $e');
+    } catch (e, stackTrace) {
+      Log.e("Error seekToNextSafe: $e", error: e, stackTrace: stackTrace);
+
     }
   }
 
@@ -460,8 +462,8 @@ class AudioPlayerProvider extends ChangeNotifier {
           await _audioPlayer.seekToPrevious();
         }
       }
-    } catch (e) {
-      debugPrint('Error seeking to previous: $e');
+    } catch (e, stackTrace) {
+      Log.e("Error seekToPreviousSafe: $e", error: e, stackTrace: stackTrace);
     }
   }
 

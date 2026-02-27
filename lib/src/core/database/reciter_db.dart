@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const reciterListIds = 'RECITER_IDS';
@@ -34,9 +35,8 @@ class ReciterDB {
       }
 
       return data;
-    } on Exception catch (error) {
-      debugPrint(error.toString());
-
+    } on Exception catch (error, stackTrace) {
+      Log.e("Error getting reciters ids: $error", error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -72,8 +72,8 @@ class ReciterDB {
         return [];
       }
       return data;
-    } on Exception catch (error) {
-      debugPrint(error.toString());
+    } on Exception catch (error, stackTrace) {
+      Log.e("Error getting favorite surahs: $error", error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -107,9 +107,8 @@ class ReciterDB {
       final List<String> data = db.getStringList(DownloadedRecitationPath) ?? [];
 
       return data;
-    } on Exception catch (error) {
-      debugPrint(error.toString());
-
+    } on Exception catch (error, stackTrace) {
+      Log.e("Error getting downloaded recitation: $error", error: error, stackTrace: stackTrace);
       return [];
     }
   }

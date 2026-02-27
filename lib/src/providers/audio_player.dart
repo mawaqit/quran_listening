@@ -22,10 +22,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/mawaqit_quran_listening.dart';
-import 'package:mawaqit_quran_listening/src/ui/components/circular_button.dart';
-import 'package:mawaqit_quran_listening/src/ui/components/svg_image_asset.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
@@ -68,7 +67,7 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
 
   Future setAudio() async {
     // Repeat song when completed
-    print('audio starts now');
+    Log.i('audio starts now');
 
     SchedulerBinding.instance.addPostFrameCallback((duration){
       if (!mounted) return;
