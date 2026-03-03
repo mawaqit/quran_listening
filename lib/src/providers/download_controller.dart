@@ -123,191 +123,196 @@ class DownloadController extends ChangeNotifier {
     notifyListeners();
   }
 
-Future<bool> downloadSurah({
-  required BuildContext context,
-  required String reciterId,
-  required String surahId,
-  required String url,
-  Function(double)? onProgress,
-}) async {
-  final downloadCompletedMsg = context.tr.download_completed;
-  final downloadFailedMsg = context.tr.download_failed;
+  Future<bool> downloadSurah({
+    required BuildContext context,
+    required String reciterId,
+    required String surahId,
+    required String url,
+    Function(double)? onProgress,
+  }) async {
+    final downloadCompletedMsg = context.tr.download_completed;
+    final downloadFailedMsg = context.tr.download_failed;
 
-  final cancelToken = CancelToken();
-  final downloadKey = '${reciterId}_$surahId';
-  _activeDownloads[downloadKey] = cancelToken;
-
-  try {
-    final savePath = await getApplicationSupportDirectory();
-    final reciterDir = Directory('${savePath.path}/$reciterId');
-    await reciterDir.create(recursive: true);
-
-    final tempPath = '${reciterDir.path}/$surahId.temp';
-    final finalPath = '${reciterDir.path}/$surahId.mp3';
-
-    bool downloadCompleted = await _downloadWithResume(
-      url: url,
-      tempPath: tempPath,
-      finalPath: finalPath,
-      cancelToken: cancelToken,
-      onProgress: onProgress,
-    );
-
-    if (downloadCompleted) {
-      final finalFile = File(finalPath);
-      if (!await finalFile.exists() || await finalFile.length() == 0) {
-        await finalFile.delete();
-        throw Exception('Downloaded file is empty or missing');
-      }
-
-      final hiveManager = ReciterHiveManager();
-      await hiveManager.addDownloadedRecitationPath(
-        reciterId: reciterId,
-        chapterId: surahId,
-        path: finalPath,
-      );
-
-      await loadDownloadedRecitations();
-
-      Fluttertoast.showToast(
-        msg: downloadCompletedMsg,
-        toastLength: Toast.LENGTH_SHORT,
-      );
-
-      _activeDownloads.remove(downloadKey);
-      return true;
-    }
-
-    _activeDownloads.remove(downloadKey);
-    return false;
-  } catch (e) {
-    if (e is DioException && e.type == DioExceptionType.cancel) {
-      debugPrint('Download cancelled by user: $downloadKey');
-      // Keep temp file so we can resume later
-    } else {
-      debugPrint('Download error: $e');
-      Fluttertoast.showToast(
-        msg: downloadFailedMsg,
-        toastLength: Toast.LENGTH_SHORT,
-      );
-    }
-    _activeDownloads.remove(downloadKey);
-    return false;
-  }
-}
-
-Future<bool> _downloadWithResume({
-  required String url,
-  required String tempPath,
-  required String finalPath,
-  required CancelToken cancelToken,
-  Function(double)? onProgress,
-  int maxRetries = 3,
-}) async {
-  int attempt = 0;
-
-  while (attempt < maxRetries) {
-    attempt++;
-    debugPrint('Download attempt $attempt/$maxRetries');
+    final cancelToken = CancelToken();
+    final downloadKey = '${reciterId}_$surahId';
+    _activeDownloads[downloadKey] = cancelToken;
 
     try {
-      final tempFile = File(tempPath);
-      int downloadedBytes = await tempFile.exists() ? await tempFile.length() : 0;
+      final savePath = await getApplicationSupportDirectory();
+      final reciterDir = Directory('${savePath.path}/$reciterId');
+      await reciterDir.create(recursive: true);
 
-      // Get total file size first via HEAD request
-      final dio = Dio(BaseOptions(
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 60),
-      ));
+      final tempPath = '${reciterDir.path}/$surahId.temp';
+      final finalPath = '${reciterDir.path}/$surahId.mp3';
 
-      int totalSize = await _getFileSize(dio, url);
-      debugPrint('Total size: $totalSize, Already downloaded: $downloadedBytes');
+      bool downloadCompleted = await downloadWithConcurrentChunks(
+        url: url,
+        tempPath: tempPath,
+        finalPath: finalPath,
+        cancelToken: cancelToken,
+        onProgress: onProgress,
+      );
 
-      // If temp file already has all bytes, just finalize
-      if (totalSize > 0 && downloadedBytes >= totalSize) {
-        debugPrint('File already complete, finalizing...');
-        await tempFile.copy(finalPath);
-        await tempFile.delete();
+      if (downloadCompleted) {
+        final finalFile = File(finalPath);
+        if (!await finalFile.exists() || await finalFile.length() == 0) {
+          await finalFile.delete();
+          throw Exception('Downloaded file is empty or missing');
+        }
+
+        final hiveManager = ReciterHiveManager();
+        await hiveManager.addDownloadedRecitationPath(
+          reciterId: reciterId,
+          chapterId: surahId,
+          path: finalPath,
+        );
+
+        await loadDownloadedRecitations();
+
+        Fluttertoast.showToast(
+          msg: downloadCompletedMsg,
+          toastLength: Toast.LENGTH_SHORT,
+        );
+
+        _activeDownloads.remove(downloadKey);
         return true;
       }
 
-      // Set Range header to resume
-      final options = Options(
-        headers: downloadedBytes > 0
-            ? {'Range': 'bytes=$downloadedBytes-'}
-            : {},
-        responseType: ResponseType.stream,
-      );
-
-      final response = await dio.get(
-        url,
-        options: options,
-        cancelToken: cancelToken,
-      );
-
-      // Open file in append mode if resuming, write mode if fresh
-      final raf = await tempFile.open(
-        mode: downloadedBytes > 0 ? FileMode.append : FileMode.write,
-      );
-
-      int received = downloadedBytes;
-      final stream = response.data.stream as Stream<List<int>>;
-
-      await for (final chunk in stream) {
-        await raf.writeFrom(chunk);
-        received += chunk.length;
-
-        if (totalSize > 0 && onProgress != null) {
-          onProgress(received / totalSize);
-        }
-      }
-
-      await raf.close();
-
-      // Verify downloaded size
-      final finalTempSize = await tempFile.length();
-      debugPrint('Download finished. File size: $finalTempSize / $totalSize');
-
-      if (totalSize > 0 && finalTempSize < totalSize) {
-        debugPrint('Incomplete download, will retry...');
-        continue; // retry
-      }
-
-      // Move to final path
-      await tempFile.copy(finalPath);
-      await tempFile.delete();
-      return true;
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.cancel) rethrow;
-
-      debugPrint('DioException on attempt $attempt: ${e.message}');
-
-      if (attempt >= maxRetries) {
-        rethrow;
-      }
-
-      // Wait before retrying
-      await Future.delayed(Duration(seconds: attempt * 2));
+      _activeDownloads.remove(downloadKey);
+      return false;
     } catch (e) {
-      debugPrint('Error on attempt $attempt: $e');
-      if (attempt >= maxRetries) rethrow;
-      await Future.delayed(Duration(seconds: attempt * 2));
+      if (e is DioException && e.type == DioExceptionType.cancel) {
+        debugPrint('Download cancelled by user: $downloadKey');
+        // Keep temp file so we can resume later
+      } else {
+        debugPrint('Download error: $e');
+        Fluttertoast.showToast(
+          msg: downloadFailedMsg,
+          toastLength: Toast.LENGTH_SHORT,
+        );
+      }
+      _activeDownloads.remove(downloadKey);
+      return false;
     }
   }
 
-  return false;
-}
 
-Future<int> _getFileSize(Dio dio, String url) async {
-  try {
-    final response = await dio.head(url);
-    final contentLength = response.headers.value('content-length');
-    return int.tryParse(contentLength ?? '') ?? 0;
-  } catch (e) {
-    debugPrint('Could not get file size: $e');
-    return 0;
+  Future<bool> downloadWithConcurrentChunks({
+    required String url,
+    required String tempPath,
+    required String finalPath,
+    required CancelToken cancelToken,
+    Function(double)? onProgress,
+    int maxRetries = 3,
+    int chunkSize = 5 * 1024 * 1024, // 5MB
+    int concurrentChunks = 3,
+  }) async {
+    final tempFile = File(tempPath);
+
+    // STEP 1: Get total file size
+    int totalSize = 0;
+    try {
+      final dio = Dio();
+      final headResponse = await dio.head(url);
+      totalSize =
+          int.tryParse(headResponse.headers.value('content-length') ?? '') ?? 0;
+      if (totalSize == 0) throw Exception('Cannot determine file size');
+    } catch (e) {
+      debugPrint('HEAD request failed: $e');
+      totalSize = 0;
+    }
+
+    // STEP 2: Create or open temp file
+    if (!await tempFile.exists()) {
+      await tempFile.create(recursive: true);
+    }
+
+    // STEP 3: Calculate chunk ranges
+    List<Map<String, int>> chunks = [];
+    for (int start = 0; start < totalSize; start += chunkSize) {
+      int end = (start + chunkSize - 1).clamp(0, totalSize - 1);
+      chunks.add({'start': start, 'end': end});
+    }
+
+    // STEP 4: Track downloaded bytes for progress
+    int downloadedBytes = await tempFile.length();
+    final progressLock = Object();
+
+    if (onProgress != null) {
+      onProgress(downloadedBytes / totalSize);
+    }
+
+    // STEP 5: Helper function to download a single chunk
+    Future<void> downloadChunk(Map<String, int> chunk) async {
+      int attempt = 0;
+      while (attempt < maxRetries) {
+        attempt++;
+        try {
+          final dio = Dio();
+          final headers = {'Range': 'bytes=${chunk['start']}-${chunk['end']}'};
+
+          final response = await dio.get(
+            url,
+            options: Options(
+              headers: headers,
+              responseType: ResponseType.stream,
+            ),
+            cancelToken: cancelToken,
+          );
+
+          if (response.statusCode != 206 && response.statusCode != 200) {
+            throw Exception('Unexpected response: ${response.statusCode}');
+          }
+
+          final chunkRaf = await tempFile.open(mode: FileMode.write);
+          await chunkRaf.setPosition(chunk['start']!);
+
+          final stream = response.data.stream as Stream<List<int>>;
+          await for (final data in stream) {
+            await chunkRaf.writeFrom(data);
+            downloadedBytes += data.length;
+
+            if (onProgress != null && totalSize > 0) {
+              synchronized(progressLock, () {
+                onProgress(downloadedBytes / totalSize);
+              });
+            }
+          }
+          await chunkRaf.close();
+          break; // success
+        } catch (e) {
+          debugPrint('Chunk download failed (attempt $attempt): $e');
+          if (attempt >= maxRetries) rethrow;
+          await Future.delayed(Duration(seconds: attempt * 2));
+        }
+      }
+    }
+
+    // STEP 6: Download chunks in concurrent batches
+    for (int i = 0; i < chunks.length; i += concurrentChunks) {
+      final batch = chunks.sublist(
+        i,
+        (i + concurrentChunks).clamp(0, chunks.length),
+      );
+      await Future.wait(batch.map(downloadChunk));
+    }
+
+    // STEP 7: Finalize
+    await tempFile.copy(finalPath);
+    await tempFile.delete();
+
+    if (onProgress != null) onProgress(1.0);
+
+    debugPrint('Download completed: $finalPath');
+    return true;
   }
-}
+
+  // Lock helper for progress updates
+  void synchronized(Object lock, void Function() action) {
+    action();
+  }
+
+
   Future<bool> deleteDownloadedSurah({
     required BuildContext context,
     required String reciterId,
