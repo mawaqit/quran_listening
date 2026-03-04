@@ -145,9 +145,9 @@ class DownloadController extends ChangeNotifier {
       final tempPath = '${reciterDir.path}/$surahId.temp';
       final finalPath = '${reciterDir.path}/$surahId.mp3';
 
-      bool downloadCompleted = await downloadWithConcurrentChunks(
+      bool downloadCompleted = await downloadWithSafeConcurrentChunks(
         url: url,
-        tempPath: tempPath,
+        tempDirPath: reciterDir.path,
         finalPath: finalPath,
         cancelToken: cancelToken,
         onProgress: onProgress,
@@ -304,6 +304,169 @@ class DownloadController extends ChangeNotifier {
     if (onProgress != null) onProgress(1.0);
 
     debugPrint('Download completed: $finalPath');
+    return true;
+  }
+
+  Future<bool> downloadWithSafeConcurrentChunks({
+    required String url,
+    required String tempDirPath, // directory, not file
+    required String finalPath,
+    required CancelToken cancelToken,
+    Function(double)? onProgress,
+    int maxRetries = 3,
+    int chunkSize = 5 * 1024 * 1024, // 5MB
+    int concurrentChunks = 3,
+  }) async {
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 120),
+        followRedirects: true,
+      ),
+    );
+
+    // STEP 1: Get total file size
+    final headResponse = await dio.head(url);
+    final totalSize =
+        int.tryParse(headResponse.headers.value('content-length') ?? '') ?? 0;
+
+    if (totalSize == 0) {
+      throw Exception('Unable to determine file size.');
+    }
+
+    // STEP 2: Prepare chunk metadata
+    final chunks = <Map<String, dynamic>>[];
+    int partIndex = 0;
+
+    for (int start = 0; start < totalSize; start += chunkSize) {
+      int end = (start + chunkSize - 1).clamp(0, totalSize - 1);
+
+      final partPath = '$tempDirPath/part_$partIndex.tmp';
+      final partFile = File(partPath);
+
+      int existingSize = 0;
+      if (await partFile.exists()) {
+        existingSize = await partFile.length();
+      }
+
+      chunks.add({
+        'index': partIndex,
+        'start': start,
+        'end': end,
+        'file': partFile,
+        'downloaded': existingSize,
+      });
+
+      partIndex++;
+    }
+
+    int downloadedBytes = chunks.fold(
+      0,
+          (sum, c) => sum + (c['downloaded'] as int),
+    );
+
+    if (onProgress != null) {
+      onProgress(downloadedBytes / totalSize);
+    }
+
+    // STEP 3: Download chunks in batches
+    Future<void> downloadChunk(Map<String, dynamic> chunk) async {
+      int attempt = 0;
+
+      final int start = chunk['start'];
+      final int end = chunk['end'];
+      final File partFile = chunk['file'];
+      int existingSize = chunk['downloaded'];
+
+      // If already complete, skip
+      if (existingSize == (end - start + 1)) {
+        return;
+      }
+
+      while (attempt < maxRetries) {
+        attempt++;
+
+        try {
+          final headers = {
+            'Range': 'bytes=${start + existingSize}-$end',
+          };
+
+          final response = await dio.get(
+            url,
+            options: Options(
+              headers: headers,
+              responseType: ResponseType.stream,
+            ),
+            cancelToken: cancelToken,
+          );
+
+          if (response.statusCode != 206 && response.statusCode != 200) {
+            throw Exception('Unexpected response: ${response.statusCode}');
+          }
+
+          final raf = await partFile.open(mode: FileMode.append);
+
+          final stream = response.data.stream as Stream<List<int>>;
+          await for (final data in stream) {
+            await raf.writeFrom(data);
+
+            existingSize += data.length;
+            downloadedBytes += data.length;
+
+            if (onProgress != null) {
+              onProgress(downloadedBytes / totalSize);
+            }
+          }
+
+          await raf.close();
+          break;
+        } catch (e) {
+          if (attempt >= maxRetries) rethrow;
+          await Future.delayed(Duration(seconds: attempt * 2));
+        }
+      }
+    }
+
+    // Batched concurrency
+    for (int i = 0; i < chunks.length; i += concurrentChunks) {
+      final batch = chunks.sublist(
+        i,
+        (i + concurrentChunks).clamp(0, chunks.length),
+      );
+      await Future.wait(batch.map(downloadChunk));
+    }
+
+    // STEP 4: Merge parts safely
+    final finalFile = File(finalPath);
+
+    if (await finalFile.exists()) {
+      await finalFile.delete();
+    }
+
+    final output = await finalFile.open(mode: FileMode.write);
+
+    for (final chunk in chunks) {
+      final File partFile = chunk['file'];
+
+      final input = await partFile.open(mode: FileMode.read);
+
+      const bufferSize = 64 * 1024; // 64KB
+      while (true) {
+        final bytes = await input.read(bufferSize);
+        if (bytes.isEmpty) break;
+        await output.writeFrom(bytes);
+      }
+
+      await input.close();
+      await partFile.delete();
+    }
+
+    await output.close();
+
+    if (onProgress != null) {
+      onProgress(1.0);
+    }
+
     return true;
   }
 
