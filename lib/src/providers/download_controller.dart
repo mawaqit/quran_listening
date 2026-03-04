@@ -142,7 +142,6 @@ class DownloadController extends ChangeNotifier {
       final reciterDir = Directory('${savePath.path}/$reciterId');
       await reciterDir.create(recursive: true);
 
-      final tempPath = '${reciterDir.path}/$surahId.temp';
       final finalPath = '${reciterDir.path}/$surahId.mp3';
 
       bool downloadCompleted = await downloadWithSafeConcurrentChunks(
@@ -194,117 +193,6 @@ class DownloadController extends ChangeNotifier {
       _activeDownloads.remove(downloadKey);
       return false;
     }
-  }
-
-
-  Future<bool> downloadWithConcurrentChunks({
-    required String url,
-    required String tempPath,
-    required String finalPath,
-    required CancelToken cancelToken,
-    Function(double)? onProgress,
-    int maxRetries = 3,
-    int chunkSize = 5 * 1024 * 1024, // 5MB
-    int concurrentChunks = 3,
-  }) async {
-    final tempFile = File(tempPath);
-
-    // STEP 1: Get total file size
-    int totalSize = 0;
-    try {
-      final dio = Dio();
-      final headResponse = await dio.head(url);
-      totalSize =
-          int.tryParse(headResponse.headers.value('content-length') ?? '') ?? 0;
-      if (totalSize == 0) throw Exception('Cannot determine file size');
-    } catch (e) {
-      debugPrint('HEAD request failed: $e');
-      totalSize = 0;
-    }
-
-    // STEP 2: Create or open temp file
-    if (!await tempFile.exists()) {
-      await tempFile.create(recursive: true);
-    }
-
-    // STEP 3: Calculate chunk ranges
-    List<Map<String, int>> chunks = [];
-    for (int start = 0; start < totalSize; start += chunkSize) {
-      int end = (start + chunkSize - 1).clamp(0, totalSize - 1);
-      chunks.add({'start': start, 'end': end});
-    }
-
-    // STEP 4: Track downloaded bytes for progress
-    int downloadedBytes = await tempFile.length();
-    final progressLock = Object();
-
-    if (onProgress != null) {
-      onProgress(downloadedBytes / totalSize);
-    }
-
-    // STEP 5: Helper function to download a single chunk
-    Future<void> downloadChunk(Map<String, int> chunk) async {
-      int attempt = 0;
-      while (attempt < maxRetries) {
-        attempt++;
-        try {
-          final dio = Dio();
-          final headers = {'Range': 'bytes=${chunk['start']}-${chunk['end']}'};
-
-          final response = await dio.get(
-            url,
-            options: Options(
-              headers: headers,
-              responseType: ResponseType.stream,
-            ),
-            cancelToken: cancelToken,
-          );
-
-          if (response.statusCode != 206 && response.statusCode != 200) {
-            throw Exception('Unexpected response: ${response.statusCode}');
-          }
-
-          final chunkRaf = await tempFile.open(mode: FileMode.write);
-          await chunkRaf.setPosition(chunk['start']!);
-
-          final stream = response.data.stream as Stream<List<int>>;
-          await for (final data in stream) {
-            await chunkRaf.writeFrom(data);
-            downloadedBytes += data.length;
-
-            if (onProgress != null && totalSize > 0) {
-              synchronized(progressLock, () {
-                onProgress(downloadedBytes / totalSize);
-              });
-            }
-          }
-          await chunkRaf.close();
-          break; // success
-        } catch (e) {
-          debugPrint('Chunk download failed (attempt $attempt): $e');
-          if (attempt >= maxRetries) rethrow;
-          await Future.delayed(Duration(seconds: attempt * 2));
-        }
-      }
-    }
-
-    // STEP 6: Download chunks in concurrent batches
-    for (int i = 0; i < chunks.length; i += concurrentChunks) {
-      final batch = chunks.sublist(
-        i,
-        (i + concurrentChunks).clamp(0, chunks.length),
-      );
-      await Future.wait(batch.map(downloadChunk));
-    }
-
-    // STEP 7: Finalize
-    await tempFile.copy(finalPath);
-    await tempFile.delete();
-
-    if (onProgress != null) onProgress(1.0);
-
-    debugPrint('Download completed: $finalPath');
-    return true;
   }
 
   Future<bool> downloadWithSafeConcurrentChunks({
@@ -469,12 +357,6 @@ class DownloadController extends ChangeNotifier {
 
     return true;
   }
-
-  // Lock helper for progress updates
-  void synchronized(Object lock, void Function() action) {
-    action();
-  }
-
 
   Future<bool> deleteDownloadedSurah({
     required BuildContext context,
