@@ -6,6 +6,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:mawaqit_quran_listening/src/utils/helpers/watch_icons.dart';
 import 'package:sizer/sizer.dart';
 import 'package:path_provider/path_provider.dart';
@@ -268,7 +269,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
             final serverUrl = widget.reciters[ind].serverUrl ?? '';
             if (serverUrl.isNotEmpty) {
               final audioUrl =
-                  '${serverUrl}${chap.id.toString().padLeft(3, '0')}.mp3';
+                  '$serverUrl${chap.id.toString().padLeft(3, '0')}.mp3';
               playlist.add(
                 AudioSource.uri(
                   Uri.parse(audioUrl),
@@ -376,9 +377,8 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
         Future.delayed(const Duration(milliseconds: 100));
         audioManager.subscribeToStreams();
       } else {
-        debugPrint('No valid audio sources in playlist');
+        Log.w('No valid audio sources in playlist');
       }
-      // ===== your existing logic ends =====
     });
   }
 
@@ -427,8 +427,9 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                               final serverUrl = audioManager.reciter
                                   ?.serverUrl ?? '';
                               final chapterId = audioManager.playingChapter?.id;
-                              if (serverUrl.isEmpty || chapterId == null)
+                              if (serverUrl.isEmpty || chapterId == null) {
                                 return;
+                              }
                               final audioUrl = '$serverUrl${chapterId
                                   .toString()
                                   .padLeft(3, '0')}.mp3';

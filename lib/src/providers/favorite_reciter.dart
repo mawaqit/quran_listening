@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 
 import '../core/database/reciter_db.dart';
 
@@ -24,8 +25,8 @@ class FavoriteReciter extends ChangeNotifier {
         fetchFavoriteReciter();
       }
       return res;
-    } catch (error) {
-      debugPrint(error.toString());
+    } catch (error, stackTrace) {
+      Log.e("Error adding reciter to favorite: $error", error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -37,8 +38,8 @@ class FavoriteReciter extends ChangeNotifier {
         fetchFavoriteReciter();
       }
       return res;
-    } catch (error) {
-      debugPrint(error.toString());
+    } catch (error, stackTrace) {
+      Log.e("Error removing reciter from favorite: $error", error: error, stackTrace: stackTrace);
       return false;
     }
   }

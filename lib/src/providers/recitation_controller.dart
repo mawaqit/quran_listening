@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:mawaqit_quran_listening/mawaqit_quran_listening.dart';
 
 enum RecitationsScreenState { loading, success, failed }
@@ -22,8 +23,8 @@ class RecitationsManager extends ChangeNotifier {
       try {
         surahs = await QuranApi.getSurah(language: 'en');
         notifyListeners();
-      } catch (e) {
-        debugPrint('Error initializing surahs: $e');
+      } catch (e, stackTrace) {
+        Log.e('Error initializing surahs: $e', error: e, stackTrace: stackTrace);
       }
     }
   }
@@ -34,8 +35,8 @@ class RecitationsManager extends ChangeNotifier {
         try {
           surahs = await QuranApi.getSurah(language: 'en');
           notifyListeners();
-        } catch (e) {
-          debugPrint('Error caching surahs: $e');
+        } catch (e, stackTrace) {
+          Log.e('Error caching surahs: $e', error: e, stackTrace: stackTrace);
         }
       }
     });
@@ -55,7 +56,7 @@ class RecitationsManager extends ChangeNotifier {
 
       // If already loading for this reciter, skip duplicate call
       if (_loadingReciterIds.contains(reciterId)) {
-        debugPrint('RecitationsManager: Already loading recitations for reciter ID $reciterId, skipping duplicate call');
+        Log.i('RecitationsManager: Already loading recitations for reciter ID $reciterId, skipping duplicate call');
         return;
       }
 
@@ -77,8 +78,8 @@ class RecitationsManager extends ChangeNotifier {
           state = RecitationsScreenState.success;
           notifyListeners();
           return;
-        } catch (e) {
-          debugPrint('RecitationsManager: Error parsing cached data: $e');
+        } catch (e, stackTrace) {
+          Log.e('RecitationsManager: Error parsing cached data: $e', error: e, stackTrace: stackTrace);
         }
       }
 
@@ -105,8 +106,8 @@ class RecitationsManager extends ChangeNotifier {
         // Always remove from loading set, even if there's an error
         _loadingReciterIds.remove(reciterId);
       }
-    } on Exception catch (e) {
-      debugPrint('RecitationsManager: Error getting recitations for reciter ID $reciterId: $e');
+    } on Exception catch (e, stackTrace) {
+      Log.e('RecitationsManager: Error getting recitations for reciter ID $reciterId: $e', error: e, stackTrace: stackTrace);
       state = RecitationsScreenState.failed;
       _loadingReciterIds.remove(reciterId); // Ensure it's removed on error
       notifyListeners();

@@ -44,6 +44,10 @@ dependencies:
     git:
       url: https://github.com/mawaqit/mawaqit-mobile-i18n.git
       ref: main
+  mawaqit_core_logger:
+    git:
+      url: https://github.com/mawaqit/mawaqit_core_logger.git
+      ref: v1.1.3
 
 #  # Main app dependencies for icons
 #  mawaqit:

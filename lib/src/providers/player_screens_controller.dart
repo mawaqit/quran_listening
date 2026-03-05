@@ -5,7 +5,6 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import '../../mawaqit_quran_listening.dart';
 import '../ui/listening_components/audio_player_v3.dart';
-import 'audio_provider.dart';
 
 class RecitersScreenViews {
   final String title;

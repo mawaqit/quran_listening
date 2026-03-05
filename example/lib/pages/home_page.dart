@@ -54,7 +54,7 @@ class HomePage extends StatelessWidget {
                     onTap: () {
                       context.read<PlayerScreensController>().navigateToPlayerScreenV3(
                         context,
-                        audioManager.reciters ?? [],
+                        audioManager.reciters,
                         audioManager.playingChapter!,
                         audioManager.chapters,
                         audioManager.playerType!,
