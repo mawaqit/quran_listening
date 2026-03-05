@@ -144,9 +144,12 @@ class DownloadController extends ChangeNotifier {
 
       final finalPath = '${reciterDir.path}/$surahId.mp3';
 
+      final surahDir = Directory('${reciterDir.path}/$surahId');
+      await surahDir.create(recursive: true);
+
       bool downloadCompleted = await downloadWithSafeConcurrentChunks(
         url: url,
-        tempDirPath: reciterDir.path,
+        tempDirPath: surahDir.path,
         finalPath: finalPath,
         cancelToken: cancelToken,
         onProgress: onProgress,
@@ -197,7 +200,7 @@ class DownloadController extends ChangeNotifier {
 
   Future<bool> downloadWithSafeConcurrentChunks({
     required String url,
-    required String tempDirPath, // directory, not file
+    required String tempDirPath,
     required String finalPath,
     required CancelToken cancelToken,
     Function(double)? onProgress,
@@ -213,8 +216,12 @@ class DownloadController extends ChangeNotifier {
       ),
     );
 
-    // STEP 1: Get total file size
+    final tempDir = Directory(tempDirPath);
+    await tempDir.create(recursive: true);
+
+    // STEP 1 — Get file size
     final headResponse = await dio.head(url);
+
     final totalSize =
         int.tryParse(headResponse.headers.value('content-length') ?? '') ?? 0;
 
@@ -222,8 +229,9 @@ class DownloadController extends ChangeNotifier {
       throw Exception('Unable to determine file size.');
     }
 
-    // STEP 2: Prepare chunk metadata
+    // STEP 2 — Prepare chunk metadata
     final chunks = <Map<String, dynamic>>[];
+
     int partIndex = 0;
 
     for (int start = 0; start < totalSize; start += chunkSize) {
@@ -233,6 +241,7 @@ class DownloadController extends ChangeNotifier {
       final partFile = File(partPath);
 
       int existingSize = 0;
+
       if (await partFile.exists()) {
         existingSize = await partFile.length();
       }
@@ -253,20 +262,19 @@ class DownloadController extends ChangeNotifier {
           (sum, c) => sum + (c['downloaded'] as int),
     );
 
-    if (onProgress != null) {
-      onProgress(downloadedBytes / totalSize);
-    }
+    onProgress?.call(downloadedBytes / totalSize);
 
-    // STEP 3: Download chunks in batches
+    // STEP 3 — Chunk downloader
     Future<void> downloadChunk(Map<String, dynamic> chunk) async {
       int attempt = 0;
 
       final int start = chunk['start'];
       final int end = chunk['end'];
       final File partFile = chunk['file'];
+
       int existingSize = chunk['downloaded'];
 
-      // If already complete, skip
+      // Skip if already completed
       if (existingSize == (end - start + 1)) {
         return;
       }
@@ -292,39 +300,49 @@ class DownloadController extends ChangeNotifier {
             throw Exception('Unexpected response: ${response.statusCode}');
           }
 
+          // Server ignored range → restart chunk
+          if (response.statusCode == 200 && (start + existingSize) > 0) {
+            if (await partFile.exists()) {
+              await partFile.delete();
+            }
+            existingSize = 0;
+          }
+
           final raf = await partFile.open(mode: FileMode.append);
 
           final stream = response.data.stream as Stream<List<int>>;
+
           await for (final data in stream) {
             await raf.writeFrom(data);
 
             existingSize += data.length;
             downloadedBytes += data.length;
 
-            if (onProgress != null) {
-              onProgress(downloadedBytes / totalSize);
-            }
+            onProgress?.call(downloadedBytes / totalSize);
           }
 
           await raf.close();
+
           break;
         } catch (e) {
           if (attempt >= maxRetries) rethrow;
+
           await Future.delayed(Duration(seconds: attempt * 2));
         }
       }
     }
 
-    // Batched concurrency
+    // STEP 4 — Batched concurrency
     for (int i = 0; i < chunks.length; i += concurrentChunks) {
       final batch = chunks.sublist(
         i,
         (i + concurrentChunks).clamp(0, chunks.length),
       );
+
       await Future.wait(batch.map(downloadChunk));
     }
 
-    // STEP 4: Merge parts safely
+    // STEP 5 — Merge parts
     final finalFile = File(finalPath);
 
     if (await finalFile.exists()) {
@@ -336,12 +354,18 @@ class DownloadController extends ChangeNotifier {
     for (final chunk in chunks) {
       final File partFile = chunk['file'];
 
+      if (!await partFile.exists()) {
+        throw Exception("Missing chunk file: ${partFile.path}");
+      }
+
       final input = await partFile.open(mode: FileMode.read);
 
-      const bufferSize = 64 * 1024; // 64KB
+      const bufferSize = 64 * 1024;
+
       while (true) {
         final bytes = await input.read(bufferSize);
         if (bytes.isEmpty) break;
+
         await output.writeFrom(bytes);
       }
 
@@ -351,9 +375,21 @@ class DownloadController extends ChangeNotifier {
 
     await output.close();
 
-    if (onProgress != null) {
-      onProgress(1.0);
+    // STEP 6 — Validate merged file
+    final mergedSize = await finalFile.length();
+
+    if (mergedSize != totalSize) {
+      throw Exception(
+        "Merged file corrupted: $mergedSize / $totalSize",
+      );
     }
+
+    // STEP 7 — Cleanup temp directory
+    try {
+      await tempDir.delete(recursive: true);
+    } catch (_) {}
+
+    onProgress?.call(1.0);
 
     return true;
   }
