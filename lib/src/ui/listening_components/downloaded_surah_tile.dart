@@ -293,6 +293,9 @@ class DownloadedSurahTileV3 extends StatelessWidget {
         final downloadController = context.read<DownloadController>();
 
         List<AudioSource> playlist = [];
+        List<SurahModel> validChapters = [];
+        List<Reciter> validReciters = [];
+
         for (int ind = 0; ind < chapters.length; ind++) {
           final chap = chapters[ind];
           final chapterReciter = ind < reciters.length ? reciters[ind] : reciter;
@@ -311,29 +314,25 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                 ),
               ),
             );
+            validChapters.add(chap);
+            validReciters.add(chapterReciter);
           }
         }
 
         int chapterIndex = -1;
-        for (int i = 0; i < chapters.length; i++) {
-          final chap = chapters[i];
-          final chapterReciter = i < reciters.length ? reciters[i] : reciter;
-          if (chap.id == chapter.id && chapterReciter.id == reciter.id) {
+        for (int i = 0; i < validChapters.length; i++) {
+          if (validChapters[i].id == chapter.id && validReciters[i].id == reciter.id) {
             chapterIndex = i;
             break;
           }
         }
-        if (chapterIndex == -1) {
-          // Fallback to original behavior if no match found
-          chapterIndex = chapters.indexWhere(
-            (element) => element.id == chapter.id,
-          );
-        }
+
+        if (chapterIndex == -1 || playlist.isEmpty) return;
 
         audioManager.setPlaylist(
           playlist,
-          chapters,
-          reciters,
+          validChapters,
+          validReciters,
           playerType,
           index: chapterIndex,
         );
@@ -341,9 +340,9 @@ class DownloadedSurahTileV3 extends StatelessWidget {
 
         context.read<PlayerScreensController>().navigateToPlayerScreenV3(
           context,
-          reciters,
+          validReciters,
           chapter,
-          chapters,
+          validChapters,
           playerType,
           reciterFromAllSaved: reciter,
         );
