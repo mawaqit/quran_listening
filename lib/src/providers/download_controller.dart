@@ -205,193 +205,314 @@ class DownloadController extends ChangeNotifier {
     required String finalPath,
     required CancelToken cancelToken,
     Function(double)? onProgress,
-    int maxRetries = 3,
-    int chunkSize = 5 * 1024 * 1024, // 5MB
+    int chunkSize = 5 * 1024 * 1024,
     int concurrentChunks = 3,
   }) async {
     final dio = Dio(
       BaseOptions(
         connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 120),
+        receiveTimeout: const Duration(seconds: 60),
         followRedirects: true,
+        validateStatus: (status) => status != null && (status < 400 || status == 416),
       ),
     );
 
     final tempDir = Directory(tempDirPath);
     await tempDir.create(recursive: true);
 
-    // STEP 1 — Get file size
-    final headResponse = await dio.head(url);
-
-    final totalSize =
-        int.tryParse(headResponse.headers.value('content-length') ?? '') ?? 0;
-
-    if (totalSize == 0) {
-      throw Exception('Unable to determine file size.');
-    }
-
-    // STEP 2 — Prepare chunk metadata
-    final chunks = <Map<String, dynamic>>[];
-
-    int partIndex = 0;
-
-    for (int start = 0; start < totalSize; start += chunkSize) {
-      int end = (start + chunkSize - 1).clamp(0, totalSize - 1);
-
-      final partPath = '$tempDirPath/part_$partIndex.tmp';
-      final partFile = File(partPath);
-
-      int existingSize = 0;
-
-      if (await partFile.exists()) {
-        existingSize = await partFile.length();
-      }
-
-      chunks.add({
-        'index': partIndex,
-        'start': start,
-        'end': end,
-        'file': partFile,
-        'downloaded': existingSize,
-      });
-
-      partIndex++;
-    }
-
-    int downloadedBytes = chunks.fold(
-      0,
-          (sum, c) => sum + (c['downloaded'] as int),
+    // GET bytes=0-0 to probe the true file size from content-range.
+    // HEAD content-length is unreliable on this CDN — edge nodes return stale values.
+    final probe = await dio.get(
+      url,
+      options: Options(
+        headers: {'Range': 'bytes=0-0'},
+        responseType: ResponseType.stream,
+      ),
+      cancelToken: cancelToken,
     );
+    try {
+      await (probe.data.stream as Stream).drain<void>();
+    } catch (_) {}
 
-    onProgress?.call(downloadedBytes / totalSize);
+    final probeContentRange = probe.headers.value('content-range') ?? '';
+    int totalSize =
+        RegExp(r'/(\d+)$').firstMatch(probeContentRange) != null
+            ? int.parse(RegExp(r'/(\d+)$').firstMatch(probeContentRange)!.group(1)!)
+            : int.tryParse(probe.headers.value('content-length') ?? '') ?? 0;
 
-    // STEP 3 — Chunk downloader
-    Future<void> downloadChunk(Map<String, dynamic> chunk) async {
-      int attempt = 0;
+    if (totalSize == 0) throw Exception('Unable to determine file size');
 
-      final int start = chunk['start'];
-      final int end = chunk['end'];
-      final File partFile = chunk['file'];
+    // Mutable via single-element list so inner closures can update it.
+    // CDN edge nodes disagree on file size; we refine as we receive responses.
+    final trueTotalRef = [totalSize];
 
-      int existingSize = chunk['downloaded'];
+    // Build chunk list
+    final chunks = <_ChunkInfo>[];
+    for (int i = 0, start = 0; start < totalSize; start += chunkSize, i++) {
+      final int end = (start + chunkSize - 1).clamp(0, totalSize - 1);
+      final int expectedSize = end - start + 1;
+      final partFile = File('$tempDirPath/part_$i.tmp');
 
-      // Skip if already completed
-      if (existingSize == (end - start + 1)) {
-        return;
+      int existing = 0;
+      if (await partFile.exists()) {
+        existing = await partFile.length();
+        if (existing > expectedSize) {
+          await partFile.delete();
+          existing = 0;
+        }
       }
+      chunks.add(
+        _ChunkInfo(
+          index: i,
+          start: start,
+          end: end,
+          file: partFile,
+          existingBytes: existing,
+        ),
+      );
+    }
 
-      while (attempt < maxRetries) {
-        attempt++;
+    // Per-chunk counters — never a shared accumulator.
+    // Each counter is reset to real disk size at the top of every attempt,
+    // so progress can never drift ahead on retries.
+    final chunkCounters = List<int>.from(chunks.map((c) => c.existingBytes));
+    void reportProgress() {
+      final int written = chunkCounters.fold(0, (s, v) => s + v);
+      onProgress?.call((written / trueTotalRef[0]).clamp(0.0, 1.0));
+    }
 
+    reportProgress();
+
+    Future<void> downloadChunk(_ChunkInfo chunk) async {
+      while (true) {
+        if (cancelToken.isCancelled) {
+          throw DioException(
+            requestOptions: RequestOptions(path: url),
+            type: DioExceptionType.cancel,
+          );
+        }
+
+        // Re-read disk size on every attempt — in-memory state is unreliable
+        // after a partial write or stream drop.
+        int existingSize = 0;
+        if (await chunk.file.exists()) {
+          existingSize = await chunk.file.length();
+          if (existingSize > chunk.expectedSize) {
+            await chunk.file.delete();
+            existingSize = 0;
+          }
+        }
+        chunkCounters[chunk.index] = existingSize;
+        if (existingSize == chunk.expectedSize) return;
+
+        final int rangeStart = chunk.start + existingSize;
+        final int rangeEnd = chunk.end;
+
+        Response? response;
         try {
-          final headers = {
-            'Range': 'bytes=${start + existingSize}-$end',
-          };
-
-          final response = await dio.get(
+          response = await dio.get(
             url,
             options: Options(
-              headers: headers,
+              headers: {'Range': 'bytes=$rangeStart-$rangeEnd'},
               responseType: ResponseType.stream,
             ),
             cancelToken: cancelToken,
           );
-
-          if (response.statusCode != 206 && response.statusCode != 200) {
-            throw Exception('Unexpected response: ${response.statusCode}');
-          }
-
-          // Server ignored range → restart chunk
-          if (response.statusCode == 200 && (start + existingSize) > 0) {
-            if (await partFile.exists()) {
-              await partFile.delete();
-            }
-            existingSize = 0;
-          }
-
-          final raf = await partFile.open(mode: FileMode.append);
-
-          final stream = response.data.stream as Stream<List<int>>;
-
-          await for (final data in stream) {
-            await raf.writeFrom(data);
-
-            existingSize += data.length;
-            downloadedBytes += data.length;
-
-            onProgress?.call(downloadedBytes / totalSize);
-          }
-
-          await raf.close();
-
-          break;
-        } catch (e) {
-          if (attempt >= maxRetries) rethrow;
-
-          await Future.delayed(Duration(seconds: attempt * 2));
+        } on DioException catch (e) {
+          if (e.type == DioExceptionType.cancel) rethrow;
+          Log.w('Download: chunk ${chunk.index} connect error — ${e.message}');
+          await Future.delayed(const Duration(seconds: 2));
+          continue;
         }
+
+        if (response.statusCode == 416) {
+          final cr = response.headers.value('content-range') ?? '';
+          final m = RegExp(r'/(\d+)$').firstMatch(cr);
+          final int? serverTotal = m != null ? int.parse(m.group(1)!) : null;
+
+          if (serverTotal != null) {
+            // 416 always means our range overshoots real EOF — trust this total.
+            if (serverTotal < trueTotalRef[0]) {
+              trueTotalRef[0] = serverTotal;
+            }
+
+            if (chunk.start >= serverTotal) {
+              // Entire chunk is beyond real EOF — nothing to download.
+              if (await chunk.file.exists()) await chunk.file.delete();
+              chunk.clampEnd(chunk.start - 1);
+              chunkCounters[chunk.index] = 0;
+              return;
+            }
+
+            if (rangeStart >= serverTotal) {
+              // The bytes already on disk reach the server's EOF — chunk is complete.
+              chunk.clampEnd(serverTotal - 1);
+              chunkCounters[chunk.index] = existingSize;
+              return;
+            }
+
+            if (chunk.end >= serverTotal) {
+              // Our end overshoots — clamp and retry.
+              chunk.clampEnd(serverTotal - 1);
+              if (existingSize > chunk.expectedSize) {
+                await chunk.file.delete();
+                chunkCounters[chunk.index] = 0;
+              }
+              continue;
+            }
+          }
+
+          // 416 with no usable content-range — wipe and retry.
+          Log.w('Download: chunk ${chunk.index} got 416 with no content-range');
+          if (await chunk.file.exists()) await chunk.file.delete();
+          chunkCounters[chunk.index] = 0;
+          await Future.delayed(const Duration(seconds: 2));
+          continue;
+        }
+
+        if (response.statusCode != 206 && response.statusCode != 200) {
+          throw Exception('Unexpected status: ${response.statusCode}');
+        }
+
+        // Server returned 200 (ignored Range header) — restart from zero.
+        if (response.statusCode == 200 && rangeStart > 0) {
+          if (await chunk.file.exists()) await chunk.file.delete();
+          existingSize = 0;
+          chunkCounters[chunk.index] = 0;
+        }
+
+        // Only update trueTotalRef if this response's rangeEnd touches the server's
+        // reported EOF (rangeEnd == serverTotal - 1). Middle chunks from inconsistent
+        // edge nodes may report a smaller total that doesn't reflect reality — ignore those.
+        final responseCR = response.headers.value('content-range') ?? '';
+        final rcm = RegExp(r'bytes (\d+)-(\d+)/(\d+)').firstMatch(responseCR);
+        if (rcm != null) {
+          final int responseRangeEnd = int.parse(rcm.group(2)!);
+          final int responseTotal = int.parse(rcm.group(3)!);
+          if (responseRangeEnd == responseTotal - 1 &&
+              responseTotal < trueTotalRef[0]) {
+            trueTotalRef[0] = responseTotal;
+            if (chunk.end >= responseTotal) chunk.clampEnd(responseTotal - 1);
+          }
+        }
+
+        // Stream bytes to disk
+        final raf = await chunk.file.open(mode: FileMode.append);
+        bool rafClosed = false;
+        Object? streamError;
+
+        try {
+          final stream = response.data.stream as Stream<List<int>>;
+          await for (final data in stream) {
+            if (cancelToken.isCancelled) break;
+            final int remaining = chunk.expectedSize - existingSize;
+            if (remaining <= 0) break;
+            final List<int> toWrite =
+                data.length > remaining ? data.sublist(0, remaining) : data;
+            await raf.writeFrom(toWrite);
+            existingSize += toWrite.length;
+            chunkCounters[chunk.index] = existingSize;
+            reportProgress();
+            if (toWrite.length < data.length) break;
+          }
+          await raf.flush();
+          await raf.close();
+          rafClosed = true;
+        } catch (e) {
+          streamError = e;
+          if (!rafClosed) {
+            try {
+              await raf.flush();
+              await raf.close();
+            } catch (_) {}
+          }
+          if (e is DioException && e.type == DioExceptionType.cancel) rethrow;
+        }
+
+        if (cancelToken.isCancelled) return;
+
+        final int diskSize =
+            await chunk.file.exists() ? await chunk.file.length() : 0;
+        chunkCounters[chunk.index] = diskSize;
+
+        if (diskSize == chunk.expectedSize) return;
+
+        // Stream ended short — log and reconnect from where we left off.
+        Log.w(
+          'Download: chunk ${chunk.index} incomplete '
+          '($diskSize/${chunk.expectedSize})${streamError != null ? ' — $streamError' : ''}, reconnecting',
+        );
+        await Future.delayed(const Duration(milliseconds: 500));
       }
     }
 
-    // STEP 4 — Batched concurrency
+    // Run in batches. Errors are collected per-chunk so sibling futures
+    // always complete before the error is propagated.
     for (int i = 0; i < chunks.length; i += concurrentChunks) {
-      final batch = chunks.sublist(
-        i,
-        (i + concurrentChunks).clamp(0, chunks.length),
-      );
-
-      await Future.wait(batch.map(downloadChunk));
-    }
-
-    // STEP 5 — Merge parts
-    final finalFile = File(finalPath);
-
-    if (await finalFile.exists()) {
-      await finalFile.delete();
-    }
-
-    final output = await finalFile.open(mode: FileMode.write);
-
-    for (final chunk in chunks) {
-      final File partFile = chunk['file'];
-
-      if (!await partFile.exists()) {
-        throw Exception("Missing chunk file: ${partFile.path}");
+      if (cancelToken.isCancelled) {
+        throw DioException(
+          requestOptions: RequestOptions(path: url),
+          type: DioExceptionType.cancel,
+        );
       }
 
-      final input = await partFile.open(mode: FileMode.read);
+      final batch = chunks.sublist(
+        i, (i + concurrentChunks).clamp(0, chunks.length),
+      );
+      final errors = <Object>[];
+      await Future.wait(
+        batch.map((chunk) async {
+          try {
+            await downloadChunk(chunk);
+          } catch (e) {
+            if (e is DioException && e.type == DioExceptionType.cancel) rethrow;
+            errors.add(e);
+          }
+        }),
+      );
+      if (errors.isNotEmpty) throw errors.first;
+    }
 
-      const bufferSize = 64 * 1024;
+    // Validate
+    for (final chunk in chunks) {
+      if (chunk.expectedSize <= 0) continue;
+      if (!await chunk.file.exists()) {
+        throw Exception('Missing chunk file: ${chunk.index}');
+      }
+      final int size = await chunk.file.length();
+      if (size != chunk.expectedSize) {
+        throw Exception('Chunk ${chunk.index} corrupted ($size / ${chunk.expectedSize})');
+      }
+    }
 
+    // Merge
+    final finalFile = File(finalPath);
+    if (await finalFile.exists()) await finalFile.delete();
+    final output = await finalFile.open(mode: FileMode.write);
+    for (final chunk in chunks) {
+      if (chunk.expectedSize <= 0) continue;
+      final input = await chunk.file.open(mode: FileMode.read);
+      const int bufferSize = 64 * 1024;
       while (true) {
         final bytes = await input.read(bufferSize);
         if (bytes.isEmpty) break;
-
         await output.writeFrom(bytes);
       }
-
       await input.close();
-      await partFile.delete();
+      await chunk.file.delete();
     }
-
     await output.close();
 
-    // STEP 6 — Validate merged file
-    final mergedSize = await finalFile.length();
-
-    if (mergedSize != totalSize) {
-      throw Exception(
-        "Merged file corrupted: $mergedSize / $totalSize",
-      );
+    final int mergedSize = await finalFile.length();
+    if (mergedSize != trueTotalRef[0]) {
+      throw Exception('Merged file corrupted: $mergedSize / ${trueTotalRef[0]}');
     }
 
-    // STEP 7 — Cleanup temp directory
     try {
       await tempDir.delete(recursive: true);
     } catch (_) {}
-
     onProgress?.call(1.0);
-
+    Log.i('Download complete: $finalPath ($mergedSize bytes)');
     return true;
   }
 
@@ -548,11 +669,34 @@ class DownloadController extends ChangeNotifier {
         toastLength: Toast.LENGTH_SHORT,
       );
     } catch (error, stackTrace) {
-      Log.e('Error while deleting all recitations: $error', error: error, stackTrace: stackTrace);
+      Log.e(
+        'Error while deleting all recitations: $error',
+        error: error,
+        stackTrace: stackTrace,
+      );
       Fluttertoast.showToast(
         msg: failedDeleteMsg,
         toastLength: Toast.LENGTH_SHORT,
       );
     }
   }
+}
+
+class _ChunkInfo {
+  final int index;
+  final int start;
+  int end;
+  final File file;
+  final int existingBytes;
+
+  _ChunkInfo({
+    required this.index,
+    required this.start,
+    required this.end,
+    required this.file,
+    required this.existingBytes,
+  });
+
+  int get expectedSize => end - start + 1;
+  void clampEnd(int newEnd) => end = newEnd;
 }
