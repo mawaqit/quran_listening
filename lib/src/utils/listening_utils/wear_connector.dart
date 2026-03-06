@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 
 class WearConnector {
   static const _channel = MethodChannel('com.mawaqit.app/app_group');
@@ -20,8 +21,8 @@ class WearConnector {
         // Fallback if the result isn't what we expect
         return {'connected': false, 'deviceName': null};
       }
-    } catch (e) {
-      print('Wear check failed: $e');
+    } catch (e, stackTrace) {
+      Log.e('Wear check failed: $e', error: e, stackTrace: stackTrace);
       return {'connected': false, 'deviceName': null};
     }
   }

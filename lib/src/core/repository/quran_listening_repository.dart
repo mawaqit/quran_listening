@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import '../api/quran_api.dart';
 import '../database/hive_manager.dart';
 import '../../models/reciter.dart';
@@ -40,8 +41,8 @@ class QuranListeningRepository {
         );
       }
       return apiReciters;
-    } catch (e) {
-      debugPrint('QuranListeningRepository.getReciters error: $e');
+    } catch (e, stackTrace) {
+      Log.e("Error getting reciters: $e", error: e, stackTrace: stackTrace);
       return [];
     }
   }
