@@ -38,14 +38,16 @@ class _SurahPageState extends State<SurahPage> {
       if (!mounted || _isInitialized) return;
       _isInitialized = true;
 
-      await downloadController.fetchDownloadedRecitation(reciterId: audioPlayerProvider.currentReciterId.toString());
+      await downloadController.fetchDownloadedRecitation(
+        reciterId: audioPlayerProvider.currentReciterId.toString(),
+      );
 
       // Initialize surahs and load recitations for current reciter
       final recitationsManager = context.read<RecitationsManager>();
       if (recitationsManager.surahs.isEmpty) {
         await recitationsManager.initializeSurahs();
       }
-      
+
       // Ensure we have a valid currentReciterId before loading recitations
       if (audioPlayerProvider.currentReciterId != null) {
         final reciterId = audioPlayerProvider.currentReciterId!;
@@ -70,9 +72,11 @@ class _SurahPageState extends State<SurahPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
+
     // Only fetch favorite surahs once or when reciter changes
-    Provider.of<FavoriteSurah>(context).fetchFavoriteSurahs(audioPlayerProvider.currentReciterId.toString()).then((listFavoriteSurahs) => likedSurahsIds = listFavoriteSurahs);
+    Provider.of<FavoriteSurah>(context)
+        .fetchFavoriteSurahs(audioPlayerProvider.currentReciterId.toString())
+        .then((listFavoriteSurahs) => likedSurahsIds = listFavoriteSurahs);
 
     // Only attach listener once to prevent multiple calls
     if (!_listenerAttached) {
@@ -83,16 +87,16 @@ class _SurahPageState extends State<SurahPage> {
 
   void _onReciterChanged() {
     if (!mounted) return;
-    
+
     // Initialize surahs and load recitations when reciter changes
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      
+
       final recitationsManager = context.read<RecitationsManager>();
       if (recitationsManager.surahs.isEmpty) {
         await recitationsManager.initializeSurahs();
       }
-      
+
       // Load recitations for the current reciter only if it's different from last loaded
       if (audioPlayerProvider.currentReciterId != null) {
         final reciterId = audioPlayerProvider.currentReciterId!;
@@ -123,8 +127,11 @@ class _SurahPageState extends State<SurahPage> {
         if (likedSurahsIds.contains(chapter.id)) {
           likedSurahs.add(chapter);
         } else {
-          final Reciter? reciter = audioPlayerProvider.getCurrentReciterV3(context: context);
-          if (reciter != null && reciter.surahsList != null && reciter.surahsList!.contains(chapter.id.toString())) {
+          final Reciter? reciter = audioPlayerProvider.getCurrentReciterV3(
+            context: context,
+          );
+          if (reciter != null && reciter.surahsList != null &&
+              reciter.surahsList!.contains(chapter.id.toString())) {
             surahs.add(chapter);
           }
         }
@@ -140,11 +147,17 @@ class _SurahPageState extends State<SurahPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Expanded(
-            child:
-                recitationsManager.isLoading
+            child: recitationsManager.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : isErrorView
-                    ? ApiErrorWidget(callback: () => recitationsManager.getRecitations(reciterId: audioPlayerProvider.currentReciterId ?? 1, retry: true))
+                    ? ApiErrorWidget(
+                      callback:
+                          () => recitationsManager.getRecitations(
+                            reciterId:
+                                audioPlayerProvider.currentReciterId ?? 1,
+                            retry: true,
+                          ),
+                    )
                     : ListView.builder(
                       key: const Key('surah_page_listview'),
                       padding: widget.listPadding,
@@ -153,7 +166,9 @@ class _SurahPageState extends State<SurahPage> {
                         return SurahListTileV3(
                           chapter: surahs[index],
                           chapters: context.read<RecitationsManager>().surahs,
-                          reciter: audioPlayerProvider.getCurrentReciterV3(context: context),
+                          reciter: audioPlayerProvider.getCurrentReciterV3(
+                            context: context,
+                          ),
                           playerType: PlayerType.reciterUnLikedSurahs,
                           index: index,
                         );

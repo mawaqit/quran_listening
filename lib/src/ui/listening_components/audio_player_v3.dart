@@ -268,8 +268,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
             // Use the proper server URL for non-downloaded recitations
             final serverUrl = widget.reciters[ind].serverUrl ?? '';
             if (serverUrl.isNotEmpty) {
-              final audioUrl =
-                  '$serverUrl${chap.id.toString().padLeft(3, '0')}.mp3';
+              final audioUrl = '$serverUrl${chap.id.toString().padLeft(3, '0')}.mp3';
               playlist.add(
                 AudioSource.uri(
                   Uri.parse(audioUrl),
