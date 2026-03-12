@@ -38,7 +38,11 @@ class ListeningSearchTextField extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
         prefixIcon: Padding(
           padding: const EdgeInsets.only(left: 16.0, right: 15, top: 1),
-          child: SvgImageAsset('assets/icons/ic_search.svg', color: Theme.of(context).disabledColor),
+          child: SvgImageAsset('assets/icons/ic_search.svg',
+              color: Theme.of(context).disabledColor,
+              height: 24,
+              width: 24,
+          ),
         ),
         suffixIcon:
             hasSuffix
