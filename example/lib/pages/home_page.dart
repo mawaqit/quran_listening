@@ -52,9 +52,12 @@ class HomePage extends StatelessWidget {
                   return GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTap: () {
+                      final reciterForPlayer = audioManager.playerType == PlayerType.allSavedSurahs
+                          ? audioManager.reciters
+                          : [audioManager.playingRecitor!];
                       context.read<PlayerScreensController>().navigateToPlayerScreenV3(
                         context,
-                        audioManager.reciters,
+                        reciterForPlayer,
                         audioManager.playingChapter!,
                         audioManager.chapters,
                         audioManager.playerType!,

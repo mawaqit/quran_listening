@@ -48,16 +48,14 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
         downloadController.singleSavedRecitation(
           reciterId: widget.reciter.id,
           recitationId: widget.chapter.id,
-        ) !=
-        null;
+        ) != null;
     bool isDownloading =
         downloadController.inProgressSurahs[widget.reciter.id.toString()]
             ?.containsKey(widget.chapter.id.toString()) ??
         false;
     double progress =
         downloadController.inProgressSurahs[widget.reciter.id
-            .toString()]?[widget.chapter.id.toString()] ??
-        0.0;
+            .toString()]?[widget.chapter.id.toString()] ?? 0.0;
     const greyColor = Colors.grey;
 
     bool isPlaying =
@@ -67,28 +65,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
 
     return GestureDetector(
       key: Key('surah_tile_key_${widget.index}'),
-      onTap: () {
-        context.closeKeyboard();
-        // bool connected = await WearConnector.isWatchConnected();
-        FocusManager.instance.primaryFocus?.unfocus();
-        List<SurahModel> selectedChapters = [];
-        List<Reciter> selectedReciters = [];
-        // For Liked/All Recitators tabs: pass ALL 114 surahs from selected reciter
-        selectedChapters.addAll(widget.chapters);
-        selectedReciters.addAll([widget.reciter]);
-
-        /// ------------------------------------ open v3 bottom sheet for player ------------------------------------
-        context.read<AudioPlayerProvider>().disposePlayer();
-        context.read<AudioPlayerProvider>().setPlayingRecitor(widget.reciter);
-        context.read<PlayerScreensController>().navigateToPlayerScreenV3(
-          context,
-          selectedReciters,
-          widget.chapter,
-          selectedChapters,
-          widget.playerType,
-        );
-        FocusScope.of(context).unfocus();
-      },
+      onTap: onSurahPressed,
       child: Container(
         padding: const EdgeInsets.only(left: 5, top: 15, bottom: 15, right: 5),
         margin: const EdgeInsets.only(bottom: 10),
@@ -105,26 +82,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
               onPressed: () {
                 context.read<AudioPlayerProvider>().disposePlayer();
                 if (!isPlaying) {
-                  List<SurahModel> selectedChapters = [];
-                  List<Reciter> selectedReciters = [];
-                  // For Liked/All Recitators tabs: pass ALL 114 surahs from selected reciter
-                  selectedChapters.addAll(widget.chapters);
-                  selectedReciters.addAll([widget.reciter]);
-
-                  /// ------------------------------------ open v3 bottom sheet for player ------------------------------------
-                  context.read<AudioPlayerProvider>().setPlayingRecitor(
-                    widget.reciter,
-                  );
-                  context
-                      .read<PlayerScreensController>()
-                      .navigateToPlayerScreenV3(
-                    context,
-                    selectedReciters,
-                    widget.chapter,
-                    selectedChapters,
-                    widget.playerType,
-                  );
-                  FocusScope.of(context).unfocus();
+                  onSurahPressed();
                 } else {
                   final audioManager = context.read<AudioPlayerProvider>();
                   final audioPlayer = audioManager.audioPlayer;
@@ -250,5 +208,26 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
         ),
       ),
     );
+  }
+
+  void onSurahPressed() {
+    context.closeKeyboard();
+    // bool connected = await WearConnector.isWatchConnected();
+    FocusManager.instance.primaryFocus?.unfocus();
+    context.read<AudioPlayerProvider>().disposePlayer();
+    context.read<AudioPlayerProvider>().setPlayingRecitor(widget.reciter);
+
+    // For Liked/All Recitators tabs: pass ALL 114 surahs from selected reciter
+    List<SurahModel> selectedChapters = [...widget.chapters];
+    List<Reciter> selectedReciters = [...[widget.reciter]];
+
+    context.read<PlayerScreensController>().navigateToPlayerScreenV3(
+      context,
+      selectedReciters,
+      widget.chapter,
+      selectedChapters,
+      widget.playerType,
+    );
+    FocusScope.of(context).unfocus();
   }
 }

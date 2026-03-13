@@ -3,7 +3,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:provider/provider.dart';
 import '../../../../mawaqit_quran_listening.dart';
-import '../../../../mawaqit_quran_listening.dart' as recitor_controller;
 import '../../listening_components/reciter_list_tile.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:sizer/sizer.dart';
@@ -29,6 +28,7 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final audioPlayerProvider = context.read<AudioPlayerProvider>();
     return Consumer<RecitorsProvider>(
       builder: (context, provider, child) {
         if (provider.state == RecitersScreenState.loading) {
@@ -48,21 +48,23 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
           );
         }
 
-        return provider.reciters.isEmpty
-            ? Expanded(
-              child: Center(
-                child: Text(
-                  context.tr.not_downloaded_recitation,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Theme.of(context).primaryColor,
-                  ),
+        if (provider.reciters.isEmpty){
+          return Expanded(
+            child: Center(
+              child: Text(
+                context.tr.not_downloaded_recitation,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: Theme.of(context).primaryColor,
                 ),
               ),
-            )
-            : Expanded(
+            ),
+          );
+        }
+
+        return Expanded(
               child: ListView.builder(
                 key: const Key('recitors_tab_listview'),
                 itemCount: provider.reciters.length,
@@ -78,13 +80,10 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
                       final selectedReciter = provider.reciters[index];
                       
                       // Set reciters list in audio provider
-                      context.read<AudioPlayerProvider>().reciters =
-                          context.read<recitor_controller.RecitorsProvider>().reciters;
+                      audioPlayerProvider.reciters = provider.originalReciters;
                       
                       // Change reciter (this sets currentReciterId)
-                      context.read<AudioPlayerProvider>().changeReciter(
-                        selectedReciter,
-                      );
+                      audioPlayerProvider.changeReciter(selectedReciter);
                       
                       // Set reciter in player screens controller
                       context.read<PlayerScreensController>().setRecitor(
