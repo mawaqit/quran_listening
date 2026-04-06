@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
-import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icon_v3_cions.dart';
 import 'package:provider/provider.dart';
@@ -48,20 +46,26 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
         downloadController.singleSavedRecitation(
           reciterId: widget.reciter.id,
           recitationId: widget.chapter.id,
-        ) != null;
+        ) !=
+        null;
     bool isDownloading =
         downloadController.inProgressSurahs[widget.reciter.id.toString()]
             ?.containsKey(widget.chapter.id.toString()) ??
         false;
+    bool isQueued = downloadController.isQueued(
+      reciterId: widget.reciter.id.toString(),
+      chapterId: widget.chapter.id.toString(),
+    );
     double progress =
         downloadController.inProgressSurahs[widget.reciter.id
-            .toString()]?[widget.chapter.id.toString()] ?? 0.0;
+            .toString()]?[widget.chapter.id.toString()] ??
+        0.0;
     const greyColor = Colors.grey;
 
     bool isPlaying =
-        audioManager.isPlaying && (widget.index == audioManager.playingChapterIndex) &&
-            widget.reciter.id == audioManager.playingRecitor?.id;
-
+        audioManager.isPlaying &&
+        (widget.index == audioManager.playingChapterIndex) &&
+        widget.reciter.id == audioManager.playingRecitor?.id;
 
     return GestureDetector(
       key: Key('surah_tile_key_${widget.index}'),
@@ -105,18 +109,23 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: (context.isFoldable ? 8 : 13).sp,
-                      color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
+                      color: context.colorScheme.onPrimaryContainer.withValues(
+                        alpha: .9,
+                      ),
                     ),
                   ),
                   Text(
                     widget.reciter.reciterName,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: greyColor, fontSize: (context.isFoldable ? 6 : 10).sp),
+                    style: TextStyle(
+                      color: greyColor,
+                      fontSize: (context.isFoldable ? 6 : 10).sp,
+                    ),
                   ),
                 ],
               ),
             ),
-            isDownloading
+            (isDownloading || isQueued)
                 ? GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () async {
@@ -136,7 +145,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
-                            value: progress,
+                            value: isQueued ? null : progress,
                             strokeWidth: 2,
                             backgroundColor: greyColor,
                           ),
@@ -188,18 +197,13 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                       );
 
                       Log.i('Deleted : $result');
-                    } else if (downloadController.canDownload()) {
+                    } else {
                       await downloadController.downloadRecite(
                         context: context,
                         url:
                             '${audioManager.reciter!.serverUrl!}${widget.chapter.id.toString().padLeft(3, '0')}.mp3',
                         reciterId: widget.reciter.id.toString(),
                         chapterId: widget.chapter.id.toString(),
-                      );
-                    } else {
-                      Fluttertoast.showToast(
-                        msg: context.tr.cant_download_more_than_3,
-                        toastLength: Toast.LENGTH_SHORT,
                       );
                     }
                   },
@@ -219,7 +223,9 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
 
     // For Liked/All Recitators tabs: pass ALL 114 surahs from selected reciter
     List<SurahModel> selectedChapters = [...widget.chapters];
-    List<Reciter> selectedReciters = [...[widget.reciter]];
+    List<Reciter> selectedReciters = [
+      ...[widget.reciter],
+    ];
 
     context.read<PlayerScreensController>().navigateToPlayerScreenV3(
       context,

@@ -1,9 +1,9 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
@@ -36,8 +36,13 @@ class DownloadController extends ChangeNotifier {
 
   final Map<String, Map<String, double>> _inProgressSurahs = {};
   final Map<String, CancelToken> _activeDownloads = {};
+  final Queue<_QueuedDownloadRequest> _downloadQueue =
+      Queue<_QueuedDownloadRequest>();
+  final Map<String, _QueuedDownloadRequest> _queuedDownloadsByKey = {};
+  final Map<String, Set<String>> _queuedSurahs = {};
 
   Map<String, Map<String, double>> get inProgressSurahs => _inProgressSurahs;
+  Map<String, Set<String>> get queuedSurahs => _queuedSurahs;
   bool get isLoading => _isLoading;
 
   List<String> _downloadedRecitation = [];
@@ -64,6 +69,23 @@ class DownloadController extends ChangeNotifier {
       _downloadedSurahsForSpecificReciter;
 
   DownloadController({required this.reciterId});
+
+  String _downloadKey({required String reciterId, required String chapterId}) =>
+      '${reciterId}_$chapterId';
+
+  void _pruneEmptyTrackingMaps(String reciterId) {
+    if (_inProgressSurahs[reciterId]?.isEmpty ?? false) {
+      _inProgressSurahs.remove(reciterId);
+    }
+    if (_queuedSurahs[reciterId]?.isEmpty ?? false) {
+      _queuedSurahs.remove(reciterId);
+    }
+  }
+
+  bool isQueued({required String reciterId, required String chapterId}) =>
+      _queuedSurahs[reciterId]?.contains(chapterId) ?? false;
+
+  int get activeDownloadCount => _activeDownloads.length;
 
   void setCombinedList() {
     originalSurahRecitorList.clear();
@@ -125,17 +147,15 @@ class DownloadController extends ChangeNotifier {
   }
 
   Future<bool> downloadSurah({
-    required BuildContext context,
     required String reciterId,
     required String surahId,
     required String url,
+    required String downloadCompletedMsg,
+    required String downloadFailedMsg,
     Function(double)? onProgress,
   }) async {
-    final downloadCompletedMsg = context.tr.download_completed;
-    final downloadFailedMsg = context.tr.download_failed;
-
     final cancelToken = CancelToken();
-    final downloadKey = '${reciterId}_$surahId';
+    final downloadKey = _downloadKey(reciterId: reciterId, chapterId: surahId);
     _activeDownloads[downloadKey] = cancelToken;
 
     try {
@@ -213,7 +233,8 @@ class DownloadController extends ChangeNotifier {
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 60),
         followRedirects: true,
-        validateStatus: (status) => status != null && (status < 400 || status == 416),
+        validateStatus:
+            (status) => status != null && (status < 400 || status == 416),
       ),
     );
 
@@ -237,7 +258,9 @@ class DownloadController extends ChangeNotifier {
     final probeContentRange = probe.headers.value('content-range') ?? '';
     int totalSize =
         RegExp(r'/(\d+)$').firstMatch(probeContentRange) != null
-            ? int.parse(RegExp(r'/(\d+)$').firstMatch(probeContentRange)!.group(1)!)
+            ? int.parse(
+              RegExp(r'/(\d+)$').firstMatch(probeContentRange)!.group(1)!,
+            )
             : int.tryParse(probe.headers.value('content-length') ?? '') ?? 0;
 
     if (totalSize == 0) throw Exception('Unable to determine file size');
@@ -457,7 +480,8 @@ class DownloadController extends ChangeNotifier {
       }
 
       final batch = chunks.sublist(
-        i, (i + concurrentChunks).clamp(0, chunks.length),
+        i,
+        (i + concurrentChunks).clamp(0, chunks.length),
       );
       final errors = <Object>[];
       await Future.wait(
@@ -481,7 +505,9 @@ class DownloadController extends ChangeNotifier {
       }
       final int size = await chunk.file.length();
       if (size != chunk.expectedSize) {
-        throw Exception('Chunk ${chunk.index} corrupted ($size / ${chunk.expectedSize})');
+        throw Exception(
+          'Chunk ${chunk.index} corrupted ($size / ${chunk.expectedSize})',
+        );
       }
     }
 
@@ -505,7 +531,9 @@ class DownloadController extends ChangeNotifier {
 
     final int mergedSize = await finalFile.length();
     if (mergedSize != trueTotalRef[0]) {
-      throw Exception('Merged file corrupted: $mergedSize / ${trueTotalRef[0]}');
+      throw Exception(
+        'Merged file corrupted: $mergedSize / ${trueTotalRef[0]}',
+      );
     }
 
     try {
@@ -558,17 +586,32 @@ class DownloadController extends ChangeNotifier {
     required String reciterId,
     required String chapterId,
   }) async {
-    // Cancel the actual Dio download
-    final downloadKey = '${reciterId}_$chapterId';
+    final downloadKey = _downloadKey(
+      reciterId: reciterId,
+      chapterId: chapterId,
+    );
+
+    final queuedRequest = _queuedDownloadsByKey.remove(downloadKey);
+    if (queuedRequest != null) {
+      _downloadQueue.removeWhere(
+        (request) => request.downloadKey == downloadKey,
+      );
+      _queuedSurahs[reciterId]?.remove(chapterId);
+      _pruneEmptyTrackingMaps(reciterId);
+      notifyListeners();
+      return;
+    }
+
     final cancelToken = _activeDownloads[downloadKey];
     if (cancelToken != null && !cancelToken.isCancelled) {
       cancelToken.cancel('Download cancelled by user');
     }
 
-    // Remove from tracking
     _activeDownloads.remove(downloadKey);
     _inProgressSurahs[reciterId]?.remove(chapterId);
+    _pruneEmptyTrackingMaps(reciterId);
     notifyListeners();
+    _processQueue();
   }
 
   Future<void> fetchDownloadedRecitation({required String reciterId}) async {
@@ -577,13 +620,7 @@ class DownloadController extends ChangeNotifier {
   }
 
   bool canDownload() {
-    // Check if can download (e.g., limit of 3 concurrent downloads)
-    // Count currently downloading surahs across all reciters
-    int concurrentDownloads = 0;
-    _inProgressSurahs.forEach((reciterId, surahs) {
-      concurrentDownloads += surahs.length;
-    });
-    return concurrentDownloads < 3;
+    return activeDownloadCount < oneTimeDownloadLimit;
   }
 
   Future<void> downloadRecite({
@@ -592,39 +629,104 @@ class DownloadController extends ChangeNotifier {
     required String reciterId,
     required String chapterId,
   }) async {
-    // Start download progress tracking
-    _inProgressSurahs[reciterId] ??= {};
-    _inProgressSurahs[reciterId]![chapterId] = 0.0;
+    final downloadKey = _downloadKey(
+      reciterId: reciterId,
+      chapterId: chapterId,
+    );
+    if (_activeDownloads.containsKey(downloadKey) ||
+        _queuedDownloadsByKey.containsKey(downloadKey) ||
+        singleSavedRecitation(
+              reciterId: int.parse(reciterId),
+              recitationId: int.parse(chapterId),
+            ) !=
+            null) {
+      return;
+    }
+
+    final request = _QueuedDownloadRequest(
+      reciterId: reciterId,
+      chapterId: chapterId,
+      url: url,
+      downloadCompletedMsg: context.tr.download_completed,
+      downloadFailedMsg: context.tr.download_failed,
+    );
+
+    if (canDownload()) {
+      _startDownload(request);
+      return;
+    }
+
+    _queuedDownloadsByKey[downloadKey] = request;
+    _queuedSurahs.putIfAbsent(reciterId, () => <String>{}).add(chapterId);
+    notifyListeners();
+    _downloadQueue.addLast(request);
+  }
+
+  Future<void> queueBulkDownloads({
+    required BuildContext context,
+    required Reciter reciter,
+    required List<SurahModel> surahs,
+  }) async {
+    final serverUrl = reciter.serverUrl;
+    if (serverUrl == null || serverUrl.isEmpty) return;
+
+    for (final chapter in surahs) {
+      await downloadRecite(
+        context: context,
+        url: '$serverUrl${chapter.id.toString().padLeft(3, '0')}.mp3',
+        reciterId: reciter.id.toString(),
+        chapterId: chapter.id.toString(),
+      );
+    }
+  }
+
+  void _startDownload(_QueuedDownloadRequest request) {
+    _queuedDownloadsByKey.remove(request.downloadKey);
+    _queuedSurahs[request.reciterId]?.remove(request.chapterId);
+    _pruneEmptyTrackingMaps(request.reciterId);
+
+    _inProgressSurahs[request.reciterId] ??= {};
+    _inProgressSurahs[request.reciterId]![request.chapterId] = 0.0;
     notifyListeners();
 
+    _runDownload(request);
+  }
+
+  Future<void> _runDownload(_QueuedDownloadRequest request) async {
     try {
-      // Call the real download method with progress callback
-      final success = await downloadSurah(
-        context: context,
-        reciterId: reciterId,
-        surahId: chapterId,
-        url: url,
+      await downloadSurah(
+        reciterId: request.reciterId,
+        surahId: request.chapterId,
+        url: request.url,
+        downloadCompletedMsg: request.downloadCompletedMsg,
+        downloadFailedMsg: request.downloadFailedMsg,
         onProgress: (progress) {
-          _inProgressSurahs[reciterId]![chapterId] = progress;
+          _inProgressSurahs[request.reciterId]?[request.chapterId] = progress;
           notifyListeners();
         },
       );
 
-      if (success) {
-        // Download successful, remove from progress
-        _inProgressSurahs[reciterId]?.remove(chapterId);
-        // loadDownloadedRecitations() is already called in downloadSurah
-        notifyListeners();
-      } else {
-        // Download failed, remove from progress
-        _inProgressSurahs[reciterId]?.remove(chapterId);
-        notifyListeners();
-      }
+      _inProgressSurahs[request.reciterId]?.remove(request.chapterId);
+      _pruneEmptyTrackingMaps(request.reciterId);
+      notifyListeners();
     } catch (e, stackTrace) {
-      // Download failed, remove from progress
-      _inProgressSurahs[reciterId]?.remove(chapterId);
+      _inProgressSurahs[request.reciterId]?.remove(request.chapterId);
+      _pruneEmptyTrackingMaps(request.reciterId);
       notifyListeners();
       Log.e('Download error: $e', error: e, stackTrace: stackTrace);
+    } finally {
+      _processQueue();
+    }
+  }
+
+  void _processQueue() {
+    while (_activeDownloads.length < oneTimeDownloadLimit &&
+        _downloadQueue.isNotEmpty) {
+      final request = _downloadQueue.removeFirst();
+      if (!_queuedDownloadsByKey.containsKey(request.downloadKey)) {
+        continue;
+      }
+      _startDownload(request);
     }
   }
 
@@ -680,6 +782,24 @@ class DownloadController extends ChangeNotifier {
       );
     }
   }
+}
+
+class _QueuedDownloadRequest {
+  final String reciterId;
+  final String chapterId;
+  final String url;
+  final String downloadCompletedMsg;
+  final String downloadFailedMsg;
+
+  const _QueuedDownloadRequest({
+    required this.reciterId,
+    required this.chapterId,
+    required this.url,
+    required this.downloadCompletedMsg,
+    required this.downloadFailedMsg,
+  });
+
+  String get downloadKey => '${reciterId}_$chapterId';
 }
 
 class _ChunkInfo {
