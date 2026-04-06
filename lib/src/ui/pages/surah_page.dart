@@ -197,24 +197,24 @@ class _SurahPageState extends State<SurahPage> {
                     setState(() {
                       _searchQuery = '';
                     });
+                    FocusScope.of(context).unfocus();
                   },
                 ),
               ),
               const SizedBox(width: 12),
               Opacity(
-                opacity:
-                    currentReciter == null || downloadableSurahs.isEmpty
+                opacity: currentReciter == null || downloadableSurahs.isEmpty
                         ? 0.45
                         : 1,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     gradient: const LinearGradient(
-                      begin: Alignment.centerRight,
-                      end: Alignment.centerLeft,
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
                       colors: [
-                        Color(0xff4925c1),
                         Color(0xffc496fd),
+                        Color(0xff4925c1),
                       ],
                     ),
                   ),
@@ -238,7 +238,7 @@ class _SurahPageState extends State<SurahPage> {
                           message: 'Download all surahs',
                           child: Center(
                             child: Icon(
-                              ReciterIconV3.download,
+                              Icons.cloud_download_rounded,
                               color: Colors.white,
                             ),
                           ),
