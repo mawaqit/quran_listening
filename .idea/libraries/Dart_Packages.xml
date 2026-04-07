@@ -339,7 +339,7 @@
         <entry key="mawaqit_mobile_i18n">
           <value>
             <list>
-              <option value="$USER_HOME$/.pub-cache/git/mawaqit-mobile-i18n-b607c670b3d59ed021a5ed7bc5a8aa55e4eee3e7//lib" />
+              <option value="$USER_HOME$/.pub-cache/git/mawaqit-mobile-i18n-da52cff2cda3ae24b9d2b59d54f9fa9307951efc//lib" />
             </list>
           </value>
         </entry>
@@ -709,7 +709,7 @@
       </option>
     </properties>
     <CLASSES>
-      <root url="file://$USER_HOME$/.pub-cache/git/mawaqit-mobile-i18n-b607c670b3d59ed021a5ed7bc5a8aa55e4eee3e7//lib" />
+      <root url="file://$USER_HOME$/.pub-cache/git/mawaqit-mobile-i18n-da52cff2cda3ae24b9d2b59d54f9fa9307951efc//lib" />
       <root url="file://$USER_HOME$/.pub-cache/git/mawaqit_core_logger-e914b664a7d442d9d72c4e9af6249453dfa9597b//lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/args-2.7.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/async-2.13.0/lib" />

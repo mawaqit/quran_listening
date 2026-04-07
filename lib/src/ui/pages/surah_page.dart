@@ -114,15 +114,26 @@ class _SurahPageState extends State<SurahPage> {
   bool _matchesSearch(SurahModel chapter) {
     if (_searchQuery.isEmpty) return true;
 
-    final normalizedQuery = _searchQuery.trim().toLowerCase();
+    final normalizedQuery = _normalizeSearchValue(_searchQuery);
     final searchableNames = <String>[
       chapter.name ?? '',
+      chapter.englishName ?? '',
+      chapter.frenchName ?? '',
+      chapter.arabicName ?? '',
     ];
 
     return chapter.id.toString().contains(normalizedQuery) ||
         searchableNames.any(
-          (name) => name.trim().toLowerCase().contains(normalizedQuery),
+          (name) => _normalizeSearchValue(name).contains(normalizedQuery),
         );
+  }
+
+  String _normalizeSearchValue(String value) {
+    return value
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .replaceAll('\u0640', '');
   }
 
   @override
@@ -137,17 +148,21 @@ class _SurahPageState extends State<SurahPage> {
   Widget build(BuildContext context) {
     final recitationsManager = Provider.of<RecitationsManager>(context);
     Provider.of<RecitorsProvider>(context);
-    context.watch<DownloadController>();
-
-    final Reciter? currentReciter = audioPlayerProvider.getCurrentReciterV3(context: context);
-    final List<SurahModel> reciterSurahs = recitationsManager.surahs.where((chapter) {
+    context.watch<DownloadController>(); // Watch for download changes
+    final Reciter? currentReciter = audioPlayerProvider.getCurrentReciterV3(
+      context: context,
+    );
+    final List<SurahModel> reciterSurahs =
+        recitationsManager.surahs.where((chapter) {
           if (likedSurahsIds.contains(chapter.id)) return false;
 
-          return currentReciter?.surahsList?.contains(chapter.id.toString()) ?? false;
+          return currentReciter?.surahsList?.contains(chapter.id.toString()) ??
+              false;
         }).toList();
     final List<SurahModel> surahs =
         reciterSurahs.where(_matchesSearch).toList();
-    final List<SurahModel> downloadableSurahs = currentReciter == null
+    final List<SurahModel> downloadableSurahs =
+        currentReciter == null
             ? const []
             : reciterSurahs.where((chapter) {
               final reciterId = currentReciter.id;
@@ -165,7 +180,8 @@ class _SurahPageState extends State<SurahPage> {
                           ?.containsKey(chapterId.toString()) ??
                       false);
             }).toList();
-    final bulkStatus = currentReciter == null
+    final bulkStatus =
+        currentReciter == null
             ? null
             : downloadController.bulkDownloadStatus(
               currentReciter.id.toString(),
@@ -177,7 +193,8 @@ class _SurahPageState extends State<SurahPage> {
             ? downloadableSurahs.isNotEmpty
             : bulkStatus.downloadedCount < totalSurahCount;
 
-    bool isErrorView = recitationsManager.state == RecitationsScreenState.failed;
+    bool isErrorView =
+        recitationsManager.state == RecitationsScreenState.failed;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (_, __) {
@@ -224,12 +241,15 @@ class _SurahPageState extends State<SurahPage> {
           ),
           SizedBox(height: context.isFoldable ? 12 : 16),
           Expanded(
-            child: recitationsManager.isLoading
+            child:
+                recitationsManager.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : isErrorView
                     ? ApiErrorWidget(
-                      callback: () => recitationsManager.getRecitations(
-                            reciterId: audioPlayerProvider.currentReciterId ?? 1,
+                      callback:
+                          () => recitationsManager.getRecitations(
+                            reciterId:
+                                audioPlayerProvider.currentReciterId ?? 1,
                             retry: true,
                           ),
                     )

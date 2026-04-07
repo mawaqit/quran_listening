@@ -60,7 +60,11 @@ class RecitationsManager extends ChangeNotifier {
     if (surahs.isNotEmpty &&
         baseSurahs == null &&
         surahs.every(
-          (surah) => (surah.name?.isNotEmpty ?? false),
+          (surah) =>
+              (surah.name?.isNotEmpty ?? false) &&
+              (surah.englishName?.isNotEmpty ?? false) &&
+              (surah.frenchName?.isNotEmpty ?? false) &&
+              (surah.arabicName?.isNotEmpty ?? false),
         )) {
       return surahs;
     }
@@ -127,6 +131,9 @@ class RecitationsManager extends ChangeNotifier {
 
       return sourceSurah.copyWith(
         name: localizedName,
+        englishName: englishSurah?.name,
+        arabicName: arabicSurah?.name,
+        frenchName: frenchSurah?.name,
       );
     }).toList();
   }
