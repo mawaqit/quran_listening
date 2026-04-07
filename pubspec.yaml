@@ -43,7 +43,7 @@ dependencies:
   mawaqit_mobile_i18n:
     git:
       url: https://github.com/mawaqit/mawaqit-mobile-i18n.git
-      ref: l10n_main
+      ref: main
   mawaqit_core_logger:
     git:
       url: https://github.com/mawaqit/mawaqit_core_logger.git

@@ -64,7 +64,7 @@ dependencies:
   mawaqit_mobile_i18n:
     git:
       url: https://github.com/mawaqit/mawaqit-mobile-i18n.git
-      ref: l10n_main
+      ref: main
   
   # Quran Listening Package (local path)
   mawaqit_quran_listening:
