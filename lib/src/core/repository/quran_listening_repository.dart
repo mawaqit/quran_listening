@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import '../api/quran_api.dart';
 import '../database/hive_manager.dart';

@@ -6,10 +6,7 @@ import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_stor
 import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:super_converter/converter/converter.dart';
 
-import '../../models/reciter.dart';
-import '../../models/recitation.dart';
-import '../../models/surah_model.dart';
-import '../database/hive_manager.dart';
+import 'package:mawaqit_quran_listening/mawaqit_quran_listening.dart';
 
 extension on Map<dynamic, dynamic> {
   Map<String, dynamic> get toStringDynamic {

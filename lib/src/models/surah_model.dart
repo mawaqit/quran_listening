@@ -28,6 +28,22 @@ class SurahModel implements Comparable<SurahModel> {
     );
   }
 
+  SurahModel copyWith({
+    int? id,
+    String? name,
+    int? startPage,
+    int? endPage,
+    int? makkia,
+  }) {
+    return SurahModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      startPage: startPage ?? this.startPage,
+      endPage: endPage ?? this.endPage,
+      makkia: makkia ?? this.makkia,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

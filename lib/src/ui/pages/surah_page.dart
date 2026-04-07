@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
+import 'package:mawaqit_quran_listening/src/ui/listening_components/all_surah_download_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../../mawaqit_quran_listening.dart';
 import '../../extensions/device_extensions.dart';
-import '../../utils/helpers/mawaqit_icon_v3_cions.dart';
 import '../listening_components/listening_search_textfield.dart';
 import '../listening_components/surah_list_tile_v3.dart';
 
@@ -115,10 +115,14 @@ class _SurahPageState extends State<SurahPage> {
     if (_searchQuery.isEmpty) return true;
 
     final normalizedQuery = _searchQuery.trim().toLowerCase();
-    final normalizedName = (chapter.name ?? '').trim().toLowerCase();
+    final searchableNames = <String>[
+      chapter.name ?? '',
+    ];
 
     return chapter.id.toString().contains(normalizedQuery) ||
-        normalizedName.contains(normalizedQuery);
+        searchableNames.any(
+          (name) => name.trim().toLowerCase().contains(normalizedQuery),
+        );
   }
 
   @override
@@ -133,26 +137,19 @@ class _SurahPageState extends State<SurahPage> {
   Widget build(BuildContext context) {
     final recitationsManager = Provider.of<RecitationsManager>(context);
     Provider.of<RecitorsProvider>(context);
-    context.watch<DownloadController>(); // Watch for download changes
-    final Reciter? currentReciter = audioPlayerProvider.getCurrentReciterV3(
-      context: context,
-    );
-    final List<SurahModel> surahs =
-        recitationsManager.surahs
-            .where((chapter) {
-              if (likedSurahsIds.contains(chapter.id)) return false;
+    context.watch<DownloadController>();
 
-              return currentReciter?.surahsList?.contains(
-                    chapter.id.toString(),
-                  ) ??
-                  false;
-            })
-            .where(_matchesSearch)
-            .toList();
-    final List<SurahModel> downloadableSurahs =
-        currentReciter == null
+    final Reciter? currentReciter = audioPlayerProvider.getCurrentReciterV3(context: context);
+    final List<SurahModel> reciterSurahs = recitationsManager.surahs.where((chapter) {
+          if (likedSurahsIds.contains(chapter.id)) return false;
+
+          return currentReciter?.surahsList?.contains(chapter.id.toString()) ?? false;
+        }).toList();
+    final List<SurahModel> surahs =
+        reciterSurahs.where(_matchesSearch).toList();
+    final List<SurahModel> downloadableSurahs = currentReciter == null
             ? const []
-            : surahs.where((chapter) {
+            : reciterSurahs.where((chapter) {
               final reciterId = currentReciter.id;
               final chapterId = chapter.id;
               return downloadController.singleSavedRecitation(
@@ -168,9 +165,19 @@ class _SurahPageState extends State<SurahPage> {
                           ?.containsKey(chapterId.toString()) ??
                       false);
             }).toList();
+    final bulkStatus = currentReciter == null
+            ? null
+            : downloadController.bulkDownloadStatus(
+              currentReciter.id.toString(),
+            );
+    final totalSurahCount =
+        currentReciter?.totalSurah ?? currentReciter?.surahsList?.length ?? 0;
+    final bool hasRemainingBulkDownloads =
+        bulkStatus == null
+            ? downloadableSurahs.isNotEmpty
+            : bulkStatus.downloadedCount < totalSurahCount;
 
-    bool isErrorView =
-        recitationsManager.state == RecitationsScreenState.failed;
+    bool isErrorView = recitationsManager.state == RecitationsScreenState.failed;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (_, __) {
@@ -179,88 +186,50 @@ class _SurahPageState extends State<SurahPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: ListeningSearchTextField(
-                  hasSuffix: _searchQuery.isNotEmpty,
-                  hint: context.tr.search_for_surah,
-                  controller: searchController,
-                  onSubmittedPressed: (_) {},
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
-                  },
-                  onSuffixPressed: () {
-                    searchController.clear();
-                    setState(() {
-                      _searchQuery = '';
-                    });
-                    FocusScope.of(context).unfocus();
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Opacity(
-                opacity: currentReciter == null || downloadableSurahs.isEmpty
-                        ? 0.45
-                        : 1,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: const LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Color(0xffc496fd),
-                        Color(0xff4925c1),
-                      ],
-                    ),
-                  ),
-                  child: SizedBox(
-                    height: 48,
-                    width: 48,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(30),
-                        onTap: currentReciter == null || downloadableSurahs.isEmpty
-                                ? null
-                                : () async {
-                                  await downloadController.queueBulkDownloads(
-                                    context: context,
-                                    reciter: currentReciter,
-                                    surahs: downloadableSurahs,
-                                  );
-                                },
-                        child: const Tooltip(
-                          message: 'Download all surahs',
-                          child: Center(
-                            child: Icon(
-                              Icons.cloud_download_rounded,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          ListeningSearchTextField(
+            hasSuffix: _searchQuery.isNotEmpty,
+            hint: context.tr.search_for_surah,
+            controller: searchController,
+            onSubmittedPressed: (_) {},
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+            onSuffixPressed: () {
+              searchController.clear();
+              setState(() {
+                _searchQuery = '';
+              });
+              FocusScope.of(context).unfocus();
+            },
+          ),
+          SizedBox(height: context.isFoldable ? 10 : 12),
+          AllSurahDownloadWidget(
+            bulkStatus: bulkStatus,
+            isEnabled: currentReciter != null && hasRemainingBulkDownloads,
+            onDownloadAll: () async {
+              if (currentReciter == null) return;
+              await downloadController.queueBulkDownloads(
+                context: context,
+                reciter: currentReciter,
+                surahs: downloadableSurahs,
+              );
+            },
+            onCancel: (reciterId) async {
+              await downloadController.cancelBulkDownloads(
+                reciterId: reciterId,
+              );
+            },
           ),
           SizedBox(height: context.isFoldable ? 12 : 16),
           Expanded(
-            child:
-                recitationsManager.isLoading
+            child: recitationsManager.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : isErrorView
                     ? ApiErrorWidget(
-                      callback:
-                          () => recitationsManager.getRecitations(
-                            reciterId:
-                                audioPlayerProvider.currentReciterId ?? 1,
+                      callback: () => recitationsManager.getRecitations(
+                            reciterId: audioPlayerProvider.currentReciterId ?? 1,
                             retry: true,
                           ),
                     )

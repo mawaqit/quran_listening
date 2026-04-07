@@ -64,7 +64,7 @@ class RecitorsProvider extends ChangeNotifier {
       'sw',
     ];
 
-    if (localeName == "ku"){
+    if (localeName == "ku") {
       localeName = 'ar';
     } else if (!availableLocales.contains(localeName)) {
       localeName = 'en';
@@ -102,6 +102,7 @@ class RecitorsProvider extends ChangeNotifier {
       }
 
       notifyListeners();
+      if (!context.mounted) return;
       await checkLocalSurahs(context: context, locale: localeName);
     } on Exception {
       state = RecitersScreenState.failed;
@@ -125,7 +126,6 @@ class RecitorsProvider extends ChangeNotifier {
               .decode(data)
               .map<SurahModel>((e) => SurahModel.fromMap(e))
               .toList();
-      recitationManager.surahs = surahList;
     }
     bool isSurahsLocalExist = await _repository.hiveManager.isKeyExist(
       '${chaptersKey}_$localeName',
@@ -133,12 +133,15 @@ class RecitorsProvider extends ChangeNotifier {
     if (!isSurahsLocalExist) {
       surahList = await QuranApi.getSurah(language: localeName);
       if (surahList.isNotEmpty) {
-        recitationManager.surahs = surahList;
         _repository.hiveManager.write(
           key: '${chaptersKey}_$localeName',
           value: surahList.map((e) => e.toMap()).toList(),
         );
       }
+    }
+    if (surahList.isNotEmpty) {
+      recitationManager.surahs = await recitationManager
+          .getSearchableSurahsForBase(surahList, localeName);
     }
     notifyListeners();
   }
