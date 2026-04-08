@@ -13,7 +13,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 class QuranListeningExampleApp extends StatelessWidget {
   const QuranListeningExampleApp({super.key});
 
-  final _currentLocale = const Locale('en');
+  final _currentLocale = const Locale('ar');
 
   @override
   Widget build(BuildContext context) {

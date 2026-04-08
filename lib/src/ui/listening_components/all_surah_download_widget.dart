@@ -38,6 +38,7 @@ class AllSurahDownloadWidget extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     backgroundColor: context.colorScheme.primaryContainer,
+                    foregroundColor: context.colorScheme.onPrimaryContainer,
                   ),
                 ),
               )
@@ -110,7 +111,7 @@ class AllSurahDownloadWidget extends StatelessWidget {
       barrierColor: Colors.black.withValues(alpha: .3),
       context: context,
       builder: (dialogContext) => MawaqitDialog(
-            title: '${context.tr.download_all_surahs}?',
+            title: '${context.tr.download_all_surahs}${context.isRtl ? "؟" : "?"}',
             content: context.tr.this_will_download_all_surahs_for_offline,
             cancelText: context.tr.cancel,
             okText: context.tr.download,

@@ -15,9 +15,9 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quran Listening Example'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Quran Listening'),
       ),
+      backgroundColor: context.colorScheme.surface,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12.0),
