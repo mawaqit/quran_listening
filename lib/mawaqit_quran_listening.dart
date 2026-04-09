@@ -23,6 +23,11 @@ export 'src/models/surah_model.dart';
 export 'src/models/recitation.dart';
 export 'src/models/quran_audio.dart';
 export 'src/models/surah_audio.dart';
+export 'src/models/bulk_download_session_model.dart';
+export 'src/models/bulk_download_status_model.dart';
+export 'src/models/chunk_info_model.dart';
+export 'src/models/combined_surah_reciter_model.dart';
+export 'src/models/queued_download_request_model.dart';
 
 // Providers
 export 'src/providers/audio_provider.dart';

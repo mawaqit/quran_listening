@@ -1,3 +1,4 @@
+import 'package:example/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:mawaqit_mobile_i18n/gen_l10n/app_localizations.dart';
 import 'package:mawaqit_quran_listening/mawaqit_quran_listening.dart';
@@ -11,6 +12,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 /// Main app widget that sets up providers and theme
 class QuranListeningExampleApp extends StatelessWidget {
   const QuranListeningExampleApp({super.key});
+
+  final _currentLocale = const Locale('ar');
 
   @override
   Widget build(BuildContext context) {
@@ -56,11 +59,9 @@ class QuranListeningExampleApp extends StatelessWidget {
               child: MaterialApp(
                 title: 'Quran Listening Example',
                 debugShowCheckedModeBanner: false,
-                locale: Locale('en'),
-                theme: ThemeData(
-                  primarySwatch: Colors.blue,
-                  useMaterial3: true,
-                ),
+                locale: _currentLocale,
+                theme: ThemeProvider.buildLightTheme(context, _currentLocale),
+                darkTheme: ThemeProvider.buildDarkTheme(context, _currentLocale),
                 supportedLocales: const [
                   Locale('en', ''),
                   Locale('ar', ''),

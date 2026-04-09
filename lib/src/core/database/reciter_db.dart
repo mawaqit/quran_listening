@@ -1,7 +1,6 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
