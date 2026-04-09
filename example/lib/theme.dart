@@ -259,7 +259,7 @@ class ThemeProvider {
         backgroundColor: snackBarBgColor,
         actionTextColor: snackBarTextColor,
       ),
-      bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffffff)),
+      bottomAppBarTheme: const BottomAppBarThemeData(color: Color(0xffffffff)),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
           if (states.contains(WidgetState.disabled)) {
@@ -453,7 +453,7 @@ class ThemeProvider {
         actionTextColor: snackBarTextColor,
       ),
 
-      bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffffff)),
+      bottomAppBarTheme: const BottomAppBarThemeData(color: Color(0xffffffff)),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
           if (states.contains(WidgetState.disabled)) {
