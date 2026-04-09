@@ -75,6 +75,8 @@ class AllSurahDownloadWidget extends StatelessWidget {
                             children: [
                               LinearProgressIndicator(
                                 value: bulkStatus!.progress,
+                                color: context.colorScheme.primary,
+                                backgroundColor: context.colorScheme.primaryContainer,
                               ),
                               const SizedBox(height: 6),
                               Text(
@@ -94,7 +96,6 @@ class AllSurahDownloadWidget extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             backgroundColor: context.colorScheme.primaryContainer,
-
                           ),
                           child: Text(context.tr.cancel),
                         ),
