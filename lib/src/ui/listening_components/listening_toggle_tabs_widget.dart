@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
+import 'package:mawaqit_quran_listening/src/extensions/semantics_extension.dart';
 import '../../extensions/theme_extension.dart';
 import '../../providers/listening_toggle_index_provider.dart';
 import 'package:provider/provider.dart';
@@ -121,6 +122,11 @@ class ListeningToggleButton extends StatelessWidget {
           ],
         ),
       ),
+    ).excludeSemantics().semantic(
+      context: context,
+      label: title,
+      button: true,
+      selected: isSelected,
     );
   }
 }

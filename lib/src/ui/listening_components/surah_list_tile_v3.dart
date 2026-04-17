@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
+import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
+import 'package:mawaqit_quran_listening/src/extensions/semantics_extension.dart';
 import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icon_v3_cions.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
@@ -66,6 +68,10 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
         audioManager.isPlaying &&
         (widget.index == audioManager.playingChapterIndex) &&
         widget.reciter.id == audioManager.playingRecitor?.id;
+    final String surahLabel = '${widget.chapter.id} - ${widget.chapter.name}'.trim();
+    final String downloadTooltip = isDownloaded
+            ? '${context.tr.remove} $surahLabel'
+            : '${context.tr.download} $surahLabel';
 
     return GestureDetector(
       key: Key('surah_tile_key_${widget.index}'),
@@ -83,6 +89,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
           children: [
             IconButton(
               key: Key('play_button_key_${widget.index}'),
+              tooltip: '${isPlaying ? context.tr.semantic_pause : context.tr.play} $surahLabel',
               onPressed: () {
                 context.read<AudioPlayerProvider>().disposePlayer();
                 if (!isPlaying) {
@@ -165,10 +172,14 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                       ),
                     ],
                   ),
+                ).semanticAction(
+                  context: context,
+                  label: '${context.tr.cancel_download} $surahLabel, ${widget.reciter.reciterName}',
                 )
                 : IconButton(
                   constraints: const BoxConstraints(),
                   padding: EdgeInsets.zero,
+                  tooltip: downloadTooltip,
                   icon:
                       isDownloaded
                           ? Icon(

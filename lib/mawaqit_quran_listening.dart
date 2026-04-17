@@ -65,6 +65,7 @@ export 'src/utils/listening_utils/fake_recitors_list_data.dart';
 
 // Extensions
 export 'src/extensions/theme_extension.dart';
+export 'src/extensions/semantics_extension.dart';
 
 // Configuration
 export 'src/config/package_config.dart';

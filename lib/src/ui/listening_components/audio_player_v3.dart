@@ -7,6 +7,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
+import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/src/utils/helpers/watch_icons.dart';
 import 'package:sizer/sizer.dart';
 import 'package:path_provider/path_provider.dart';
@@ -385,6 +386,22 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
   Widget build(BuildContext context) {
     audioManager = context.watch<AudioPlayerProvider>();
     final audioPlayer = audioManager.audioPlayer;
+    final currentSurahId = audioManager.playingChapter?.id.toString() ?? '';
+    final currentSurahName = audioManager.playingChapter?.name ?? '';
+    final currentReciterName =
+        audioManager.reciters.isNotEmpty
+            ? audioManager.playingRecitor?.reciterName ?? ''
+            : '';
+    final currentSurahLabel = [
+      currentSurahId,
+      currentSurahName,
+    ].where((part) => part.isNotEmpty).join(' - ');
+    final playPauseLabel =
+        audioPlayer.processingState == ProcessingState.completed
+            ? context.tr.semantic_replay_current_surah
+            : audioManager.isPlaying
+            ? context.tr.semantic_pause_current_surah
+            : context.tr.semantic_play_current_surah;
 
     return Container(
       key: const Key('audio_player_bottom_sheet'),
@@ -415,94 +432,97 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                         SizedBox(
                           width: _headerActionWidth,
                           child: _isWatchConnected
-                              ? IconButton(
-                            key: const Key('watch_play_icon'),
-                            icon: Icon(
-                              Platform.isIOS?WatchIcons.apple_watch:WatchIcons.android_watch,
-                              color: context.colorScheme.primaryFixed,
-                            ),
-                            onPressed: () async {
-                              // Build current audio URL like elsewhere
-                              final serverUrl = audioManager.reciter
-                                  ?.serverUrl ?? '';
-                              final chapterId = audioManager.playingChapter?.id;
-                              if (serverUrl.isEmpty || chapterId == null) {
-                                return;
-                              }
-                              final audioUrl = '$serverUrl${chapterId
-                                  .toString()
-                                  .padLeft(3, '0')}.mp3';
-
-                              // Pause current playback while opening the sheet
-                              await audioPlayer.pause();
-
-                              showModalBottomSheet(
-                                context: context,
-                                backgroundColor: context.colorScheme.surface,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(10),
-                                    topRight: Radius.circular(10),
-                                  ),
-                                ),
-                                builder: (ctx) =>
-                                    WatchPlaybackConfirmationBottomSheet(
-                                      surahName: audioManager.playingChapter
-                                          ?.name ?? '',
-                                      onPlayOnWatch: () async {
-                                         await WearConnector.sendRecitorUrl({
-                                           'reciterName': audioManager
-                                               .playingRecitor?.reciterName,
-                                           'mushaf': audioManager
-                                               .currentReciterDetail
-                                               ?.mainReciterId,
-                                           'style': audioManager
-                                               .currentReciterDetail?.style,
-                                           'totalSurah': audioManager
-                                               .currentReciterDetail?.totalSurah,
-                                           'url': audioUrl,
-                                           'id': audioManager.playingChapter?.id,
-                                           'surahName': audioManager.playingChapter?.name,
-                                         });
-                                        Navigator.pop(ctx);
-                                      },
-                                      onPlayOnPhone: () {
-                                        Navigator.pop(ctx);
-                                        audioPlayer.play();
-                                      },
+                                  ? IconButton(
+                                    key: const Key('watch_play_icon'),
+                                    tooltip: '${context.tr.semantic_open_play_on_watch_options_for} $currentSurahName',
+                                    icon: Icon(
+                                      Platform.isIOS
+                                          ? WatchIcons.apple_watch
+                                          : WatchIcons.android_watch,
+                                      color: context.colorScheme.primaryFixed,
                                     ),
-                              );
-                            },
-                          )
-                              : const SizedBox.shrink(),
+                                    onPressed: () async {
+                                      // Build current audio URL like elsewhere
+                                      final serverUrl = audioManager.reciter?.serverUrl ?? '';
+                                      final chapterId = audioManager.playingChapter?.id;
+                                      if (serverUrl.isEmpty || chapterId == null) {
+                                        return;
+                                      }
+                                      final audioUrl = '$serverUrl${chapterId.toString().padLeft(3, '0')}.mp3';
+
+                                      // Pause current playback while opening the sheet
+                                      await audioPlayer.pause();
+
+                                      showModalBottomSheet(
+                                        context: context,
+                                        backgroundColor: context.colorScheme.surface,
+                                        shape: const RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(10),
+                                            topRight: Radius.circular(10),
+                                          ),
+                                        ),
+                                        builder:
+                                            (
+                                              ctx,
+                                            ) => WatchPlaybackConfirmationBottomSheet(
+                                              surahName: audioManager.playingChapter
+                                                      ?.name ?? '',
+                                              onPlayOnWatch: () async {
+                                                await WearConnector.sendRecitorUrl({
+                                                  'reciterName': audioManager
+                                                          .playingRecitor?.reciterName,
+                                                  'mushaf': audioManager
+                                                          .currentReciterDetail
+                                                          ?.mainReciterId,
+                                                  'style': audioManager
+                                                          .currentReciterDetail?.style,
+                                                  'totalSurah': audioManager
+                                                          .currentReciterDetail?.totalSurah,
+                                                  'url': audioUrl,
+                                                  'id': audioManager.playingChapter?.id,
+                                                  'surahName': audioManager.playingChapter?.name,
+                                                });
+                                                Navigator.pop(ctx);
+                                              },
+                                              onPlayOnPhone: () {
+                                                Navigator.pop(ctx);
+                                                audioPlayer.play();
+                                              },
+                                            ),
+                                      );
+                                    },
+                                  )
+                                  : const SizedBox.shrink(),
                         ),
                         Expanded(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                '${audioManager.playingChapter?.id??""} - ${audioManager.playingChapter?.name ?? ''}',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                  color: context.colorScheme.primaryFixed,
-                                ),
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    currentSurahLabel,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                      color: context.colorScheme.primaryFixed,
+                                    ),
+                                  ),
+                                  Text(
+                                    currentReciterName,
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      color: context.colorScheme.primaryFixed,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              )
+                              .excludeSemantics(excluding: true)
+                              .semantic(
+                                context: context,
+                                header: true,
+                                label: '${context.tr.semantic_now_playing_surah} $currentSurahLabel. ${context.tr.semantic_recited_by} $currentReciterName.',
                               ),
-                              Text(
-                                audioManager.reciters.isNotEmpty
-                                    ? audioManager
-                                            .playingRecitor
-                                            ?.reciterName ??
-                                        ''
-                                    : '',
-                                style: TextStyle(
-                                  fontSize: 10.sp,
-                                  color: context.colorScheme.primaryFixed,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
                         SizedBox(
                           width: _headerActionWidth,
@@ -511,6 +531,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                             child: CircularButton(
                               icon: Icons.keyboard_arrow_down,
                               iconColor: context.colorScheme.primaryFixed,
+                              label: context.tr.semantic_minimize_player,
                               size: 32,
                               borderColor: context.colorScheme.primaryFixed,
                               onTap: () {
@@ -563,6 +584,10 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                             activeColor: context.colorScheme.primaryFixed,
                             inactiveColor: context.colorScheme.primaryFixed
                                 .withOpacity(0.1),
+                            semanticFormatterCallback: (value) {
+                              final position = Duration(seconds: value.round());
+                              return '${context.tr.semantic_elapsed} ${formatTime(position)} ${context.tr.semantic_of} ${formatTime(total)}';
+                            },
                             onChanged: (value) {
                               setState(() {
                                 isSliderDragged = true;
@@ -615,6 +640,10 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                               ),
                             ),
                           ],
+                        ).excludeSemantics().semantic(
+                          context: context,
+                          label:
+                              '${context.tr.semantic_playback_time_elapsed} ${formatTime(effectivePosition)}. ${context.tr.semantic_remaining} ${formatTime(total - effectivePosition)}.',
                         );
                       },
                     ),
@@ -630,6 +659,9 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                       children: [
                         IconButton(
                           splashRadius: iconSplashSize,
+                          tooltip: audioPlayer.shuffleModeEnabled
+                                  ? context.tr.semantic_turn_shuffle_off
+                                  : context.tr.semantic_turn_shuffle_on,
                           icon: SvgImageAsset(
                             'assets/icons/shuffle.svg',
                             color: context.colorScheme.primaryFixed,
@@ -652,6 +684,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           maintainSize: true,
                           child: IconButton(
                             splashRadius: iconSplashSize,
+                            tooltip: context.tr.semantic_previous_surah,
                             icon: SvgImageAsset(
                               context.isRtl
                                   ? 'assets/icons/ic_next_round.svg'
@@ -672,6 +705,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                   ? Icons.pause_rounded
                                   : Icons.play_arrow_rounded,
                           iconColor: context.colorScheme.primaryFixed,
+                          label: playPauseLabel,
                           size: 62,
                           iconSize: 40,
                           color: context.colorScheme.primaryFixed.withOpacity(
@@ -697,6 +731,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           maintainSize: true,
                           child: IconButton(
                             splashRadius: iconSplashSize,
+                            tooltip: context.tr.semantic_next_surah,
                             icon: SvgImageAsset(
                               context.isRtl
                                   ? 'assets/icons/ic_previous_round.svg'
@@ -716,6 +751,9 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                             width:
                                 audioPlayer.loopMode == LoopMode.one ? 30 : 20,
                           ),
+                          tooltip: audioPlayer.loopMode == LoopMode.one
+                                  ? context.tr.semantic_turn_repeat_current_surah_off
+                                  : context.tr.semantic_turn_repeat_current_surah_on,
                           onPressed: () async {
                             await audioPlayer.setLoopMode(
                               audioPlayer.loopMode == LoopMode.one
@@ -764,7 +802,9 @@ class CustomTrackShape extends RoundedRectSliderTrackShape {
 
 Future<Uri> _loadAssetIconAsUri() async {
   // Load asset from package - use package path format
-  final byteData = await rootBundle.load('packages/mawaqit_quran_listening/assets/icons/media_logo.png');
+  final byteData = await rootBundle.load(
+    'packages/mawaqit_quran_listening/assets/icons/media_logo.png',
+  );
   final tempDir = await getTemporaryDirectory();
   final file = File('${tempDir.path}/audio_icon.png');
   await file.writeAsBytes(byteData.buffer.asUint8List());

@@ -19,6 +19,10 @@ class AllSurahDownloadWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = TextTheme.of(context);
+    final progressText = bulkStatus == null
+            ? null
+            : '${bulkStatus!.downloadedCount} ${context.tr.semantic_of} ${bulkStatus!.totalSurahs} ${context.tr.semantic_surahs_downloaded}';
+
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
       child: bulkStatus == null
@@ -40,6 +44,9 @@ class AllSurahDownloadWidget extends StatelessWidget {
                     backgroundColor: context.colorScheme.primaryContainer,
                     foregroundColor: context.colorScheme.onPrimaryContainer,
                   ),
+                ).semanticAction(
+                  context: context,
+                  label: context.tr.semantic_download_all_surahs_for_offline_listening,
                 ),
               )
               : Container(
@@ -60,10 +67,12 @@ class AllSurahDownloadWidget extends StatelessWidget {
                       context.tr.download_all_surahs,
                       textAlign: TextAlign.center,
                       style: textTheme.titleMedium?.copyWith(
-                        color: context.colorScheme.onPrimaryContainer.withValues(
-                          alpha: .9,
-                        ),
+                        color: context.colorScheme.onPrimaryContainer.withValues(alpha: .9),
                       ),
+                    ).semantic(
+                      context: context,
+                      header: true,
+                      label: context.tr.semantic_download_all_surahs,
                     ),
                     const SizedBox(height: 4),
                     Row(
@@ -77,6 +86,8 @@ class AllSurahDownloadWidget extends StatelessWidget {
                                 value: bulkStatus!.progress,
                                 color: context.colorScheme.primary,
                                 backgroundColor: context.colorScheme.primaryContainer,
+                                semanticsLabel: context.tr.semantic_bulk_download_progress,
+                                semanticsValue: progressText,
                               ),
                               const SizedBox(height: 6),
                               Text(
@@ -84,7 +95,7 @@ class AllSurahDownloadWidget extends StatelessWidget {
                                 style: textTheme.bodyMedium?.copyWith(
                                   color: Colors.grey,
                                 ),
-                              ),
+                              ).excludeSemantics(),
                             ],
                           ),
                         ),
@@ -92,16 +103,24 @@ class AllSurahDownloadWidget extends StatelessWidget {
                         TextButton(
                           onPressed: () => onCancel(bulkStatus!.reciterId),
                           style: TextButton.styleFrom(
-                            minimumSize: const Size(0, 32),
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            minimumSize: const Size(0, 42),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                            ),
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            backgroundColor: context.colorScheme.primaryContainer,
+                            backgroundColor:
+                                context.colorScheme.primaryContainer,
                           ),
                           child: Text(context.tr.cancel),
-                        ),
+                        ).semanticAction(context: context, label: context.tr.semantic_cancel_download_all_surahs),
                       ],
                     ),
                   ],
+                ).semantic(
+                  context: context,
+                  header: true,
+                  liveRegion: true,
+                  label: '${context.tr.semantic_bulk_download_in_progress} $progressText',
                 ),
               ),
     );

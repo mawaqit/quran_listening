@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:sizer/sizer.dart';
 import '../../../mawaqit_quran_listening.dart';
@@ -34,6 +35,7 @@ class DownloadedSurahTileV3 extends StatelessWidget {
 
     return Consumer<DownloadController>(
       builder: (context, controller, child) {
+        final String surahLabel = '${chapter.id} - ${chapter.name}'.trim();
         return GestureDetector(
           onTap: () {
             context.closeKeyboard();
@@ -120,6 +122,7 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                         audioManager.isPlaying &&
                         index == audioManager.playingChapterIndex && reciter?.id == audioManager.playingRecitor?.id;
                     return IconButton(
+                      tooltip: '${context.tr.play} $surahLabel',
                       onPressed: () {
                         if (!isPlaying) {
                           context.closeKeyboard();
@@ -241,12 +244,17 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                             ),
                           ],
                         ),
+                      ).semanticAction(
+                        context: context,
+                        label:
+                            '${reciter!.reciterName}, ${context.tr.all_recitators}',
                       ),
                     ],
                   ),
                 ),
                 IconButton(
                   key: Key('delete_downloaded_surah_key_$index'),
+                  tooltip: '${context.tr.remove} $surahLabel',
                   icon: Icon(
                     Icons.close,
                     color: context.colorScheme.primaryFixed,

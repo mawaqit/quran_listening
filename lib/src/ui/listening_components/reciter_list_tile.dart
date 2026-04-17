@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
+import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:sizer/sizer.dart';
 import '../../../mawaqit_quran_listening.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +12,7 @@ class RecitorListTile extends StatefulWidget {
   final Reciter recitor;
   final ListeningTab listeningTab;
   final int index;
+  final VoidCallback? onTap;
 
   @override
   State<RecitorListTile> createState() => _RecitorListTileState();
@@ -37,7 +39,16 @@ class _RecitorListTileState extends State<RecitorListTile> {
   Widget build(BuildContext context) {
 
     // this will work only for foldable
-    final bool isSelected = context.isFoldable && context.watch<AudioPlayerProvider>().reciter == widget.recitor;
+    final bool isSelected =
+        context.isFoldable &&
+        context.watch<AudioPlayerProvider>().reciter == widget.recitor;
+    final bool isFavorite = favoriteReciter.favoriteReciterUuids.contains(
+      widget.recitor.id.toString(),
+    );
+    final String favoriteTooltip =
+        isFavorite
+            ? '${context.tr.remove} ${widget.recitor.reciterName}'
+            : '${context.tr.favorite_reciters}: ${widget.recitor.reciterName}';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -49,195 +60,81 @@ class _RecitorListTileState extends State<RecitorListTile> {
       child: Row(
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.recitor.reciterName.trim(),
-                  maxLines: 2,
-                  style: TextStyle(
-                    fontSize: (context.isFoldable ? 8 : 13).sp,
-                    color: isSelected ? context.colorScheme.onPrimaryContainer : context.colorScheme.onPrimaryContainer.withOpacity(.9),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                DefaultTextStyle(
-                  style: TextStyle(
-                      color: context.colorScheme.secondary.withOpacity(.70),
-                      fontSize: (context.isFoldable ? 6 : 9).sp,
-                      fontFamily: context.getFontFamily()),
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(widget.recitor.style ?? '', overflow: TextOverflow.ellipsis, maxLines: 2),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          (widget.listeningTab == ListeningTab.allRecitator)
-              ? Padding(
-            key: Key('add_favorite_key_${widget.index}'),
-            padding: EdgeInsetsDirectional.only(start: 7.0, end: 3,),
-            child: IconButton(
-              constraints: const BoxConstraints(),
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                _saveReciter();
-                setState(() {});
-              },
-              icon: SvgImageAsset(
-                height: 17,
-                width: 17,
-                (favoriteReciter.favoriteReciterUuids.contains(widget.recitor.id.toString()))
-                    ? 'assets/icons/heart_filled.svg'
-                    : 'assets/icons/heart_outline.svg',
-                color: context.colorScheme.primaryFixed,
-              ),
-            ),
-          )
-              : Padding(
-            padding: EdgeInsetsDirectional.only(start: 7.0, end: 3,),
-            child: IconButton(
-              constraints: const BoxConstraints(),
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                _saveReciter();
-                setState(() {});
-              },
-              icon: IconButton(
-                onPressed: () {
-                  _saveReciter();
-                  setState(() {});
-                },
-                icon: Icon(
-                  Icons.close,
-                  color: context.colorScheme.primaryFixed,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-
-
-
-
-class ReciterListTile extends StatelessWidget {
-  final Reciter reciter;
-  final VoidCallback? onTap;
-  final bool isFavorite;
-  final VoidCallback? onFavoriteToggle;
-  final int index;
-
-  const ReciterListTile({
-    super.key,
-    required this.reciter,
-    required this.index,
-    this.onTap,
-    this.isFavorite = false,
-    this.onFavoriteToggle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      key: Key('reciter_tile_key_$index'),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.only(left: 5, top: 15, bottom: 15, right: 5),
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: context.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Reciter avatar/icon
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: context.colorScheme.primaryFixed.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  reciter.reciterName.isNotEmpty
-                      ? reciter.reciterName[0].toUpperCase()
-                      : 'R',
-                  style: TextStyle(
-                    color: context.colorScheme.primaryFixed,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.sp,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Reciter info
-            Expanded(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: widget.onTap,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    reciter.reciterName,
+                    widget.recitor.reciterName.trim(),
                     maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13.sp,
-                      color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
-                      fontWeight: FontWeight.w600,
+                      fontSize: (context.isFoldable ? 8 : 13).sp,
+                      color: isSelected ? context.colorScheme.onPrimaryContainer : context.colorScheme.onPrimaryContainer.withOpacity(.9),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Style: ${reciter.style ?? 'Unknown'}',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.grey, fontSize: 10.sp),
+                  const SizedBox(height: 2),
+                  DefaultTextStyle(
+                    style: TextStyle(
+                      color: context.colorScheme.secondary.withOpacity(.70),
+                      fontSize: (context.isFoldable ? 6 : 9).sp,
+                      fontFamily: context.getFontFamily(),
+                    ),
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(widget.recitor.style ?? '',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            // Action buttons
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (onFavoriteToggle != null)
-                  IconButton(
-                    key: Key('favorite_button_key_$index'),
-                    constraints: const BoxConstraints(),
-                    padding: EdgeInsets.zero,
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color:
-                          isFavorite
-                              ? Colors.red
-                              : context.colorScheme.primaryFixed,
-                      size: 22,
-                    ),
-                    onPressed: onFavoriteToggle,
-                  ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: context.colorScheme.onSurface.withOpacity(0.5),
+          ),
+          (widget.listeningTab == ListeningTab.allRecitator)
+              ? Padding(
+                key: Key('add_favorite_key_${widget.index}'),
+                padding: EdgeInsetsDirectional.only(start: 7.0, end: 3),
+                child: IconButton(
+                  constraints: const BoxConstraints(),
+                  tooltip: favoriteTooltip,
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    _saveReciter();
+                    setState(() {});
+                  },
+                  icon: SvgImageAsset(
+                        height: 17,
+                        width: 17,
+                        isFavorite
+                            ? 'assets/icons/heart_filled.svg'
+                            : 'assets/icons/heart_outline.svg',
+                        color: context.colorScheme.primaryFixed,
+                      ).excludeSemantics(),
                 ),
-              ],
-            ),
-          ],
-        ),
+              )
+              : Padding(
+                padding: EdgeInsetsDirectional.only(start: 7.0, end: 3),
+                child: IconButton(
+                  constraints: const BoxConstraints(),
+                  padding: EdgeInsets.zero,
+                  tooltip: '${context.tr.remove} ${widget.recitor.reciterName}',
+                  onPressed: () {
+                    _saveReciter();
+                    setState(() {});
+                  },
+                  icon: Icon(
+                    Icons.close,
+                    color: context.colorScheme.primaryFixed,
+                  ),
+                ),
+              ),
+        ],
       ),
     );
   }
