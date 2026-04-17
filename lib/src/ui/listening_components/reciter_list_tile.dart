@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 
 class RecitorListTile extends StatefulWidget {
-  const RecitorListTile({super.key, required this.recitor, required this.listeningTab, required this.index,});
+  const RecitorListTile({super.key, required this.recitor, required this.listeningTab, required this.index, this.onTap,});
 
   final Reciter recitor;
   final ListeningTab listeningTab;
