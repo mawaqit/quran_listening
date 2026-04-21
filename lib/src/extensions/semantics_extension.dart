@@ -32,6 +32,7 @@ extension SemanticsX on Widget {
     bool? hidden,
     bool? mixed,
     bool? expanded,
+    bool? textField,
     bool? inMutuallyExclusiveGroup,
     SemanticsSortKey? sortKey,
     VoidCallback? onTap,
@@ -55,6 +56,7 @@ extension SemanticsX on Widget {
       value: value,
       // localeForSubtree: effectiveLocale
       button: button,
+      textField: textField,
       selected: selected,
       header: header,
       image: image,
