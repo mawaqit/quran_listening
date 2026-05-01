@@ -1,6 +1,96 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:mawaqit_mobile_i18n/gen_l10n/app_localizations.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
+
+// ── SEMANTIC LOCALE FALLBACK ────────────────────────────────────────────────
+// Maps app locale codes to their English fallback for screen reader output.
+// Key:   app locale language code
+// Value: map of platform → fallback locale code, or null if supported.
+//        null means the locale IS supported on that platform — no fallback.
+const _kSemanticFallback = <String, Map<String, String?>>{
+  'ug': {'android': 'en', 'ios': 'en'},
+  'ur': {'android': null, 'ios': 'en'},
+  'fa': {'android': 'en', 'ios': null},
+  'sq': {'android': null, 'ios': 'en'},
+  'bs': {'android': null, 'ios': 'en'},
+  'ku': {'android': null, 'ios': 'en'},
+};
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Resolves the effective locale to use for semantic label TTS output.
+///
+/// If the given [appLocale] is not supported by the screen reader on the
+/// current platform, returns [Locale('en', 'GB')] as the universal fallback.
+///
+///
+/// Otherwise returns [appLocale] unchanged.
+///
+/// [isAndroid] must be passed explicitly so this class is unit-testable
+/// without a real device.
+class SemanticLocaleResolver {
+  const SemanticLocaleResolver._();
+
+  static Locale resolve(Locale appLocale, {required bool isAndroid}) {
+    final platformKey = isAndroid ? 'android' : 'ios';
+    final fallbackCode =
+    _kSemanticFallback[appLocale.languageCode]?[platformKey];
+
+    if (fallbackCode == null) return appLocale;
+    return const Locale('en', 'GB');
+  }
+}
+
+/// Returns the [AppLocalizations] instance for [locale].
+///
+/// Falls back to English if the delegate cannot load the requested locale.
+AppLocalizations _lookupSemanticTr(Locale locale) {
+  try {
+    return lookupAppLocalizations(locale);
+  } catch (_) {
+    return lookupAppLocalizations(const Locale('en', 'GB'));
+  }
+}
+
+AppLocalizations semanticTrForLocale(Locale appLocale,
+    {required bool isAndroid}) {
+  final resolved = SemanticLocaleResolver.resolve(
+    appLocale,
+    isAndroid: isAndroid,
+  );
+  return _lookupSemanticTr(resolved);
+}
+
+/// Returns [AppLocalizations] for the resolved semantic locale synchronously.
+///
+/// For supported locales, returns [context.tr] directly (zero cost).
+/// For unsupported locales, returns English localizations immediately.
+AppLocalizations _resolveSemanticTr(BuildContext context) {
+  final appLocale = Localizations.localeOf(context);
+  final resolved = SemanticLocaleResolver.resolve(
+    appLocale,
+    isAndroid: Platform.isAndroid,
+  );
+
+  if (resolved == appLocale) return context.tr;
+
+  return _lookupSemanticTr(resolved);
+}
+
+extension SemanticLocalizationsX on BuildContext {
+  AppLocalizations get semanticTr => _resolveSemanticTr(this);
+
+  bool get usesSemanticLocaleFallback {
+    final appLocale = Localizations.localeOf(this);
+    return SemanticLocaleResolver.resolve(
+      appLocale,
+      isAndroid: Platform.isAndroid,
+    ) !=
+        appLocale;
+  }
+}
 
 /// Accessibility / Semantics extensions on [Widget].
 extension SemanticsX on Widget {
@@ -54,7 +144,11 @@ extension SemanticsX on Widget {
       label: label,
       hint: hint,
       value: value,
-      // localeForSubtree: effectiveLocale
+      localeForSubtree: localeForSubtree ??
+        SemanticLocaleResolver.resolve(
+        Localizations.localeOf(context!),
+        isAndroid: Platform.isAndroid,
+        ),
       button: button,
       textField: textField,
       selected: selected,

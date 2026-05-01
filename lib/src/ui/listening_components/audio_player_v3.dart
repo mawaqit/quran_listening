@@ -398,10 +398,10 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
     ].where((part) => part.isNotEmpty).join(' - ');
     final playPauseLabel =
         audioPlayer.processingState == ProcessingState.completed
-            ? context.tr.semantic_replay_current_surah
+            ? context.semanticTr.semantic_replay_current_surah
             : audioManager.isPlaying
-            ? context.tr.semantic_pause_current_surah
-            : context.tr.semantic_play_current_surah;
+            ? context.semanticTr.semantic_pause_current_surah
+            : context.semanticTr.semantic_play_current_surah;
 
     return Container(
       key: const Key('audio_player_bottom_sheet'),
@@ -434,7 +434,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           child: _isWatchConnected
                                   ? IconButton(
                                     key: const Key('watch_play_icon'),
-                                    tooltip: '${context.tr.semantic_open_play_on_watch_options_for} $currentSurahName',
+                                    tooltip: '${context.semanticTr.semantic_open_play_on_watch_options_for} $currentSurahName',
                                     icon: Icon(
                                       Platform.isIOS
                                           ? WatchIcons.apple_watch
@@ -521,7 +521,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                               .semantic(
                                 context: context,
                                 header: true,
-                                label: '${context.tr.semantic_now_playing_surah} $currentSurahLabel. ${context.tr.semantic_recited_by} $currentReciterName.',
+                                label: '${context.semanticTr.semantic_now_playing_surah} $currentSurahLabel. ${context.semanticTr.semantic_recited_by} $currentReciterName.',
                               ),
                         ),
                         SizedBox(
@@ -531,7 +531,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                             child: CircularButton(
                               icon: Icons.keyboard_arrow_down,
                               iconColor: context.colorScheme.primaryFixed,
-                              label: context.tr.semantic_minimize_player,
+                              label: context.semanticTr.semantic_minimize_player,
                               size: 32,
                               borderColor: context.colorScheme.primaryFixed,
                               onTap: () {
@@ -586,7 +586,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                 .withOpacity(0.1),
                             semanticFormatterCallback: (value) {
                               final position = Duration(seconds: value.round());
-                              return '${context.tr.semantic_elapsed} ${formatTime(position)} ${context.tr.semantic_of} ${formatTime(total)}';
+                              return '${context.semanticTr.semantic_elapsed} ${formatTime(position)} ${context.semanticTr.semantic_of} ${formatTime(total)}';
                             },
                             onChanged: (value) {
                               setState(() {
@@ -643,7 +643,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                         ).excludeSemantics().semantic(
                           context: context,
                           label:
-                              '${context.tr.semantic_playback_time_elapsed} ${formatTime(effectivePosition)}. ${context.tr.semantic_remaining} ${formatTime(total - effectivePosition)}.',
+                              '${context.semanticTr.semantic_playback_time_elapsed} ${formatTime(effectivePosition)}. ${context.semanticTr.semantic_remaining} ${formatTime(total - effectivePosition)}.',
                         );
                       },
                     ),
@@ -660,8 +660,8 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                         IconButton(
                           splashRadius: iconSplashSize,
                           tooltip: audioPlayer.shuffleModeEnabled
-                                  ? context.tr.semantic_turn_shuffle_off
-                                  : context.tr.semantic_turn_shuffle_on,
+                                  ? context.semanticTr.semantic_turn_shuffle_off
+                                  : context.semanticTr.semantic_turn_shuffle_on,
                           icon: SvgImageAsset(
                             'assets/icons/shuffle.svg',
                             color: context.colorScheme.primaryFixed,
@@ -684,7 +684,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           maintainSize: true,
                           child: IconButton(
                             splashRadius: iconSplashSize,
-                            tooltip: context.tr.semantic_previous_surah,
+                            tooltip: context.semanticTr.semantic_previous_surah,
                             icon: SvgImageAsset(
                               context.isRtl
                                   ? 'assets/icons/ic_next_round.svg'
@@ -731,7 +731,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           maintainSize: true,
                           child: IconButton(
                             splashRadius: iconSplashSize,
-                            tooltip: context.tr.semantic_next_surah,
+                            tooltip: context.semanticTr.semantic_next_surah,
                             icon: SvgImageAsset(
                               context.isRtl
                                   ? 'assets/icons/ic_previous_round.svg'
@@ -752,8 +752,8 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                 audioPlayer.loopMode == LoopMode.one ? 30 : 20,
                           ),
                           tooltip: audioPlayer.loopMode == LoopMode.one
-                                  ? context.tr.semantic_turn_repeat_current_surah_off
-                                  : context.tr.semantic_turn_repeat_current_surah_on,
+                                  ? context.semanticTr.semantic_turn_repeat_current_surah_off
+                                  : context.semanticTr.semantic_turn_repeat_current_surah_on,
                           onPressed: () async {
                             await audioPlayer.setLoopMode(
                               audioPlayer.loopMode == LoopMode.one

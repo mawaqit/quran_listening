@@ -21,7 +21,7 @@ class AllSurahDownloadWidget extends StatelessWidget {
     final textTheme = TextTheme.of(context);
     final progressText = bulkStatus == null
             ? null
-            : '${bulkStatus!.downloadedCount} ${context.tr.semantic_of} ${bulkStatus!.totalSurahs} ${context.tr.semantic_surahs_downloaded}';
+            : '${bulkStatus!.downloadedCount} ${context.semanticTr.semantic_of} ${bulkStatus!.totalSurahs} ${context.semanticTr.semantic_surahs_downloaded}';
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
@@ -46,7 +46,7 @@ class AllSurahDownloadWidget extends StatelessWidget {
                   ),
                 ).semanticAction(
                   context: context,
-                  label: context.tr.semantic_download_all_surahs_for_offline_listening,
+                  label: context.semanticTr.semantic_download_all_surahs_for_offline_listening,
                 ),
               )
               : Container(
@@ -72,7 +72,7 @@ class AllSurahDownloadWidget extends StatelessWidget {
                     ).semantic(
                       context: context,
                       header: true,
-                      label: context.tr.semantic_download_all_surahs,
+                      label: context.semanticTr.semantic_download_all_surahs,
                     ),
                     const SizedBox(height: 4),
                     Row(
@@ -86,7 +86,7 @@ class AllSurahDownloadWidget extends StatelessWidget {
                                 value: bulkStatus!.progress,
                                 color: context.colorScheme.primary,
                                 backgroundColor: context.colorScheme.primaryContainer,
-                                semanticsLabel: context.tr.semantic_bulk_download_progress,
+                                semanticsLabel: context.semanticTr.semantic_bulk_download_progress,
                                 semanticsValue: progressText,
                               ),
                               const SizedBox(height: 6),
@@ -112,7 +112,7 @@ class AllSurahDownloadWidget extends StatelessWidget {
                                 context.colorScheme.primaryContainer,
                           ),
                           child: Text(context.tr.cancel),
-                        ).semanticAction(context: context, label: context.tr.semantic_cancel_download_all_surahs),
+                        ).semanticAction(context: context, label: context.semanticTr.semantic_cancel_download_all_surahs),
                       ],
                     ),
                   ],
@@ -120,7 +120,7 @@ class AllSurahDownloadWidget extends StatelessWidget {
                   context: context,
                   header: true,
                   liveRegion: true,
-                  label: '${context.tr.semantic_bulk_download_in_progress} $progressText',
+                  label: '${context.semanticTr.semantic_bulk_download_in_progress} $progressText',
                 ),
               ),
     );

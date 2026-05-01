@@ -89,7 +89,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
           children: [
             IconButton(
               key: Key('play_button_key_${widget.index}'),
-              tooltip: '${isPlaying ? context.tr.semantic_pause : context.tr.play} $surahLabel',
+              tooltip: '${isPlaying ? context.semanticTr.semantic_pause : context.tr.play} $surahLabel',
               onPressed: () {
                 context.read<AudioPlayerProvider>().disposePlayer();
                 if (!isPlaying) {
