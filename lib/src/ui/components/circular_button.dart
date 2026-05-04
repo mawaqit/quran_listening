@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_quran_listening/mawaqit_quran_listening.dart';
 
 class CircularButton extends StatelessWidget {
   final IconData icon;
@@ -10,6 +11,7 @@ class CircularButton extends StatelessWidget {
   final double? iconSize;
   final Widget? svgIcon;
   final Color? borderColor;
+  final String? label;
 
   const CircularButton({
     super.key,
@@ -21,6 +23,7 @@ class CircularButton extends StatelessWidget {
     this.iconColor = Colors.grey,
     this.svgIcon,
     this.borderColor,
+    this.label,
   });
 
   @override
@@ -38,6 +41,6 @@ class CircularButton extends StatelessWidget {
         ),
         child: svgIcon ?? Icon(icon, color: iconColor, size: iconSize),
       ),
-    );
+    ).semanticAction(context: context, label: label ?? "",);
   }
 }

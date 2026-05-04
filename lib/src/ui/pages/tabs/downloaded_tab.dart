@@ -232,7 +232,7 @@ class _DownloadedTabState extends State<DownloadedTab> {
                       );
                     },
                     child: Text(context.tr.delete_all),
-                  ),
+                  ).semanticAction(context: context, label: context.tr.delete_all_downloads,),
                 ],
               ),
               ListView.builder(

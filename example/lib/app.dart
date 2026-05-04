@@ -67,6 +67,7 @@ class QuranListeningExampleApp extends StatelessWidget {
                   Locale('ar', ''),
                   Locale('fr', ''),
                 ],
+                // showSemanticsDebugger: true,
                 localizationsDelegates: const [
                   AppLocalizations.delegate,
                   FallbackMaterialLocalizationsDelegate(),

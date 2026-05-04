@@ -55,9 +55,11 @@ class _LikedTabState extends State<LikedTab> {
                   if (favoriteReciter.favoriteReciterUuids.contains(
                     recitorsProvider.recitersForFavorite[index].id.toString(),
                   )) {
-                    return GestureDetector(
+                    return RecitorListTile(
                       key: Key('favorite_tile_key_$index'),
-                      behavior: HitTestBehavior.opaque,
+                      recitor: recitorsProvider.recitersForFavorite[index],
+                      listeningTab: ListeningTab.downloaded,
+                      index: index,
                       onTap: () {
                         context.closeKeyboard();
                         FocusManager.instance.primaryFocus?.unfocus();
@@ -77,11 +79,6 @@ class _LikedTabState extends State<LikedTab> {
                           );
                         }
                       },
-                      child: RecitorListTile(
-                        recitor: recitorsProvider.recitersForFavorite[index],
-                        listeningTab: ListeningTab.downloaded,
-                        index: index,
-                      ),
                     );
                   } else {
                     return const SizedBox.shrink();

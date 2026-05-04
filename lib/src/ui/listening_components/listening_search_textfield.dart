@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_quran_listening/src/extensions/semantics_extension.dart';
 import '../../extensions/theme_extension.dart';
 import '../components/svg_image_asset.dart';
 
@@ -68,6 +69,6 @@ class ListeningSearchTextField extends StatelessWidget {
           borderSide: BorderSide.none,
         ),
       ),
-    );
+    ).excludeSemantics().semantic(textField: true,context: context,label: hint);
   }
 }

@@ -65,47 +65,44 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
         }
 
         return Expanded(
-              child: ListView.builder(
-                key: const Key('recitors_tab_listview'),
-                itemCount: provider.reciters.length,
-                padding: widget.listPadding,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    key: Key('recitor_tile_key_$index'),
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      context.closeKeyboard();
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      
-                      final selectedReciter = provider.reciters[index];
-                      
-                      // Set reciters list in audio provider
-                      audioPlayerProvider.reciters = provider.originalReciters;
-                      
-                      // Change reciter (this sets currentReciterId)
-                      audioPlayerProvider.changeReciter(selectedReciter);
-                      
-                      // Set reciter in player screens controller
-                      context.read<PlayerScreensController>().setRecitor(
-                        selectedReciter,
-                      );
-                      
-                      // Navigate to page 1 (Surah page)
-                      if (!context.isFoldable){
-                        context.read<NavigationControllerV3>().navigateToPage(
-                          pageIndex: 1,
-                        );
-                      }
-                    },
-                    child: RecitorListTile(
-                      recitor: provider.reciters[index],
-                      listeningTab: ListeningTab.allRecitator,
-                      index: index,
-                    ),
+          child: ListView.builder(
+            key: const Key('recitors_tab_listview'),
+            itemCount: provider.reciters.length,
+            padding: widget.listPadding,
+            itemBuilder: (context, index) {
+              return RecitorListTile(
+                key: Key('recitor_tile_key_$index'),
+                recitor: provider.reciters[index],
+                listeningTab: ListeningTab.allRecitator,
+                index: index,
+                onTap: () {
+                  context.closeKeyboard();
+                  FocusManager.instance.primaryFocus?.unfocus();
+
+                  final selectedReciter = provider.reciters[index];
+
+                  // Set reciters list in audio provider
+                  audioPlayerProvider.reciters = provider.originalReciters;
+
+                  // Change reciter (this sets currentReciterId)
+                  audioPlayerProvider.changeReciter(selectedReciter);
+
+                  // Set reciter in player screens controller
+                  context.read<PlayerScreensController>().setRecitor(
+                    selectedReciter,
                   );
+
+                  // Navigate to page 1 (Surah page)
+                  if (!context.isFoldable) {
+                    context.read<NavigationControllerV3>().navigateToPage(
+                      pageIndex: 1,
+                    );
+                  }
                 },
-              ),
-            );
+              );
+            },
+          ),
+        );
       },
     );
   }
