@@ -58,6 +58,7 @@ export 'src/ui/components/error_widget.dart';
 export 'src/ui/components/mawaqit_dialog.dart';
 export 'src/ui/components/svg_image_asset.dart';
 export 'src/ui/components/watch_playback_confirmation_bottom_sheet.dart';
+export 'src/ui/components/speed_chip.dart';
 
 // Utils
 export 'src/utils/listening_utils/fake_recitors_list.dart';
