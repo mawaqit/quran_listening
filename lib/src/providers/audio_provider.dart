@@ -333,6 +333,7 @@ class AudioPlayerProvider extends ChangeNotifier {
 
     // just stop current audio, keep player and streams
     _audioPlayer.stop();
+    _audioPlayer.setSpeed(1.0);
 
     if (notify) notifyListeners();
   }
