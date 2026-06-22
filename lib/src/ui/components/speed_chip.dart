@@ -25,10 +25,11 @@ class SpeedChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
+        width: 42,
+        alignment:Alignment.center,
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         decoration: BoxDecoration(
-          color: context.colorScheme.primaryFixed.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: context.colorScheme.primaryFixed,
