@@ -429,10 +429,13 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          width: _headerActionWidth,
-                          child: _isWatchConnected
-                                  ? IconButton(
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_isWatchConnected)
+                              SizedBox(
+                                width: _headerActionWidth,
+                                child: IconButton(
                                     key: const Key('watch_play_icon'),
                                     tooltip: '${context.semanticTr.semantic_open_play_on_watch_options_for} $currentSurahName',
                                     icon: Icon(
@@ -492,8 +495,14 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                             ),
                                       );
                                     },
-                                  )
-                                  : const SizedBox.shrink(),
+                                  ),
+                              ),
+                            SpeedChip(
+                              key: const Key('playback_speed_chip'),
+                              speed: audioManager.playbackSpeed,
+                              onTap: () => audioManager.cyclePlaybackSpeed(),
+                            ),
+                          ],
                         ),
                         Expanded(
                           child: Column(

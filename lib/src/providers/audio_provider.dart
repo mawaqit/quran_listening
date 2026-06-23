@@ -50,6 +50,9 @@ class AudioPlayerProvider extends ChangeNotifier {
   bool _isLooping = false;
   double _playbackSpeed = 1.0;
 
+  /// Supported speed steps for the UI.
+  static const List<double> speedSteps = [0.5, 0.75, 1.0, 1.25, 1.5];
+
   // to avoid spam from position
   Duration _lastNotifiedPosition = Duration.zero;
 
@@ -109,6 +112,13 @@ class AudioPlayerProvider extends ChangeNotifier {
     _playbackSpeed = value;
     _audioPlayer.setSpeed(value);
     notifyListeners();
+  }
+
+  /// Cycles to the next speed step, wrapping back to the first.
+  void cyclePlaybackSpeed() {
+    final currentIndex = speedSteps.indexOf(_playbackSpeed);
+    final nextIndex = (currentIndex + 1) % speedSteps.length;
+    playbackSpeed = speedSteps[nextIndex];
   }
 
   changeReciter(Reciter newReciter) {
@@ -314,6 +324,7 @@ class AudioPlayerProvider extends ChangeNotifier {
 
     _isPlaying = false;
     _isLooping = false;
+    _playbackSpeed = 1.0;
     _isShuffled = false;
 
     // Clear playingRecitor to ensure next check doesn't use stale value
@@ -322,6 +333,7 @@ class AudioPlayerProvider extends ChangeNotifier {
 
     // just stop current audio, keep player and streams
     _audioPlayer.stop();
+    _audioPlayer.setSpeed(1.0);
 
     if (notify) notifyListeners();
   }
