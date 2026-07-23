@@ -18,6 +18,10 @@ enum PlayerType {
 
 class AudioPlayerProvider extends ChangeNotifier {
 
+  /// Lets the host app release its own player before this one takes the
+  /// single audio session `just_audio_background` allows.
+  static Future<void> Function()? onClaimAudioSession;
+
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   // stream subs
@@ -185,6 +189,7 @@ class AudioPlayerProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      await onClaimAudioSession?.call();
       await _waitForSafeState();
       await _audioPlayer.setAudioSources([]);
       await Future.delayed(const Duration(milliseconds: 50));
@@ -201,6 +206,7 @@ class AudioPlayerProvider extends ChangeNotifier {
   }
 
   Future<void> setAudioSource(String url) async {
+    await onClaimAudioSession?.call();
     await _audioPlayer.setAudioSource(
       AudioSource.uri(Uri.parse(url)),
       initialPosition: Duration.zero,
@@ -319,7 +325,7 @@ class AudioPlayerProvider extends ChangeNotifier {
   }
 
   // 🔹 SOFT dispose: what your UI calls when switching surahs
-  void disposePlayer({bool notify = true}) {
+  Future<void> disposePlayer({bool notify = true}) async {
     showHideFloatingPlayer(false, notify: false);
 
     _isPlaying = false;
@@ -331,11 +337,11 @@ class AudioPlayerProvider extends ChangeNotifier {
     // This is especially important when switching between reciters
     playingRecitor = null;
 
-    // just stop current audio, keep player and streams
-    _audioPlayer.stop();
-    _audioPlayer.setSpeed(1.0);
-
     if (notify) notifyListeners();
+
+    // just stop current audio, keep player and streams
+    await _audioPlayer.stop();
+    await _audioPlayer.setSpeed(1.0);
   }
 
   // 🔹 HARD dispose: called only when provider itself is destroyed
