@@ -86,7 +86,7 @@ class ReciterHiveManager extends ChangeNotifier {
         recitationsBox.put(DownloadedRecitationPath, json.encode(hiveData));
         notifyListeners();
         Fluttertoast.showToast(
-          msg: context.tr.downloaded_deleted_successfully,
+          msg: context.tr.recitation_deleted_successfully,
           toastLength: Toast.LENGTH_SHORT,
         );
         return true;

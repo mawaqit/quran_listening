@@ -23,7 +23,7 @@ class Reciter {
     return Reciter(
       id: json['id'],
       mainReciterId: json['main_reciter_id'],
-      reciterName: json['name'],
+      reciterName: _normalizeName(json['name']),
       mushaf: json['moshaf'].map<Mushaf>((e) => Mushaf.fromMap(e)).toList(),
       serverUrl:
           json['id'] == 107
@@ -36,6 +36,20 @@ class Reciter {
               ? json['surahs_list']
               : List<String>.from(json['surahs_list'] ?? []),
     );
+  }
+
+
+  static String _normalizeName(String name) {
+    if (!name.contains('،') && !name.contains(',')) return name;
+
+    const noise = {'قرآن', 'کریم', 'كريم', 'آڈیو', 'لائبریری', 'MP3', 'mp3'};
+    final cleanParts = name
+        .split(RegExp('[،,]'))
+        .map((part) => part.trim())
+        .where((part) => part.isNotEmpty && !noise.contains(part))
+        .toList();
+
+    return cleanParts.isEmpty ? name : cleanParts.join(' ');
   }
 
   Map<String, dynamic> toMap() {
