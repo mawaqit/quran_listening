@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:path_provider/path_provider.dart';
 
 const String DownloadedRecitationPath = 'downloaded_recitations';
@@ -85,7 +86,7 @@ class ReciterHiveManager extends ChangeNotifier {
         recitationsBox.put(DownloadedRecitationPath, json.encode(hiveData));
         notifyListeners();
         Fluttertoast.showToast(
-          msg: 'Recitation deleted successfully',
+          msg: context.tr.downloaded_deleted_successfully,
           toastLength: Toast.LENGTH_SHORT,
         );
         return true;
