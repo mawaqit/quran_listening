@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:mawaqit_quran_listening/generated/assets.dart';
 import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:sizer/sizer.dart';
@@ -63,30 +65,44 @@ class _RecitorListTileState extends State<RecitorListTile> {
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
               onTap: widget.onTap,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    widget.recitor.reciterName.trim(),
-                    maxLines: 2,
-                    style: TextStyle(
-                      fontSize: (context.isFoldable ? 8 : 13).sp,
-                      color: isSelected ? context.colorScheme.onPrimaryContainer : context.colorScheme.onPrimaryContainer.withOpacity(.9),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 12),
+                    child: _ReciterAvatar(
+                      mainReciterId: widget.recitor.mainReciterId,
+                      size: context.isFoldable ? 48 : 40,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  DefaultTextStyle(
-                    style: TextStyle(
-                      color: context.colorScheme.secondary.withOpacity(.70),
-                      fontSize: (context.isFoldable ? 6 : 9).sp,
-                      fontFamily: context.getFontFamily(),
-                    ),
-                    child: Row(
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Flexible(
-                          child: Text(widget.recitor.style ?? '',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
+                        Text(
+                          widget.recitor.reciterName.trim(),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: (context.isFoldable ? 8 : 13).sp,
+                            color: isSelected ? context.colorScheme.onPrimaryContainer : context.colorScheme.onPrimaryContainer.withOpacity(.9),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        DefaultTextStyle(
+                          style: TextStyle(
+                            color: context.colorScheme.secondary.withOpacity(.70),
+                            fontSize: (context.isFoldable ? 6 : 9).sp,
+                            fontFamily: context.getFontFamily(),
+                          ),
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(widget.recitor.style ?? '',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -137,5 +153,39 @@ class _RecitorListTileState extends State<RecitorListTile> {
         ],
       ),
     );
+  }
+}
+
+class _ReciterAvatar extends StatelessWidget {
+  const _ReciterAvatar({required this.mainReciterId, required this.size});
+
+  final int? mainReciterId;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final fallback = Image.asset(
+      Assets.recitersDefaultAvatar,
+      package: 'mawaqit_quran_listening',
+      fit: BoxFit.cover,
+    );
+    // Decode at display size rather than the CDN photo's full resolution.
+    final cacheSize = (size * MediaQuery.devicePixelRatioOf(context)).round();
+
+    return ClipOval(
+      child: SizedBox.square(
+        dimension: size,
+        child: mainReciterId == null
+            ? fallback
+            : CachedNetworkImage(
+                imageUrl: reciterPictureUrl(mainReciterId!),
+                memCacheWidth: cacheSize,
+                memCacheHeight: cacheSize,
+                fit: BoxFit.cover,
+                placeholder: (_, __) => fallback,
+                errorWidget: (_, __, ___) => fallback,
+              ),
+      ),
+    ).excludeSemantics();
   }
 }
