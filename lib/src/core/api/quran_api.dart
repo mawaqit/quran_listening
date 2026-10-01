@@ -28,6 +28,9 @@ extension on Map<dynamic, dynamic> {
 
 const kBaseUrlV4 = 'https://api.quran.com/api/v4/';
 
+String reciterPictureUrl(int mainReciterId) =>
+    'https://cdn.mawaqit.net/quran/reciters-pictures/$mainReciterId.jpg';
+
 class QuranApi {
   static final ReciterHiveManager _hiveManager = ReciterHiveManager();
   static final options = CacheOptions(
