@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../extensions/device_extensions.dart';
 import '../../extensions/semantics_extension.dart';
 import '../../extensions/theme_extension.dart';
-import '../../l10n/missing_surahs_strings.dart';
 import '../../models/reciter.dart';
 import '../../models/surah_model.dart';
 import '../../providers/favorite_reciter.dart';
@@ -34,10 +34,13 @@ class MissingSurahsBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = context.availableSurahsCount(
-      reciter.availableSurahCount,
-      kTotalQuranSurahs,
-    );
+    // Label + numbers kept separate: no placeholders in our i18n pipeline.
+    final count = reciter.availableSurahCount;
+    final label =
+        '${context.tr.surahs_in_this_recitation}: $count/$kTotalQuranSurahs';
+    final semanticLabel =
+        '${context.semanticTr.surahs_in_this_recitation}: $count '
+        '${context.semanticTr.semantic_of} $kTotalQuranSurahs';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -74,11 +77,12 @@ class MissingSurahsBanner extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          context.missingSurahsSuggestion,
+                          context.tr.missing_surahs_suggestion,
                           style: TextStyle(
                             fontSize: (context.isFoldable ? 6 : 9).sp,
-                            color: context.colorScheme.secondary
-                                .withValues(alpha: .7),
+                            color: context.colorScheme.secondary.withValues(
+                              alpha: .7,
+                            ),
                           ),
                         ),
                       ],
@@ -96,7 +100,8 @@ class MissingSurahsBanner extends StatelessWidget {
         ),
       ).semanticAction(
         context: context,
-        label: '$label. ${context.missingSurahsSuggestion}',
+        label:
+            '$semanticLabel. ${context.semanticTr.missing_surahs_suggestion}',
       ),
     );
   }
@@ -195,7 +200,7 @@ class _MissingSurahsSheetState extends State<_MissingSurahsSheet> {
               _SheetHeader(
                 title:
                     surah == null
-                        ? context.missingSurahsTitle
+                        ? context.tr.missing_surahs
                         : _surahLabel(surah),
                 onBack:
                     _canGoBack
@@ -262,7 +267,7 @@ class _MissingSurahsSheetState extends State<_MissingSurahsSheet> {
           ).semanticAction(
             context: context,
             label: label,
-            hint: context.findAnotherReciter,
+            hint: context.semanticTr.find_another_reciter,
           ),
         );
       },

@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import '../../../mawaqit_quran_listening.dart';
 import '../../extensions/device_extensions.dart';
-import '../../l10n/missing_surahs_strings.dart';
 import '../../utils/listening_utils/surah_availability.dart';
 import '../listening_components/listening_search_textfield.dart';
 import '../listening_components/missing_surahs_sheet.dart';
@@ -186,7 +185,7 @@ class _SurahPageState extends State<SurahPage> {
               const SizedBox(height: 6),
             ],
             Text(
-              context.notAvailableFromReciter,
+              context.tr.not_available_from_reciter,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -209,7 +208,7 @@ class _SurahPageState extends State<SurahPage> {
                 backgroundColor: context.colorScheme.primaryContainer,
                 foregroundColor: context.colorScheme.onPrimaryContainer,
               ),
-              child: Text(context.findAnotherReciter),
+              child: Text(context.tr.find_another_reciter),
             ),
           ],
         ),
