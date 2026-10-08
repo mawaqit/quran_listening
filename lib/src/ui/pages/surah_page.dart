@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 
 import '../../../mawaqit_quran_listening.dart';
 import '../../extensions/device_extensions.dart';
+import '../../utils/listening_utils/surah_availability.dart';
 import '../listening_components/listening_search_textfield.dart';
+import '../listening_components/missing_surahs_sheet.dart';
 import '../listening_components/surah_list_tile_v3.dart';
 
 class SurahPage extends StatefulWidget {
@@ -136,6 +138,84 @@ class _SurahPageState extends State<SurahPage> {
         .replaceAll('\u0640', '');
   }
 
+  void _showMissingSurahs(
+    Reciter reciter,
+    List<SurahModel> missingSurahs, {
+    SurahModel? initialSurah,
+  }) {
+    FocusScope.of(context).unfocus();
+    showMissingSurahsSheet(
+      context,
+      reciter: reciter,
+      missingSurahs: missingSurahs,
+      initialSurah: initialSurah,
+      onReciterSelected: (otherReciter, surah) {
+        if (!mounted) return;
+        openSurahPlayer(
+          context,
+          reciter: otherReciter,
+          chapter: surah,
+          chapters: context.read<RecitationsManager>().surahs,
+        );
+      },
+    );
+  }
+
+  Widget _buildMissingSearchResult(
+    Reciter reciter,
+    List<SurahModel> missingSurahs,
+    List<SurahModel> matches,
+  ) {
+    final single = matches.length == 1 ? matches.first : null;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (single != null) ...[
+              Text(
+                '${single.id} - ${single.name}'.trim(),
+                textAlign: TextAlign.center,
+                style: TextTheme.of(context).titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: context.colorScheme.onPrimaryContainer,
+                ),
+              ),
+              const SizedBox(height: 6),
+            ],
+            Text(
+              context.tr.not_available_from_reciter,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              key: const Key('find_another_reciter_button'),
+              onPressed:
+                  () => _showMissingSurahs(
+                    reciter,
+                    single == null ? matches : missingSurahs,
+                    initialSurah: single,
+                  ),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 20,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                backgroundColor: context.colorScheme.primaryContainer,
+                foregroundColor: context.colorScheme.onPrimaryContainer,
+              ),
+              child: Text(context.tr.find_another_reciter),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     audioPlayerProvider.removeListener(_onReciterChanged);
@@ -161,6 +241,18 @@ class _SurahPageState extends State<SurahPage> {
         }).toList();
     final List<SurahModel> surahs =
         reciterSurahs.where(_matchesSearch).toList();
+    final List<SurahModel> missingSurahs =
+        currentReciter != null && currentReciter.hasMissingSurahs
+            ? recitationsManager.surahs
+                .where((chapter) => !currentReciter.hasSurah(chapter.id))
+                .toList()
+            : const [];
+    final List<SurahModel> missingMatches =
+        _searchQuery.isEmpty || surahs.isNotEmpty
+            ? const []
+            : missingSurahs.where(_matchesSearch).toList();
+    final bool showMissingBanner =
+        missingSurahs.isNotEmpty && _searchQuery.isEmpty;
     final List<SurahModel> downloadableSurahs =
         currentReciter == null
             ? const []
@@ -253,6 +345,12 @@ class _SurahPageState extends State<SurahPage> {
                             retry: true,
                           ),
                     )
+                    : missingMatches.isNotEmpty
+                    ? _buildMissingSearchResult(
+                      currentReciter!,
+                      missingSurahs,
+                      missingMatches,
+                    )
                     : surahs.isEmpty
                     ? Center(
                       child: Text(
@@ -263,8 +361,20 @@ class _SurahPageState extends State<SurahPage> {
                     : ListView.builder(
                       key: const Key('surah_page_listview'),
                       padding: widget.listPadding,
-                      itemCount: surahs.length,
-                      itemBuilder: (context, index) {
+                      itemCount: surahs.length + (showMissingBanner ? 1 : 0),
+                      itemBuilder: (context, position) {
+                        if (showMissingBanner && position == 0) {
+                          return MissingSurahsBanner(
+                            reciter: currentReciter!,
+                            onTap:
+                                () => _showMissingSurahs(
+                                  currentReciter,
+                                  missingSurahs,
+                                ),
+                          );
+                        }
+                        final index =
+                            showMissingBanner ? position - 1 : position;
                         return SurahListTileV3(
                           chapter: surahs[index],
                           chapters: context.read<RecitationsManager>().surahs,
