@@ -27,6 +27,7 @@ class ListeningSearchTextField extends StatelessWidget {
       controller: controller,
       onChanged: onChanged,
       onFieldSubmitted: onSubmittedPressed,
+      contextMenuBuilder: _selectionToolbar,
       decoration: InputDecoration(
         fillColor: context.colorScheme.surfaceContainer,
         filled: true,
@@ -70,5 +71,24 @@ class ListeningSearchTextField extends StatelessWidget {
         ),
       ),
     ).excludeSemantics().semantic(textField: true,context: context,label: hint);
+  }
+
+  /// Material's toolbar paints with `colorScheme.surface` / `onSurface`, which
+  /// the host theme doesn't pair for contrast (white on near-white in light,
+  /// purple on near-black in dark).
+  Widget _selectionToolbar(BuildContext context, EditableTextState state) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: scheme.copyWith(
+          // Reads as a raised sheet in both themes.
+          surface: scheme.surfaceContainerHighest,
+          // Near-black in light, near-white in dark.
+          onSurface: scheme.secondary,
+        ),
+      ),
+      child: AdaptiveTextSelectionToolbar.editableText(editableTextState: state),
+    );
   }
 }
