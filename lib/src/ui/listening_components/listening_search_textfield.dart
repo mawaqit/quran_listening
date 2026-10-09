@@ -31,10 +31,11 @@ class ListeningSearchTextField extends StatelessWidget {
         fillColor: context.colorScheme.surfaceContainer,
         filled: true,
         hintText: hint,
-        hintStyle: TextStyle(
+        // Derive from the app's locale-aware text theme (same as the input text)
+        // so the hint matches the rest of the UI in font and size.
+        hintStyle: context.textTheme.bodyLarge?.copyWith(
           fontWeight: FontWeight.w400,
           color: Theme.of(context).disabledColor,
-          fontFamily: context.getFontFamily(),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
         prefixIcon: Padding(
