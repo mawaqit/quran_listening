@@ -22,8 +22,9 @@ extension QuranThemeDataX on BuildContext {
     return Directionality.of(this) == TextDirection.rtl;
   }
 
-  /// Get appropriate font family based on language
-  String get fontFamily => isArabicLanguage ? 'Tajawal' : 'Figtree';
+  /// Get appropriate font family based on language.
+  /// Mirrors the main app's text theme: Cairo for Arabic and Urdu, Figtree otherwise.
+  String get fontFamily => ['ar', 'ur'].contains(Localizations.localeOf(this).languageCode) ? 'Cairo' : 'Figtree';
 
   /// Get font family (same as getFontFamily in main app)
   String getFontFamily() => fontFamily;
