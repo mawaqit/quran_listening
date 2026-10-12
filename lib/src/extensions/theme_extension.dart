@@ -23,8 +23,8 @@ extension QuranThemeDataX on BuildContext {
   }
 
   /// Get appropriate font family based on language.
-  /// Mirrors the main app's text theme: Cairo for Arabic and Urdu, Figtree otherwise.
-  String get fontFamily => ['ar', 'ur'].contains(Localizations.localeOf(this).languageCode) ? 'Cairo' : 'Figtree';
+  /// Follows the main app's locale-aware text theme (Cairo for Arabic, Nastaliq for Urdu, Figtree otherwise).
+  String get fontFamily => textTheme.bodyLarge?.fontFamily ?? 'Figtree';
 
   /// Get font family (same as getFontFamily in main app)
   String getFontFamily() => fontFamily;
