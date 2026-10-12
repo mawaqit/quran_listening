@@ -161,6 +161,20 @@ class _SurahPageState extends State<SurahPage> {
     );
   }
 
+  /// One match opens straight on its reciters; several list just those.
+  void _findAnotherReciter(
+    Reciter reciter,
+    List<SurahModel> missingSurahs,
+    List<SurahModel> matches,
+  ) {
+    final single = matches.length == 1 ? matches.first : null;
+    _showMissingSurahs(
+      reciter,
+      single == null ? matches : missingSurahs,
+      initialSurah: single,
+    );
+  }
+
   Widget _buildMissingSearchResult(
     Reciter reciter,
     List<SurahModel> missingSurahs,
@@ -192,11 +206,7 @@ class _SurahPageState extends State<SurahPage> {
             FilledButton(
               key: const Key('find_another_reciter_button'),
               onPressed:
-                  () => _showMissingSurahs(
-                    reciter,
-                    single == null ? matches : missingSurahs,
-                    initialSurah: single,
-                  ),
+                  () => _findAnotherReciter(reciter, missingSurahs, matches),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   vertical: 14,
@@ -248,11 +258,15 @@ class _SurahPageState extends State<SurahPage> {
                 .toList()
             : const [];
     final List<SurahModel> missingMatches =
-        _searchQuery.isEmpty || surahs.isNotEmpty
+        _searchQuery.isEmpty
             ? const []
             : missingSurahs.where(_matchesSearch).toList();
     final bool showMissingBanner =
         missingSurahs.isNotEmpty && _searchQuery.isEmpty;
+    // Search hit both kinds: results first, then one row for the missing ones.
+    final bool showMissingSearchRow =
+        surahs.isNotEmpty && missingMatches.isNotEmpty;
+    final int leadingRows = showMissingBanner ? 1 : 0;
     final List<SurahModel> downloadableSurahs =
         currentReciter == null
             ? const []
@@ -345,7 +359,7 @@ class _SurahPageState extends State<SurahPage> {
                             retry: true,
                           ),
                     )
-                    : missingMatches.isNotEmpty
+                    : surahs.isEmpty && missingMatches.isNotEmpty
                     ? _buildMissingSearchResult(
                       currentReciter!,
                       missingSurahs,
@@ -361,7 +375,10 @@ class _SurahPageState extends State<SurahPage> {
                     : ListView.builder(
                       key: const Key('surah_page_listview'),
                       padding: widget.listPadding,
-                      itemCount: surahs.length + (showMissingBanner ? 1 : 0),
+                      itemCount:
+                          leadingRows +
+                          surahs.length +
+                          (showMissingSearchRow ? 1 : 0),
                       itemBuilder: (context, position) {
                         if (showMissingBanner && position == 0) {
                           return MissingSurahsBanner(
@@ -373,8 +390,19 @@ class _SurahPageState extends State<SurahPage> {
                                 ),
                           );
                         }
-                        final index =
-                            showMissingBanner ? position - 1 : position;
+                        final index = position - leadingRows;
+                        if (index == surahs.length) {
+                          return MissingSurahsBanner(
+                            reciter: currentReciter!,
+                            searchMatchCount: missingMatches.length,
+                            onTap:
+                                () => _findAnotherReciter(
+                                  currentReciter,
+                                  missingSurahs,
+                                  missingMatches,
+                                ),
+                          );
+                        }
                         return SurahListTileV3(
                           chapter: surahs[index],
                           chapters: context.read<RecitationsManager>().surahs,

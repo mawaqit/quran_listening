@@ -21,34 +21,47 @@ IconData _forwardArrow(BuildContext context) =>
         ? ReciterIconV3.arrow_left
         : ReciterIconV3.arrow_right;
 
-/// One-line hint shown above the surah list when a reciter is incomplete.
+/// Info row for an incomplete reciter. Above the list it shows the
+/// reciter's coverage; with [searchMatchCount] it sits below search results
+/// and counts the matching surahs this reciter doesn't have.
 class MissingSurahsBanner extends StatelessWidget {
   const MissingSurahsBanner({
     super.key,
     required this.reciter,
     required this.onTap,
+    this.searchMatchCount,
   });
 
   final Reciter reciter;
   final VoidCallback onTap;
+  final int? searchMatchCount;
 
   @override
   Widget build(BuildContext context) {
     // Label + numbers kept separate: no placeholders in our i18n pipeline.
+    final matches = searchMatchCount;
     final count = reciter.availableSurahCount;
     final label =
-        '${context.tr.surahs_in_this_recitation}: $count/$kTotalQuranSurahs';
+        matches != null
+            ? '${context.tr.missing_surahs}: $matches'
+            : '${context.tr.surahs_in_this_recitation}: $count/$kTotalQuranSurahs';
     final semanticLabel =
-        '${context.semanticTr.surahs_in_this_recitation}: $count '
-        '${context.semanticTr.semantic_of} $kTotalQuranSurahs';
+        matches != null
+            ? '${context.semanticTr.missing_surahs}: $matches'
+            : '${context.semanticTr.surahs_in_this_recitation}: $count '
+                '${context.semanticTr.semantic_of} $kTotalQuranSurahs';
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(top: matches != null ? 4 : 0, bottom: 10),
       child: Material(
         color: context.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          key: const Key('missing_surahs_banner'),
+          key: Key(
+            matches != null
+                ? 'missing_surahs_search_row'
+                : 'missing_surahs_banner',
+          ),
           borderRadius: BorderRadius.circular(12),
           onTap: onTap,
           child: ConstrainedBox(
