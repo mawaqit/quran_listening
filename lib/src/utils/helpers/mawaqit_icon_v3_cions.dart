@@ -10,4 +10,6 @@ class ReciterIconV3 {
   static const IconData download = IconData(0xe80c, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData downloaded = IconData(0xe82d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData close = IconData(0xe80d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData arrow_left = IconData(0xe831, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData arrow_right = IconData(0xe836, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }

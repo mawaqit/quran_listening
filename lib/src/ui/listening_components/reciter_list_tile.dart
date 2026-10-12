@@ -9,12 +9,14 @@ import 'package:provider/provider.dart';
 
 
 class RecitorListTile extends StatefulWidget {
-  const RecitorListTile({super.key, required this.recitor, required this.listeningTab, required this.index, this.onTap,});
+  const RecitorListTile({super.key, required this.recitor, required this.listeningTab, required this.index, this.onTap, this.showTrailingAction = true,});
 
   final Reciter recitor;
   final ListeningTab listeningTab;
   final int index;
   final VoidCallback? onTap;
+  /// Hides the favorite/remove button, e.g. when the tile is used as a picker.
+  final bool showTrailingAction;
 
   @override
   State<RecitorListTile> createState() => _RecitorListTileState();
@@ -58,7 +60,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
         color: isSelected ? context.colorScheme.primaryContainer : context.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
       ),
-      padding: EdgeInsetsDirectional.only(start: 19, top: 15, bottom: 15),
+      padding: EdgeInsetsDirectional.only(start: 19, top: 15, bottom: 15, end: widget.showTrailingAction ? 0 : 12),
       child: Row(
         children: [
           Expanded(
@@ -112,8 +114,9 @@ class _RecitorListTileState extends State<RecitorListTile> {
               ),
             ),
           ),
-          (widget.listeningTab == ListeningTab.allRecitator)
-              ? Padding(
+          if (widget.showTrailingAction &&
+              widget.listeningTab == ListeningTab.allRecitator)
+              Padding(
                 key: Key('add_favorite_key_${widget.index}'),
                 padding: EdgeInsetsDirectional.only(start: 7.0, end: 3),
                 child: IconButton(
@@ -134,7 +137,8 @@ class _RecitorListTileState extends State<RecitorListTile> {
                       ).excludeSemantics(),
                 ),
               )
-              : Padding(
+          else if (widget.showTrailingAction)
+              Padding(
                 padding: EdgeInsetsDirectional.only(start: 7.0, end: 3),
                 child: IconButton(
                   constraints: const BoxConstraints(),

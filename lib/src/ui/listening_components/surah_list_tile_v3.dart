@@ -12,6 +12,7 @@ import '../../models/surah_model.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/download_controller.dart';
 import '../../providers/player_screens_controller.dart';
+import '../../utils/listening_utils/surah_availability.dart';
 
 class SurahListTileV3 extends StatefulWidget {
   final SurahModel chapter;
@@ -66,7 +67,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
 
     bool isPlaying =
         audioManager.isPlaying &&
-        (widget.index == audioManager.playingChapterIndex) &&
+        widget.chapter.id == audioManager.playingChapterId &&
         widget.reciter.id == audioManager.playingRecitor?.id;
     final String surahLabel = '${widget.chapter.id} - ${widget.chapter.name}'.trim();
     final String downloadTooltip = isDownloaded
@@ -226,25 +227,41 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
   }
 
   void onSurahPressed() {
-    context.closeKeyboard();
-    // bool connected = await WearConnector.isWatchConnected();
-    FocusManager.instance.primaryFocus?.unfocus();
-    context.read<AudioPlayerProvider>().disposePlayer();
-    context.read<AudioPlayerProvider>().setPlayingRecitor(widget.reciter);
-
-    // For Liked/All Recitators tabs: pass ALL 114 surahs from selected reciter
-    List<SurahModel> selectedChapters = [...widget.chapters];
-    List<Reciter> selectedReciters = [
-      ...[widget.reciter],
-    ];
-
-    context.read<PlayerScreensController>().navigateToPlayerScreenV3(
+    openSurahPlayer(
       context,
-      selectedReciters,
-      widget.chapter,
-      selectedChapters,
-      widget.playerType,
+      reciter: widget.reciter,
+      chapter: widget.chapter,
+      chapters: widget.chapters,
+      playerType: widget.playerType,
     );
-    FocusScope.of(context).unfocus();
   }
+}
+
+/// Opens the player for [chapter] by [reciter]. The queue only holds surahs
+/// the reciter provides, so next/auto-advance never lands on a missing file.
+void openSurahPlayer(
+  BuildContext context, {
+  required Reciter reciter,
+  required SurahModel chapter,
+  required List<SurahModel> chapters,
+  PlayerType playerType = PlayerType.reciterUnLikedSurahs,
+}) {
+  context.closeKeyboard();
+  FocusManager.instance.primaryFocus?.unfocus();
+  context.read<AudioPlayerProvider>().disposePlayer();
+  context.read<AudioPlayerProvider>().setPlayingRecitor(reciter);
+
+  final List<SurahModel> playableChapters =
+      reciter.availableSurahCount == 0
+          ? [...chapters]
+          : chapters.where((c) => reciter.hasSurah(c.id)).toList();
+
+  context.read<PlayerScreensController>().navigateToPlayerScreenV3(
+    context,
+    [reciter],
+    chapter,
+    playableChapters,
+    playerType,
+  );
+  FocusScope.of(context).unfocus();
 }

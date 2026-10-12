@@ -446,7 +446,12 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                     ),
                                     onPressed: () async {
                                       // Build current audio URL like elsewhere
-                                      final serverUrl = audioManager.reciter?.serverUrl ?? '';
+                                      // Prefer the playing reciter: it can differ from the
+                                      // page's reciter (e.g. a surah played from another reciter).
+                                      final serverUrl =
+                                          audioManager.playingRecitor?.serverUrl ??
+                                          audioManager.reciter?.serverUrl ??
+                                          '';
                                       final chapterId = audioManager.playingChapter?.id;
                                       if (serverUrl.isEmpty || chapterId == null) {
                                         return;
