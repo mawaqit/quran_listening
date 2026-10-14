@@ -12,7 +12,9 @@ import '../../models/surah_model.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/download_controller.dart';
 import '../../providers/player_screens_controller.dart';
+import '../../utils/helpers/connectivity.dart';
 import '../../utils/listening_utils/surah_availability.dart';
+import '../components/no_internet_dialog.dart';
 
 class SurahListTileV3 extends StatefulWidget {
   final SurahModel chapter;
@@ -239,15 +241,31 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
 
 /// Opens the player for [chapter] by [reciter]. The queue only holds surahs
 /// the reciter provides, so next/auto-advance never lands on a missing file.
-void openSurahPlayer(
+///
+/// A surah that isn't downloaded has to be streamed, so when the device is
+/// offline we explain why instead of opening a player that never starts.
+Future<void> openSurahPlayer(
   BuildContext context, {
   required Reciter reciter,
   required SurahModel chapter,
   required List<SurahModel> chapters,
   PlayerType playerType = PlayerType.reciterUnLikedSurahs,
-}) {
+}) async {
   context.closeKeyboard();
   FocusManager.instance.primaryFocus?.unfocus();
+
+  final isDownloaded =
+      context.read<DownloadController>().singleSavedRecitation(
+        reciterId: reciter.id,
+        recitationId: chapter.id,
+      ) !=
+      null;
+  if (!isDownloaded && !await checkInternetConnection()) {
+    if (context.mounted) await showNoInternetDialog(context);
+    return;
+  }
+  if (!context.mounted) return;
+
   context.read<AudioPlayerProvider>().disposePlayer();
   context.read<AudioPlayerProvider>().setPlayingRecitor(reciter);
 
