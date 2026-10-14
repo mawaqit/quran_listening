@@ -6,6 +6,7 @@ import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:provider/provider.dart';
 
 import '../models/reciter.dart';
+import '../utils/helpers/connectivity.dart';
 import '../models/surah_model.dart';
 import 'reciters_controller.dart';
 
@@ -31,6 +32,15 @@ class AudioPlayerProvider extends ChangeNotifier {
   StreamSubscription<int?>? _indexSub;
   StreamSubscription<LoopMode>? _loopModeSub;
   StreamSubscription<bool>? _shuffleSub;
+  StreamSubscription<PlayerException>? _errorSub;
+
+  /// True while a stream failed because the device went offline; playback
+  /// resumes from where it stopped once the connection is back.
+  final ValueNotifier<bool> waitingForNetwork = ValueNotifier(false);
+  Timer? _reconnectTimer;
+  bool _isCheckingConnection = false;
+  int? _resumeIndex;
+  Duration _resumePosition = Duration.zero;
 
   OverlayEntry? floatingPlayer;
   PlayerType? playerType;
@@ -269,6 +279,43 @@ class AudioPlayerProvider extends ChangeNotifier {
       _isShuffled = event;
       notifyListeners();
     });
+
+    _errorSub = _audioPlayer.errorStream.listen(_onPlaybackError);
+  }
+
+  Future<void> _onPlaybackError(PlayerException error) async {
+    Log.e('Playback error: ${error.code} ${error.message}');
+    if (waitingForNetwork.value || await checkInternetConnection()) return;
+
+    _resumeIndex = _audioPlayer.currentIndex;
+    _resumePosition = _position;
+    waitingForNetwork.value = true;
+    _reconnectTimer = Timer.periodic(const Duration(seconds: 3), (_) => _resumeWhenOnline());
+  }
+
+  Future<void> _resumeWhenOnline() async {
+    if (_isCheckingConnection) return;
+    _isCheckingConnection = true;
+    final online = await checkInternetConnection();
+    _isCheckingConnection = false;
+    if (!online || !waitingForNetwork.value) return;
+
+    _stopWaitingForNetwork();
+    // A failed source leaves the player idle with `playing` still true, so it
+    // has to be reloaded; skip if the user paused while offline.
+    if (!_audioPlayer.playing) return;
+    try {
+      await _audioPlayer.seek(_resumePosition, index: _resumeIndex);
+      await _audioPlayer.load();
+    } catch (e, stackTrace) {
+      Log.e('Error resuming after reconnect: $e', error: e, stackTrace: stackTrace);
+    }
+  }
+
+  void _stopWaitingForNetwork() {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    waitingForNetwork.value = false;
   }
 
   getCurrentPlayingSurah({required BuildContext context}) {
@@ -336,6 +383,7 @@ class AudioPlayerProvider extends ChangeNotifier {
     // Clear playingRecitor to ensure next check doesn't use stale value
     // This is especially important when switching between reciters
     playingRecitor = null;
+    _stopWaitingForNetwork();
 
     if (notify) notifyListeners();
 
@@ -352,6 +400,8 @@ class AudioPlayerProvider extends ChangeNotifier {
     _indexSub?.cancel();
     _loopModeSub?.cancel();
     _shuffleSub?.cancel();
+    _errorSub?.cancel();
+    _reconnectTimer?.cancel();
 
     _playerStateSub = null;
     _durationSub = null;
@@ -359,6 +409,7 @@ class AudioPlayerProvider extends ChangeNotifier {
     _indexSub = null;
     _loopModeSub = null;
     _shuffleSub = null;
+    _errorSub = null;
 
     _audioPlayer.dispose();
   }
