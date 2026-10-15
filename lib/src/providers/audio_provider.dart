@@ -42,6 +42,11 @@ class AudioPlayerProvider extends ChangeNotifier {
   int? _resumeIndex;
   Duration _resumePosition = Duration.zero;
 
+  /// When a stream runs out of buffer offline, ExoPlayer rewinds to zero a few
+  /// seconds before it reports the error, so keep where playback really was.
+  Duration _positionBeforeRewind = Duration.zero;
+  DateTime? _rewoundAt;
+
   OverlayEntry? floatingPlayer;
   PlayerType? playerType;
 
@@ -239,6 +244,10 @@ class AudioPlayerProvider extends ChangeNotifier {
 
     // high-frequency → no notify here
     _positionSub = _audioPlayer.positionStream.listen((newPosition) {
+      if (newPosition < const Duration(seconds: 1) && _position > const Duration(seconds: 5)) {
+        _positionBeforeRewind = _position;
+        _rewoundAt = DateTime.now();
+      }
       _position = newPosition;
       if (_position.inSeconds != _lastNotifiedPosition.inSeconds) {
         _lastNotifiedPosition = _position;
@@ -246,6 +255,7 @@ class AudioPlayerProvider extends ChangeNotifier {
     });
 
     _indexSub = _audioPlayer.currentIndexStream.listen((event) {
+      _rewoundAt = null;
       if (event != null) {
         playingChapterIndex = event;
         if (chapters.isNotEmpty && event < chapters.length) {
@@ -285,10 +295,16 @@ class AudioPlayerProvider extends ChangeNotifier {
 
   Future<void> _onPlaybackError(PlayerException error) async {
     Log.e('Playback error: ${error.code} ${error.message}');
-    if (waitingForNetwork.value || await checkInternetConnection()) return;
+    if (waitingForNetwork.value) return;
+    final rewoundAt = _rewoundAt;
+    final rewoundBeforeError =
+        rewoundAt != null && DateTime.now().difference(rewoundAt) < const Duration(seconds: 15);
+    final resumeIndex = _audioPlayer.currentIndex;
+    final resumePosition = rewoundBeforeError ? _positionBeforeRewind : _position;
+    if (await checkInternetConnection()) return;
 
-    _resumeIndex = _audioPlayer.currentIndex;
-    _resumePosition = _position;
+    _resumeIndex = resumeIndex;
+    _resumePosition = resumePosition;
     waitingForNetwork.value = true;
     _reconnectTimer = Timer.periodic(const Duration(seconds: 3), (_) => _resumeWhenOnline());
   }
@@ -302,11 +318,15 @@ class AudioPlayerProvider extends ChangeNotifier {
 
     _stopWaitingForNetwork();
     // A failed source leaves the player idle with `playing` still true, so it
-    // has to be reloaded; skip if the user paused while offline.
+    // has to be reloaded; skip if the user paused while offline. `load()` would
+    // restart from the queue's original start, so reload at the saved spot.
     if (!_audioPlayer.playing) return;
     try {
-      await _audioPlayer.seek(_resumePosition, index: _resumeIndex);
-      await _audioPlayer.load();
+      await _audioPlayer.setAudioSources(
+        List.of(_audioPlayer.audioSources),
+        initialIndex: _resumeIndex,
+        initialPosition: _resumePosition,
+      );
     } catch (e, stackTrace) {
       Log.e('Error resuming after reconnect: $e', error: e, stackTrace: stackTrace);
     }
