@@ -6,6 +6,7 @@ import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:provider/provider.dart';
 
 import '../models/reciter.dart';
+import '../utils/helpers/connectivity.dart';
 import '../models/surah_model.dart';
 import 'reciters_controller.dart';
 
@@ -31,6 +32,20 @@ class AudioPlayerProvider extends ChangeNotifier {
   StreamSubscription<int?>? _indexSub;
   StreamSubscription<LoopMode>? _loopModeSub;
   StreamSubscription<bool>? _shuffleSub;
+  StreamSubscription<PlayerException>? _errorSub;
+
+  /// True while a stream failed because the device went offline; playback
+  /// resumes from where it stopped once the connection is back.
+  final ValueNotifier<bool> waitingForNetwork = ValueNotifier(false);
+  Timer? _reconnectTimer;
+  bool _isCheckingConnection = false;
+  int? _resumeIndex;
+  Duration _resumePosition = Duration.zero;
+
+  /// When a stream runs out of buffer offline, ExoPlayer rewinds to zero a few
+  /// seconds before it reports the error, so keep where playback really was.
+  Duration _positionBeforeRewind = Duration.zero;
+  DateTime? _rewoundAt;
 
   OverlayEntry? floatingPlayer;
   PlayerType? playerType;
@@ -229,6 +244,10 @@ class AudioPlayerProvider extends ChangeNotifier {
 
     // high-frequency → no notify here
     _positionSub = _audioPlayer.positionStream.listen((newPosition) {
+      if (newPosition < const Duration(seconds: 1) && _position > const Duration(seconds: 5)) {
+        _positionBeforeRewind = _position;
+        _rewoundAt = DateTime.now();
+      }
       _position = newPosition;
       if (_position.inSeconds != _lastNotifiedPosition.inSeconds) {
         _lastNotifiedPosition = _position;
@@ -236,6 +255,7 @@ class AudioPlayerProvider extends ChangeNotifier {
     });
 
     _indexSub = _audioPlayer.currentIndexStream.listen((event) {
+      _rewoundAt = null;
       if (event != null) {
         playingChapterIndex = event;
         if (chapters.isNotEmpty && event < chapters.length) {
@@ -269,6 +289,53 @@ class AudioPlayerProvider extends ChangeNotifier {
       _isShuffled = event;
       notifyListeners();
     });
+
+    _errorSub = _audioPlayer.errorStream.listen(_onPlaybackError);
+  }
+
+  Future<void> _onPlaybackError(PlayerException error) async {
+    Log.e('Playback error: ${error.code} ${error.message}');
+    if (waitingForNetwork.value) return;
+    final rewoundAt = _rewoundAt;
+    final rewoundBeforeError =
+        rewoundAt != null && DateTime.now().difference(rewoundAt) < const Duration(seconds: 15);
+    final resumeIndex = _audioPlayer.currentIndex;
+    final resumePosition = rewoundBeforeError ? _positionBeforeRewind : _position;
+    if (await checkInternetConnection()) return;
+
+    _resumeIndex = resumeIndex;
+    _resumePosition = resumePosition;
+    waitingForNetwork.value = true;
+    _reconnectTimer = Timer.periodic(const Duration(seconds: 3), (_) => _resumeWhenOnline());
+  }
+
+  Future<void> _resumeWhenOnline() async {
+    if (_isCheckingConnection) return;
+    _isCheckingConnection = true;
+    final online = await checkInternetConnection();
+    _isCheckingConnection = false;
+    if (!online || !waitingForNetwork.value) return;
+
+    _stopWaitingForNetwork();
+    // A failed source leaves the player idle with `playing` still true, so it
+    // has to be reloaded; skip if the user paused while offline. `load()` would
+    // restart from the queue's original start, so reload at the saved spot.
+    if (!_audioPlayer.playing) return;
+    try {
+      await _audioPlayer.setAudioSources(
+        List.of(_audioPlayer.audioSources),
+        initialIndex: _resumeIndex,
+        initialPosition: _resumePosition,
+      );
+    } catch (e, stackTrace) {
+      Log.e('Error resuming after reconnect: $e', error: e, stackTrace: stackTrace);
+    }
+  }
+
+  void _stopWaitingForNetwork() {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    waitingForNetwork.value = false;
   }
 
   getCurrentPlayingSurah({required BuildContext context}) {
@@ -336,6 +403,7 @@ class AudioPlayerProvider extends ChangeNotifier {
     // Clear playingRecitor to ensure next check doesn't use stale value
     // This is especially important when switching between reciters
     playingRecitor = null;
+    _stopWaitingForNetwork();
 
     if (notify) notifyListeners();
 
@@ -352,6 +420,8 @@ class AudioPlayerProvider extends ChangeNotifier {
     _indexSub?.cancel();
     _loopModeSub?.cancel();
     _shuffleSub?.cancel();
+    _errorSub?.cancel();
+    _reconnectTimer?.cancel();
 
     _playerStateSub = null;
     _durationSub = null;
@@ -359,6 +429,7 @@ class AudioPlayerProvider extends ChangeNotifier {
     _indexSub = null;
     _loopModeSub = null;
     _shuffleSub = null;
+    _errorSub = null;
 
     _audioPlayer.dispose();
   }

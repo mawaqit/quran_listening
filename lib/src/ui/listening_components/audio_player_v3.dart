@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../mawaqit_quran_listening.dart';
+import '../components/no_internet_dialog.dart';
 import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
 
 enum QuranPlayerType { surah, ayah }
@@ -49,11 +50,28 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
   static const double _headerActionWidth = 48;
   final GlobalKey<TooltipState> _watchTooltipKey = GlobalKey<TooltipState>();
 
+  late final ValueNotifier<bool> _waitingForNetwork;
+
   @override
   void initState() {
     super.initState();
+    _waitingForNetwork = context.read<AudioPlayerProvider>().waitingForNetwork;
+    _waitingForNetwork.addListener(_onWaitingForNetworkChanged);
     setAudio();
     _checkWatchConnection();
+  }
+
+  @override
+  void dispose() {
+    _waitingForNetwork.removeListener(_onWaitingForNetworkChanged);
+    super.dispose();
+  }
+
+  /// Streaming fails silently when offline; tell the user why it stopped.
+  /// The dialog closes itself once playback resumes.
+  void _onWaitingForNetworkChanged() {
+    if (!_waitingForNetwork.value || !mounted) return;
+    showNoInternetDialog(context, waitingForNetwork: _waitingForNetwork);
   }
 
   Future<void> _checkWatchConnection() async {
