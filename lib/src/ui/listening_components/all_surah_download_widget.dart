@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/mawaqit_quran_listening.dart';
 
+import '../../utils/helpers/connectivity.dart';
+import '../components/no_internet_dialog.dart';
+
 class AllSurahDownloadWidget extends StatelessWidget {
   final BulkDownloadStatus? bulkStatus;
   final bool isEnabled;
@@ -127,6 +130,12 @@ class AllSurahDownloadWidget extends StatelessWidget {
   }
 
   Future<void> _confirmAndDownload(BuildContext context) async {
+    if (!await checkInternetConnection()) {
+      if (context.mounted) await showNoInternetDialog(context);
+      return;
+    }
+    if (!context.mounted) return;
+
     final confirmed = await showDialog<bool>(
       barrierColor: Colors.black.withValues(alpha: .3),
       context: context,
