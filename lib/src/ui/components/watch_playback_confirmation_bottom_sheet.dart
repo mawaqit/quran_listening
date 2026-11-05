@@ -50,7 +50,11 @@ class _WatchPlaybackConfirmationBottomSheetState
   Widget build(BuildContext context) {
     return Container(
       key: const Key('watch_playback_confirmation_bottom_sheet'),
-      padding: const EdgeInsets.symmetric(vertical: 26),
+      // Keep the buttons above the system navigation bar in edge-to-edge mode
+      padding: EdgeInsets.only(
+        top: 26,
+        bottom: 26 + MediaQuery.viewPaddingOf(context).bottom,
+      ),
       decoration: BoxDecoration(
         color:
             context.isDark
