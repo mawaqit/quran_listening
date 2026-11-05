@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_quran_listening/src/ui/components/sheet_frame.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:provider/provider.dart';
-import 'package:sizer/sizer.dart';
 
 import '../../extensions/device_extensions.dart';
 import '../../extensions/semantics_extension.dart';
@@ -83,7 +83,7 @@ class MissingSurahsBanner extends StatelessWidget {
                         Text(
                           label,
                           style: TextStyle(
-                            fontSize: (context.isFoldable ? 7 : 11).sp,
+                            fontSize: context.sp(context.isFoldable ? 7 : 11),
                             color: context.colorScheme.onPrimaryContainer
                                 .withValues(alpha: .9),
                           ),
@@ -92,7 +92,7 @@ class MissingSurahsBanner extends StatelessWidget {
                         Text(
                           context.tr.missing_surahs_suggestion,
                           style: TextStyle(
-                            fontSize: (context.isFoldable ? 6 : 9).sp,
+                            fontSize: context.sp(context.isFoldable ? 6 : 9),
                             color: context.colorScheme.secondary.withValues(
                               alpha: .7,
                             ),
@@ -103,7 +103,7 @@ class MissingSurahsBanner extends StatelessWidget {
                   ),
                   Icon(
                     _forwardArrow(context),
-                    size: 14.sp,
+                    size: context.sp(14),
                     color: context.colorScheme.primaryFixed,
                   ),
                 ],
@@ -129,7 +129,7 @@ Future<void> showMissingSurahsSheet(
   required void Function(Reciter reciter, SurahModel surah) onReciterSelected,
   SurahModel? initialSurah,
 }) {
-  return showModalBottomSheet<void>(
+  return showFramedModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -263,14 +263,14 @@ class _MissingSurahsSheetState extends State<_MissingSurahsSheet> {
                         label,
                         style: TextStyle(
                           color: context.colorScheme.onPrimaryContainer,
-                          fontSize: context.isFoldable ? 18 : 13.sp,
+                          fontSize: context.isFoldable ? 18 : context.sp(13),
                         ),
                       ),
                     ),
                     const SizedBox(width: 4),
                     Icon(
                       _forwardArrow(context),
-                      size: 14.sp,
+                      size: context.sp(14),
                       color: context.colorScheme.primaryFixed,
                     ),
                   ],
@@ -338,7 +338,7 @@ class _SheetHeader extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.colorScheme.onPrimaryContainer,
-              fontSize: context.isFoldable ? 28 : 14.sp,
+              fontSize: context.isFoldable ? 28 : context.sp(14),
             ),
           ).semantic(context: context, header: true),
         ),

@@ -3,7 +3,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
-import 'package:sizer/sizer.dart';
 import '../../../mawaqit_quran_listening.dart';
 import 'package:provider/provider.dart';
 import '../../utils/helpers/mawaqit_icon_v3_cions.dart';
@@ -205,7 +204,7 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: (context.isFoldable ? 9 : 13).sp,
+                          fontSize: context.sp(context.isFoldable ? 9 : 13),
                           color: context.colorScheme.onPrimaryContainer.withOpacity(.9),
                         ),
                       ),
@@ -237,7 +236,7 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: greyColor,
-                                fontSize: (context.isFoldable ? 7 : 10).sp,
+                                fontSize: context.sp(context.isFoldable ? 7 : 10),
                                 decoration: TextDecoration.underline,
                                 decorationColor: greyColor,
                               ),
@@ -409,7 +408,7 @@ class DownloadedSurahTile extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: (context.isFoldable ? 9 : 13).sp,
+                      fontSize: context.sp(context.isFoldable ? 9 : 13),
                       color: context.colorScheme.surfaceContainerHighest,
                     ),
                   ),
@@ -426,7 +425,7 @@ class DownloadedSurahTile extends StatelessWidget {
                         'Downloaded',
                         style: TextStyle(
                           color: Colors.green,
-                          fontSize: (context.isFoldable ? 7 : 9).sp,
+                          fontSize: context.sp(context.isFoldable ? 7 : 9),
                           fontWeight: FontWeight.w500,
                         ),
                       ),

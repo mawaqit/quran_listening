@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../../../mawaqit_quran_listening.dart';
 import '../../listening_components/reciter_list_tile.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
-import 'package:sizer/sizer.dart';
 
 class AllRecitatorsTab extends StatefulWidget {
   const AllRecitatorsTab({super.key, required this.listPadding});
@@ -40,7 +39,7 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
               child: Text(
                 context.tr.no_recitator_found,
                 style: TextStyle(
-                  fontSize: 12.sp,
+                  fontSize: context.sp(12),
                   color: Theme.of(context).primaryColor,
                 ),
               ),
@@ -56,7 +55,7 @@ class _AllRecitatorsTabState extends State<AllRecitatorsTab> {
                 maxLines: 2,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 12.sp,
+                  fontSize: context.sp(12),
                   color: Theme.of(context).primaryColor,
                 ),
               ),

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:mawaqit_quran_listening/generated/assets.dart';
 import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
-import 'package:sizer/sizer.dart';
 import '../../../mawaqit_quran_listening.dart';
 import 'package:provider/provider.dart';
 
@@ -85,7 +84,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: (context.isFoldable ? 8 : 13).sp,
+                            fontSize: context.sp(context.isFoldable ? 8 : 13),
                             color: isSelected ? context.colorScheme.onPrimaryContainer : context.colorScheme.onPrimaryContainer.withOpacity(.9),
                           ),
                         ),
@@ -93,7 +92,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
                         DefaultTextStyle(
                           style: TextStyle(
                             color: context.colorScheme.secondary.withOpacity(.70),
-                            fontSize: (context.isFoldable ? 6 : 9).sp,
+                            fontSize: context.sp(context.isFoldable ? 6 : 9),
                             fontFamily: context.getFontFamily(),
                           ),
                           child: Row(
