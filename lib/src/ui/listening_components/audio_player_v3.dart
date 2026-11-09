@@ -47,7 +47,8 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
   late AudioPlayerProvider audioManager;
   double? _lastSliderValue;
   bool _isWatchConnected = false;
-  static const double _headerActionWidth = 48;
+  // Fits watch button (24 + 2*2 padding) + gap (8) + speed chip (42)
+  static const double _headerActionWidth = 78;
   final GlobalKey<TooltipState> _watchTooltipKey = GlobalKey<TooltipState>();
 
   late final ValueNotifier<bool> _waitingForNetwork;
@@ -447,15 +448,24 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        // Same width as the close-button slot so the title stays centred
+                        SizedBox(
+                          width: _headerActionWidth,
+                          child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (_isWatchConnected)
-                              SizedBox(
-                                width: _headerActionWidth,
+                              Padding(
+                                padding: const EdgeInsetsDirectional.only(end: 8),
+                                // Compact so it never grows the row taller than the speed chip
                                 child: IconButton(
                                     key: const Key('watch_play_icon'),
                                     tooltip: '${context.semanticTr.semantic_open_play_on_watch_options_for} $currentSurahName',
+                                    padding: const EdgeInsets.all(2),
+                                    constraints: const BoxConstraints(),
+                                    style: const ButtonStyle(
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
                                     icon: Icon(
                                       Platform.isIOS
                                           ? WatchIcons.apple_watch
@@ -526,6 +536,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                               onTap: () => audioManager.cyclePlaybackSpeed(),
                             ),
                           ],
+                        ),
                         ),
                         Expanded(
                           child: Column(
