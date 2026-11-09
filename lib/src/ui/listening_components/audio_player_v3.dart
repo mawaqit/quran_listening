@@ -47,8 +47,8 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
   late AudioPlayerProvider audioManager;
   double? _lastSliderValue;
   bool _isWatchConnected = false;
-  // Fits watch icon (24) + gap (8) + speed chip (42)
-  static const double _headerActionWidth = 74;
+  // Fits watch button (24 + 2*2 padding) + gap (8) + speed chip (42)
+  static const double _headerActionWidth = 78;
   final GlobalKey<TooltipState> _watchTooltipKey = GlobalKey<TooltipState>();
 
   late final ValueNotifier<bool> _waitingForNetwork;
@@ -463,7 +463,6 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                                     tooltip: '${context.semanticTr.semantic_open_play_on_watch_options_for} $currentSurahName',
                                     padding: const EdgeInsets.all(2),
                                     constraints: const BoxConstraints(),
-                                    iconSize: 20,
                                     style: const ButtonStyle(
                                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                     ),
