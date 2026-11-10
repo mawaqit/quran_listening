@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import '../../extensions/theme_extension.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:sizer/sizer.dart';
 
 import '../components/svg_image_asset.dart';
 
@@ -27,12 +27,12 @@ class PlayerBottomSheetWidget extends StatelessWidget {
               Text(
                 '2 - Surah al Baqarah',
                 style: context.textTheme.bodyLarge
-                    ?.copyWith(fontWeight: FontWeight.w700, fontSize: 14.sp, color: context.colorScheme.primary),
+                    ?.copyWith(fontWeight: FontWeight.w700, fontSize: context.sp(14), color: context.colorScheme.primary),
               ),
               Text(
                 'Mishary al Afassy',
                 style: context.textTheme.bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w600, fontSize: 11.sp, color: context.colorScheme.primary),
+                    ?.copyWith(fontWeight: FontWeight.w600, fontSize: context.sp(11), color: context.colorScheme.primary),
               ),
               const SizedBox(height: 20),
               Container(

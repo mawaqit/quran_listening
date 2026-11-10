@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../mawaqit_quran_listening.dart';
 import '../../listening_components/downloaded_surah_tile.dart';
 import 'package:collection/collection.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
-import 'package:sizer/sizer.dart';
 
 class DownloadedTab extends StatefulWidget {
   const DownloadedTab({super.key, required this.listPadding});
@@ -140,13 +140,13 @@ class _DownloadedTabState extends State<DownloadedTab> {
                           Text(
                             "Ibrahim Al-Akdar",
                             maxLines: 2,
-                            style: TextStyle(fontSize: 13.sp, color: context.colorScheme.surfaceContainerHighest),
+                            style: TextStyle(fontSize: context.sp(13), color: context.colorScheme.surfaceContainerHighest),
                           ),
                           const SizedBox(height: 2),
                           DefaultTextStyle(
                             style: TextStyle(
                               color: context.colorScheme.secondary.withOpacity(.70),
-                              fontSize: 10.sp,
+                              fontSize: context.sp(10),
                               fontFamily: context.getFontFamily(),
                             ),
                             child: Row(
@@ -192,7 +192,7 @@ class _DownloadedTabState extends State<DownloadedTab> {
             context.tr.no_surah_found,
             maxLines: 2,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12.sp, color: Theme.of(context).primaryColor),
+            style: TextStyle(fontSize: context.sp(12), color: Theme.of(context).primaryColor),
           ),
         ),
       );

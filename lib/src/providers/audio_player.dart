@@ -26,7 +26,6 @@ import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/mawaqit_quran_listening.dart';
 import 'package:provider/provider.dart';
-import 'package:sizer/sizer.dart';
 
 const double iconSize = 41;
 const double iconSplashSize = 25;
@@ -443,8 +442,8 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                         ? ClipOval(
                           child: reciterController.getImage(
                             'assets/reciters/reciter_${audioManager.currentReciterDetail?.mainReciterId ?? ''}.jpg',
-                            height: 55.w,
-                            width: 55.w,
+                            height: kPlayerAvatarSize,
+                            width: kPlayerAvatarSize,
                           ),
                         )
                         : const SizedBox.shrink(),
@@ -698,6 +697,9 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
 }
 
 const double kAvatarSize = 27;
+
+/// Reciter photo on the full player: what sizer's `55.w` gave on a 390dp phone.
+const double kPlayerAvatarSize = 214;
 const double kSplashRadius = 20;
 
 class FloatingQuranPlayer extends StatelessWidget {
@@ -764,8 +766,8 @@ class FloatingQuranPlayer extends StatelessWidget {
                                 child: ClipOval(
                                   child: reciterController.getImage(
                                     'assets/reciters/reciter_${audioManager.currentReciterDetail?.mainReciterId}.jpg',
-                                    height: 55.w,
-                                    width: 55.w,
+                                    height: kAvatarSize,
+                                    width: kAvatarSize,
                                   ),
                                 ),
                               ),

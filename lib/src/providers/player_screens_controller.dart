@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mawaqit_quran_listening/src/ui/components/sheet_frame.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/src/providers/audio_player.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import '../../mawaqit_quran_listening.dart';
 import '../ui/listening_components/audio_player_v3.dart';
@@ -90,7 +90,7 @@ class PlayerScreensController extends ChangeNotifier {
   }) {
     final audioPlayerProvider = context.read<AudioPlayerProvider>();
 
-    showModalBottomSheet(
+    showFramedModalBottomSheet(
       context: context,
       backgroundColor: context.isDark ? const Color(0xff1C1B23) : Colors.white,
       shape: const RoundedRectangleBorder(
@@ -119,7 +119,7 @@ class PlayerScreensController extends ChangeNotifier {
     PlayerType playerType, {
     Reciter? reciterFromAllSaved,
   }) {
-    showBarModalBottomSheet(
+    showFramedBarModalBottomSheet(
       context: context,
       expand: true,
       backgroundColor: Theme.of(context).colorScheme.surface,

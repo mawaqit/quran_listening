@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
-import 'package:sizer/sizer.dart';
 
 import '../../extensions/theme_extension.dart';
 import '../../utils/helpers/watch_icons.dart';
@@ -99,7 +99,7 @@ class _WatchPlaybackConfirmationBottomSheetState
                     Text(
                       "${context.tr.connected_watch}: ${_watchName == null || _watchName!.isEmpty ? context.tr.unknown_smartwatch : _watchName}",
                       style: TextStyle(
-                        fontSize: 18.sp,
+                        fontSize: context.sp(18),
                         fontWeight: FontWeight.w700,
                         color: context.colorScheme.primaryFixed,
                       ),
@@ -111,7 +111,7 @@ class _WatchPlaybackConfirmationBottomSheetState
                     Text(
                       "${context.tr.chapter} ${widget.surahName} ${context.tr.ready_play_watch}",
                       style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: context.sp(12),
                         color: context.colorScheme.primaryFixed.withOpacity(
                           0.7,
                         ),
@@ -137,7 +137,7 @@ class _WatchPlaybackConfirmationBottomSheetState
                             child: Text(
                               context.tr.take_time_appear_watch,
                               style: TextStyle(
-                                fontSize: 10.sp,
+                                fontSize: context.sp(10),
                                 color: context.colorScheme.primaryFixed.withOpacity(0.6),
                                 fontWeight: FontWeight.w500,
                               ),
@@ -181,7 +181,7 @@ class _WatchPlaybackConfirmationBottomSheetState
                                       context.tr.play,
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 14.sp,
+                                        fontSize: context.sp(14),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -225,7 +225,7 @@ class _WatchPlaybackConfirmationBottomSheetState
                                       context.tr.cancel,
                                       style: TextStyle(
                                         color: context.colorScheme.primaryFixed,
-                                        fontSize: 14.sp,
+                                        fontSize: context.sp(14),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),

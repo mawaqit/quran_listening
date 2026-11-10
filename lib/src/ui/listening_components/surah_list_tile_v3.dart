@@ -5,7 +5,6 @@ import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:mawaqit_quran_listening/src/extensions/semantics_extension.dart';
 import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icon_v3_cions.dart';
 import 'package:provider/provider.dart';
-import 'package:sizer/sizer.dart';
 import '../../extensions/theme_extension.dart';
 import '../../models/reciter.dart';
 import '../../models/surah_model.dart';
@@ -118,7 +117,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: (context.isFoldable ? 8 : 13).sp,
+                      fontSize: context.sp(context.isFoldable ? 8 : 13),
                       color: context.colorScheme.onPrimaryContainer.withValues(
                         alpha: .9,
                       ),
@@ -129,7 +128,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: greyColor,
-                      fontSize: (context.isFoldable ? 6 : 10).sp,
+                      fontSize: context.sp(context.isFoldable ? 6 : 10),
                     ),
                   ),
                 ],
