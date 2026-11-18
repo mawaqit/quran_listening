@@ -19,8 +19,13 @@ class ApiErrorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     const box = SizedBox(height: 32);
     const errorColor = Color(0xffb00020);
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    // The app's colorScheme surface colours don't follow light/dark mode,
+    // so pick dark text on light themes and light text on dark themes.
+    final isDark = theme.brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : Colors.black87;
+    final subtitleColor = isDark ? Colors.white70 : Colors.black54;
 
     return Center(
       child: SingleChildScrollView(
@@ -32,7 +37,7 @@ class ApiErrorWidget extends StatelessWidget {
               Icon(
                 Icons.wifi_off_rounded,
                 size: 80,
-                color: colorScheme.onSurfaceVariant,
+                color: subtitleColor,
               ),
               const SizedBox(height: 16),
               Text(
@@ -40,7 +45,7 @@ class ApiErrorWidget extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
+                  color: titleColor,
                 ),
               ),
               const SizedBox(height: 8),
@@ -48,7 +53,7 @@ class ApiErrorWidget extends StatelessWidget {
                 context.tr.msg_internet_connection,
                 textAlign: TextAlign.center,
                 style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                  color: subtitleColor,
                 ),
               ),
             ] else ...[
