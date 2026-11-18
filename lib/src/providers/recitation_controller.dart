@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:mawaqit_quran_listening/mawaqit_quran_listening.dart';
 
+import '../utils/helpers/connectivity.dart';
+
 enum RecitationsScreenState { loading, success, failed }
 
 class RecitationsManager extends ChangeNotifier {
@@ -15,6 +17,15 @@ class RecitationsManager extends ChangeNotifier {
   RecitationsScreenState state = RecitationsScreenState.success;
 
   bool get isLoading => state == RecitationsScreenState.loading;
+
+  /// Whether the last failed load happened because the device was offline.
+  bool isOffline = false;
+
+  /// Set when the surah names could not be fetched (e.g. no internet).
+  bool _surahsFailed = false;
+
+  /// True when either the surah names or the reciter's recitations failed.
+  bool get hasError => state == RecitationsScreenState.failed || _surahsFailed;
   Map<int, List<Recitation>> recitations = {};
   List<SurahModel> surahs = [];
   final Map<String, List<SurahModel>> _surahsByLanguage = {};
@@ -25,6 +36,7 @@ class RecitationsManager extends ChangeNotifier {
     if (surahs.isEmpty) {
       try {
         surahs = await getSearchableSurahs();
+        _surahsFailed = false;
         notifyListeners();
       } catch (e, stackTrace) {
         Log.e(
@@ -32,7 +44,27 @@ class RecitationsManager extends ChangeNotifier {
           error: e,
           stackTrace: stackTrace,
         );
+        _surahsFailed = true;
+        isOffline = !await checkInternetConnection();
+        notifyListeners();
       }
+    }
+  }
+
+  /// Reloads everything the reciter's surah list needs: the surah names
+  /// (skipped if already loaded) and the reciter's recitations.
+  Future<void> retry({required int reciterId}) async {
+    state = RecitationsScreenState.loading;
+    notifyListeners();
+
+    await initializeSurahs();
+    await getRecitations(reciterId: reciterId);
+
+    // getRecitations returns early without a state change when a load for
+    // this reciter is already running; don't leave the spinner up forever.
+    if (state == RecitationsScreenState.loading) {
+      state = RecitationsScreenState.success;
+      notifyListeners();
     }
   }
 
@@ -214,8 +246,9 @@ class RecitationsManager extends ChangeNotifier {
         error: e,
         stackTrace: stackTrace,
       );
-      state = RecitationsScreenState.failed;
       _loadingReciterIds.remove(reciterId); // Ensure it's removed on error
+      isOffline = !await checkInternetConnection();
+      state = RecitationsScreenState.failed;
       notifyListeners();
     }
   }

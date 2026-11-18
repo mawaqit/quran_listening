@@ -8,6 +8,10 @@ import '../components/no_internet_dialog.dart';
 class AllSurahDownloadWidget extends StatelessWidget {
   final BulkDownloadStatus? bulkStatus;
   final bool isEnabled;
+
+  /// Every surah of the reciter is already saved (or queued); tapping the
+  /// button then says so instead of starting a download.
+  final bool isAllDownloaded;
   final Future<void> Function() onDownloadAll;
   final Future<void> Function(String reciterId) onCancel;
 
@@ -15,6 +19,7 @@ class AllSurahDownloadWidget extends StatelessWidget {
     super.key,
     required this.bulkStatus,
     required this.isEnabled,
+    this.isAllDownloaded = false,
     required this.onDownloadAll,
     required this.onCancel,
   });
@@ -33,8 +38,14 @@ class AllSurahDownloadWidget extends StatelessWidget {
                 key: const ValueKey('bulk_download_button'),
                 width: double.infinity,
                 child: FilledButton.icon(
-                  onPressed: isEnabled ? () => _confirmAndDownload(context) : null,
-                  icon: const Icon(Icons.cloud_download_rounded),
+                  // Always tappable: a disabled FilledButton ignores the colours
+                  // below and is nearly invisible, and gives no feedback.
+                  onPressed: () => _confirmAndDownload(context),
+                  icon: Icon(
+                    isAllDownloaded
+                        ? Icons.download_done_rounded
+                        : Icons.cloud_download_rounded,
+                  ),
                   label: Text(context.tr.download_all_surahs),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
@@ -130,11 +141,19 @@ class AllSurahDownloadWidget extends StatelessWidget {
   }
 
   Future<void> _confirmAndDownload(BuildContext context) async {
+    if (isAllDownloaded) {
+      ScaffoldMessenger.maybeOf(context)
+        ?..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(context.tr.surahs_downloaded)));
+      return;
+    }
     if (!await checkInternetConnection()) {
       if (context.mounted) await showNoInternetDialog(context);
       return;
     }
-    if (!context.mounted) return;
+    // Online but nothing to download yet (list still loading or failed):
+    // the list area below already shows the loader or the error.
+    if (!isEnabled || !context.mounted) return;
 
     final confirmed = await showDialog<bool>(
       barrierColor: Colors.black.withValues(alpha: .3),

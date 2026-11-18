@@ -113,6 +113,15 @@ class _SurahPageState extends State<SurahPage> {
     }
   }
 
+  /// Reloads the surah names and the current reciter's recitations, so the
+  /// list fills in without leaving the screen once the connection is back.
+  Future<void> _retry() async {
+    final recitationsManager = context.read<RecitationsManager>();
+    await recitationsManager.retry(
+      reciterId: audioPlayerProvider.currentReciterId ?? 1,
+    );
+  }
+
   bool _matchesSearch(SurahModel chapter) {
     if (_searchQuery.isEmpty) return true;
 
@@ -299,8 +308,11 @@ class _SurahPageState extends State<SurahPage> {
             ? downloadableSurahs.isNotEmpty
             : bulkStatus.downloadedCount < totalSurahCount;
 
-    bool isErrorView =
-        recitationsManager.state == RecitationsScreenState.failed;
+    final bool isErrorView = recitationsManager.hasError;
+    final bool isAllDownloaded =
+        currentReciter != null &&
+        reciterSurahs.isNotEmpty &&
+        !hasRemainingBulkDownloads;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (_, __) {
@@ -331,6 +343,7 @@ class _SurahPageState extends State<SurahPage> {
           AllSurahDownloadWidget(
             bulkStatus: bulkStatus,
             isEnabled: currentReciter != null && hasRemainingBulkDownloads,
+            isAllDownloaded: isAllDownloaded,
             onDownloadAll: () async {
               if (currentReciter == null) return;
               await downloadController.queueBulkDownloads(
@@ -352,12 +365,8 @@ class _SurahPageState extends State<SurahPage> {
                     ? const Center(child: CircularProgressIndicator())
                     : isErrorView
                     ? ApiErrorWidget(
-                      callback:
-                          () => recitationsManager.getRecitations(
-                            reciterId:
-                                audioPlayerProvider.currentReciterId ?? 1,
-                            retry: true,
-                          ),
+                      isOffline: recitationsManager.isOffline,
+                      callback: _retry,
                     )
                     : surahs.isEmpty && missingMatches.isNotEmpty
                     ? _buildMissingSearchResult(
