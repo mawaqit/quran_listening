@@ -72,6 +72,8 @@ class _SurahPageState extends State<SurahPage> {
     final recitorsProvider = context.read<RecitorsProvider>();
     if (recitationsManager.surahs.isEmpty) {
       await recitationsManager.initializeSurahs();
+      // The user may have left the page while surahs were loading.
+      if (!mounted) return;
     }
 
     if (audioPlayerProvider.currentReciterId == null) {
@@ -84,6 +86,7 @@ class _SurahPageState extends State<SurahPage> {
   }
 
   Future<void> _loadCurrentReciterData() async {
+    if (!mounted) return;
     final reciterId = audioPlayerProvider.currentReciterId;
     final favoriteSurahProvider = context.read<FavoriteSurah>();
     if (reciterId == null) return;
@@ -92,6 +95,7 @@ class _SurahPageState extends State<SurahPage> {
     if (_lastLoadedReciterId != reciterId) {
       _lastLoadedReciterId = reciterId;
       await recitationsManager.getRecitations(reciterId: reciterId);
+      if (!mounted) return;
     }
 
     if (_lastDownloadedReciterId != reciterId) {
@@ -99,6 +103,7 @@ class _SurahPageState extends State<SurahPage> {
       await downloadController.fetchDownloadedRecitation(
         reciterId: reciterId.toString(),
       );
+      if (!mounted) return;
     }
 
     if (_lastFavoriteReciterId != reciterId) {
