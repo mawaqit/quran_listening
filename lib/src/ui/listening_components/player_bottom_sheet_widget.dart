@@ -3,7 +3,7 @@ import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import '../../extensions/theme_extension.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../components/svg_image_asset.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 class PlayerBottomSheetWidget extends StatelessWidget {
   const PlayerBottomSheetWidget({
@@ -54,7 +54,7 @@ class PlayerBottomSheetWidget extends StatelessWidget {
                 children: [
                   Icon(
                     size: 20,
-                    CupertinoIcons.shuffle_medium,
+                    MawaqitIcons.shuffle,
                     color: context.colorScheme.primary,
                   ),
                   const Spacer(),
@@ -62,7 +62,7 @@ class PlayerBottomSheetWidget extends StatelessWidget {
                       onPressed: () {},
                       icon: Icon(
                         size: 36,
-                        Icons.fast_rewind_rounded,
+                        MawaqitIcons.rewindleft,
                         color: context.colorScheme.primary,
                       )),
                   const SizedBox(width: 6),
@@ -75,7 +75,7 @@ class PlayerBottomSheetWidget extends StatelessWidget {
                       color: context.colorScheme.primary.withOpacity(0.09),
                     ),
                     child: Icon(
-                      Icons.pause,
+                      MawaqitIcons.pause,
                       color: context.colorScheme.primary,
                       size: 34,
                     ),
@@ -85,14 +85,13 @@ class PlayerBottomSheetWidget extends StatelessWidget {
                       onPressed: () {},
                       icon: Icon(
                         size: 36,
-                        Icons.fast_forward_rounded,
+                        MawaqitIcons.rewindright,
                         color: context.colorScheme.primary,
                       )),
                   const Spacer(),
-                  SvgImageAsset(
-                    height: 15,
-                    width: 15,
-                    'assets/icons/loop.svg',
+                  Icon(
+                    size: 15,
+                    MawaqitIcons.repeat,
                     color: context.colorScheme.primary,
                   ),
                 ],
@@ -111,7 +110,7 @@ class PlayerBottomSheetWidget extends StatelessWidget {
                 color: context.colorScheme.primary.withOpacity(0.09),
               ),
               child: Icon(
-                Icons.keyboard_arrow_down_outlined,
+                MawaqitIcons.arrow_down,
                 color: context.colorScheme.primary,
                 size: 30,
               ),

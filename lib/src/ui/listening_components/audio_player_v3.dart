@@ -17,6 +17,7 @@ import 'package:provider/provider.dart';
 import '../../../mawaqit_quran_listening.dart';
 import '../components/no_internet_dialog.dart';
 import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 enum QuranPlayerType { surah, ayah }
 
@@ -573,7 +574,7 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           child: Align(
                             alignment: AlignmentDirectional.topEnd,
                             child: CircularButton(
-                              icon: Icons.keyboard_arrow_down,
+                              icon: MawaqitIcons.arrow_down,
                               iconColor: context.colorScheme.primaryFixed,
                               label: context.semanticTr.semantic_minimize_player,
                               size: 32,
@@ -706,10 +707,10 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           tooltip: audioPlayer.shuffleModeEnabled
                                   ? context.semanticTr.semantic_turn_shuffle_off
                                   : context.semanticTr.semantic_turn_shuffle_on,
-                          icon: SvgImageAsset(
-                            'assets/icons/shuffle.svg',
+                          icon: Icon(
+                            MawaqitIcons.shuffle,
                             color: context.colorScheme.primaryFixed,
-                            width: audioPlayer.shuffleModeEnabled ? 30 : 20,
+                            size: audioPlayer.shuffleModeEnabled ? 30 : 20,
                           ),
                           onPressed: () async {
                             final newShuffleState = !audioPlayer.shuffleModeEnabled;
@@ -729,11 +730,12 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           child: IconButton(
                             splashRadius: iconSplashSize,
                             tooltip: context.semanticTr.semantic_previous_surah,
-                            icon: SvgImageAsset(
+                            icon: Icon(
                               context.isRtl
-                                  ? 'assets/icons/ic_next_round.svg'
-                                  : 'assets/icons/ic_previous_round.svg',
+                                  ? MawaqitIcons.rewindright
+                                  : MawaqitIcons.rewindleft,
                               color: context.colorScheme.primaryFixed,
+                              size: 32,
                             ),
                             onPressed: () async {
                               await audioManager.seekToPreviousSafe();
@@ -744,10 +746,10 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           icon:
                               audioPlayer.processingState ==
                                       ProcessingState.completed
-                                  ? Icons.replay_rounded
+                                  ? MawaqitIcons.refresh
                                   : audioManager.isPlaying
-                                  ? Icons.pause_rounded
-                                  : Icons.play_arrow_rounded,
+                                  ? MawaqitIcons.pause
+                                  : MawaqitIcons.play,
                           iconColor: context.colorScheme.primaryFixed,
                           label: playPauseLabel,
                           size: 62,
@@ -776,11 +778,12 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                           child: IconButton(
                             splashRadius: iconSplashSize,
                             tooltip: context.semanticTr.semantic_next_surah,
-                            icon: SvgImageAsset(
+                            icon: Icon(
                               context.isRtl
-                                  ? 'assets/icons/ic_previous_round.svg'
-                                  : 'assets/icons/ic_next_round.svg',
+                                  ? MawaqitIcons.rewindleft
+                                  : MawaqitIcons.rewindright,
                               color: context.colorScheme.primaryFixed,
+                              size: 32,
                             ),
                             onPressed: () async {
                               await audioManager.seekToNextSafe();
@@ -789,10 +792,10 @@ class QuranAudioPlayerV3State extends State<QuranAudioPlayerV3> {
                         ),
                         IconButton(
                           splashRadius: iconSplashSize,
-                          icon: SvgImageAsset(
-                            'assets/icons/loop.svg',
+                          icon: Icon(
+                            MawaqitIcons.repeat,
                             color: context.colorScheme.primaryFixed,
-                            width:
+                            size:
                                 audioPlayer.loopMode == LoopMode.one ? 30 : 20,
                           ),
                           tooltip: audioPlayer.loopMode == LoopMode.one

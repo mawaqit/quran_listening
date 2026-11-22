@@ -26,6 +26,7 @@ import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/mawaqit_quran_listening.dart';
 import 'package:provider/provider.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 const double iconSize = 41;
 const double iconSplashSize = 25;
@@ -356,7 +357,7 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     CircularButton(
-                      icon: Icons.keyboard_arrow_down,
+                      icon: MawaqitIcons.arrow_down,
                       iconColor: whiteColor,
                       size: iconSize,
                       borderColor: whiteColor.withOpacity(0.2),
@@ -396,9 +397,9 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                         ),
                         child: Row(
                           children: [
-                            SvgImageAsset(
-                              'assets/icons/star.svg',
-                              height: 15,
+                            Icon(
+                              MawaqitIcons.rewindright,
+                              size: 16,
                               color: whiteColor,
                             ),
                             const SizedBox(width: 10),
@@ -421,7 +422,7 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                       maintainAnimation: true,
                       maintainSize: true,
                       child: CircularButton(
-                        icon: Icons.search,
+                        icon: MawaqitIcons.search,
                         iconColor: whiteColor,
                         onTap: () {
                           Navigator.pop(context);
@@ -568,10 +569,10 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                             /// Shuffle playlist order (true|false)
                             IconButton(
                               splashRadius: iconSplashSize,
-                              icon: SvgImageAsset(
-                                'assets/icons/shuffle.svg',
+                              icon: Icon(
+                                MawaqitIcons.shuffle,
                                 color: whiteColor,
-                                width: audioPlayer.shuffleModeEnabled ? 30 : 20,
+                                size: audioPlayer.shuffleModeEnabled ? 30 : 20,
                               ),
                               onPressed: () async {
                                 final newShuffleState = !audioPlayer.shuffleModeEnabled;
@@ -593,8 +594,8 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                                 splashRadius: iconSplashSize,
                                 icon: Icon(
                                   context.isRtl
-                                      ? Icons.skip_next_rounded
-                                      : Icons.skip_previous_rounded,
+                                      ? MawaqitIcons.rewindright
+                                      : MawaqitIcons.rewindleft,
                                   color: whiteColor,
                                   size: 34,
                                 ),
@@ -609,10 +610,10 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                               icon:
                                   audioPlayer.processingState ==
                                           ProcessingState.completed
-                                      ? Icons.replay_rounded
+                                      ? MawaqitIcons.refresh
                                       : audioManager.isPlaying
-                                      ? Icons.pause_rounded
-                                      : Icons.play_arrow_rounded,
+                                      ? MawaqitIcons.pause
+                                      : MawaqitIcons.play,
                               iconColor: whiteColor,
                               size: 60,
                               iconSize: 34,
@@ -639,8 +640,8 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                                 splashRadius: iconSplashSize,
                                 icon: Icon(
                                   context.isRtl
-                                      ? Icons.skip_previous_rounded
-                                      : Icons.skip_next_rounded,
+                                      ? MawaqitIcons.rewindleft
+                                      : MawaqitIcons.rewindright,
                                   color: whiteColor,
                                   size: 34,
                                 ),
@@ -653,10 +654,10 @@ class QuranAudioPlayerState extends State<QuranAudioPlayer> {
                             /// Set playlist to loop (off|all|one)
                             IconButton(
                               splashRadius: iconSplashSize,
-                              icon: SvgImageAsset(
-                                'assets/icons/loop.svg',
+                              icon: Icon(
+                                MawaqitIcons.repeat,
                                 color: whiteColor,
-                                width:
+                                size:
                                     audioPlayer.loopMode == LoopMode.one
                                         ? 30
                                         : 20,
@@ -806,8 +807,8 @@ class FloatingQuranPlayer extends StatelessWidget {
                           splashRadius: kSplashRadius,
                           icon: Icon(
                             context.isRtl
-                                ? Icons.skip_next_rounded
-                                : Icons.skip_previous_rounded,
+                                ? MawaqitIcons.rewindright
+                                : MawaqitIcons.rewindleft,
                             color: whiteColor,
                           ),
                           onPressed: () {
@@ -822,10 +823,10 @@ class FloatingQuranPlayer extends StatelessWidget {
                         icon: Icon(
                           audioPlayer.processingState ==
                                   ProcessingState.completed
-                              ? Icons.replay_rounded
+                              ? MawaqitIcons.refresh
                               : audioManager.isPlaying
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
+                              ? MawaqitIcons.pause
+                              : MawaqitIcons.play,
                           color: whiteColor,
                         ),
                         onPressed: () async {
@@ -850,8 +851,8 @@ class FloatingQuranPlayer extends StatelessWidget {
                           splashRadius: kSplashRadius,
                           icon: Icon(
                             context.isRtl
-                                ? Icons.skip_previous_rounded
-                                : Icons.skip_next_rounded,
+                                ? MawaqitIcons.rewindleft
+                                : MawaqitIcons.rewindright,
                             color: whiteColor,
                           ),
                           onPressed: () {
@@ -861,7 +862,7 @@ class FloatingQuranPlayer extends StatelessWidget {
                       ),
                       IconButton(
                         splashRadius: kSplashRadius,
-                        icon: Icon(Icons.clear, color: whiteColor, size: 22),
+                        icon: Icon(MawaqitIcons.close, color: whiteColor, size: 22),
                         onPressed: () {
                           audioManager.disposePlayer();
                         },

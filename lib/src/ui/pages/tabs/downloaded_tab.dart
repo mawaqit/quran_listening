@@ -6,6 +6,7 @@ import '../../../../mawaqit_quran_listening.dart';
 import '../../listening_components/downloaded_surah_tile.dart';
 import 'package:collection/collection.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 class DownloadedTab extends StatefulWidget {
   const DownloadedTab({super.key, required this.listPadding});
@@ -172,7 +173,7 @@ class _DownloadedTabState extends State<DownloadedTab> {
                         onPressed: () {},
                         icon: IconButton(
                           onPressed: () {},
-                          icon: Icon(Icons.close, color: context.colorScheme.primaryFixed),
+                          icon: Icon(MawaqitIcons.close, color: context.colorScheme.primaryFixed),
                         ),
                       ),
                     ),

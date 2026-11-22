@@ -4,8 +4,8 @@ import 'package:mawaqit_quran_listening/src/extensions/semantics_extension.dart'
 import '../../extensions/theme_extension.dart';
 import '../../providers/listening_toggle_index_provider.dart';
 import 'package:provider/provider.dart';
-import '../components/svg_image_asset.dart';
 import '../pages/quran_listening_page.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 class ListeningToggleTabsWidget extends StatefulWidget {
   const ListeningToggleTabsWidget({super.key, required this.onTabChanged});
@@ -36,7 +36,7 @@ class _ListeningToggleTabsWidgetState extends State<ListeningToggleTabsWidget> {
                     key: const Key('liked_toggle_key'),
                     child: ListeningToggleButton(
                       title: context.tr.liked,
-                      iconPath: 'assets/icons/heart_filled.svg',
+                      icon: MawaqitIcons.heart,
                       isSelected: selectedIndex == 0,
                       onTap: () {
                         widget.onTabChanged(ListeningTab.liked);
@@ -49,7 +49,7 @@ class _ListeningToggleTabsWidgetState extends State<ListeningToggleTabsWidget> {
                     key: const Key('recitors_toggle_key'),
                     child: ListeningToggleButton(
                       title: context.tr.all_recitators,
-                      iconPath: 'assets/icons/ic_recitator.svg',
+                      icon: MawaqitIcons.reciter,
                       isSelected: selectedIndex == 1,
                       onTap: () {
                         widget.onTabChanged(ListeningTab.allRecitator);
@@ -62,7 +62,7 @@ class _ListeningToggleTabsWidgetState extends State<ListeningToggleTabsWidget> {
                     key: const Key('downloaded_toggle_key'),
                     child: ListeningToggleButton(
                       title: context.tr.downloaded,
-                      iconPath: 'assets/icons/download.svg',
+                      icon: MawaqitIcons.download,
                       isSelected: selectedIndex == 2,
                       onTap: () {
                         widget.onTabChanged(ListeningTab.downloaded);
@@ -83,13 +83,13 @@ class _ListeningToggleTabsWidgetState extends State<ListeningToggleTabsWidget> {
 class ListeningToggleButton extends StatelessWidget {
   const ListeningToggleButton({
     super.key,
-    required this.iconPath,
+    required this.icon,
     required this.title,
     required this.isSelected,
     required this.onTap,
   });
 
-  final String iconPath;
+  final IconData icon;
   final String title;
   final bool isSelected;
   final VoidCallback onTap;
@@ -107,8 +107,9 @@ class ListeningToggleButton extends StatelessWidget {
         ),
         child: Row(
           children: [
-            SvgImageAsset(
-              iconPath,
+            Icon(
+              icon,
+              size: 18,
               color: isSelected ? context.colorScheme.onSecondary : context.colorScheme.onPrimaryContainer,
             ),
             const SizedBox(width: 4),

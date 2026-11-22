@@ -1,0 +1,33 @@
+{
+"about": "Quran listening icon font. Edit with tool/icons/icon_editor.html, not by hand.",
+"font": {"family":"MawaqitIcons","className":"MawaqitIcons","package":"mawaqit_quran_listening","unitsPerEm":1000,"ascent":850,"descent":150,"fontFile":"assets/fonts/MawaqitIcons.ttf","dartFile":"lib/src/utils/helpers/mawaqit_icons_icons.dart"},
+"icons": [
+  {"name":"alert","code":"e809","box":802,"cy":343,"mirror":false},
+  {"name":"arrow_down","code":"e80b","box":499,"cy":350,"mirror":false},
+  {"name":"arrow_left","code":"e80c","box":477,"cy":349,"mirror":false},
+  {"name":"arrow_right","code":"e80d","box":477,"cy":351,"mirror":false},
+  {"name":"close","code":"e821","box":502,"cy":349,"mirror":false},
+  {"name":"delete","code":"e826","box":866,"cy":343,"mirror":false},
+  {"name":"download","code":"e82a","box":851,"cy":350,"mirror":false},
+  {"name":"downloaded","code":"e82c","box":807,"cy":356,"mirror":false},
+  {"name":"heart","code":"e886","box":848,"cy":343,"mirror":false},
+  {"name":"heart_outline","code":"e887","box":848,"cy":343,"mirror":false},
+  {"name":"info","code":"e83e","box":800,"cy":343,"mirror":false},
+  {"name":"pause","code":"e857","box":700,"cy":350,"mirror":false},
+  {"name":"phone","code":"e859","box":986,"cy":343,"mirror":false},
+  {"name":"play","code":"e85b","box":738,"cy":350,"mirror":false},
+  {"name":"reciter","code":"e888","box":832,"cy":343,"mirror":false},
+  {"name":"refresh","code":"e861","box":668,"cy":343,"mirror":false},
+  {"name":"repeat","code":"e862","box":1000,"cy":350,"mirror":false},
+  {"name":"rewindleft","code":"e863","box":916,"cy":351,"mirror":false},
+  {"name":"rewindright","code":"e864","box":916,"cy":350,"mirror":false},
+  {"name":"search","code":"e866","box":803,"cy":350,"mirror":false},
+  {"name":"shuffle","code":"e889","box":1000,"cy":343,"mirror":false},
+  {"name":"wifi_off","code":"e88a","box":884,"cy":343,"mirror":false}
+],
+"aliases": [
+  {"name":"arrow_start","glyph":"arrow_left","mirror":true},
+  {"name":"arrow_end","glyph":"arrow_right","mirror":true}
+],
+"retiredCodes": []
+}

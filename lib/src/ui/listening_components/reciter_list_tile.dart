@@ -5,6 +5,7 @@ import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import '../../../mawaqit_quran_listening.dart';
 import 'package:provider/provider.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 
 class RecitorListTile extends StatefulWidget {
@@ -126,12 +127,9 @@ class _RecitorListTileState extends State<RecitorListTile> {
                     _saveReciter();
                     setState(() {});
                   },
-                  icon: SvgImageAsset(
-                        height: 17,
-                        width: 17,
-                        isFavorite
-                            ? 'assets/icons/heart_filled.svg'
-                            : 'assets/icons/heart_outline.svg',
+                  icon: Icon(
+                        isFavorite ? MawaqitIcons.heart : MawaqitIcons.heart_outline,
+                        size: 18,
                         color: context.colorScheme.primaryFixed,
                       ).excludeSemantics(),
                 ),
@@ -148,7 +146,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
                     setState(() {});
                   },
                   icon: Icon(
-                    Icons.close,
+                    MawaqitIcons.close,
                     color: context.colorScheme.primaryFixed,
                   ),
                 ),

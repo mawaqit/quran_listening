@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 
 import 'mawaqit_dialog.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 /// Tells the user a surah can't be streamed because the device is offline.
 ///
@@ -27,7 +28,7 @@ Future<void> showNoInternetDialog(
     builder: (context) {
       dialogContext = context;
       return MawaqitDialog(
-        icon: Icons.wifi_off_rounded,
+        icon: MawaqitIcons.wifi_off,
         title: context.tr.no_internet_connection,
         content: context.tr.msg_internet_connection,
         okText: context.tr.ok,

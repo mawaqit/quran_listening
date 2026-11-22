@@ -8,6 +8,7 @@ import 'package:mawaqit_quran_listening/src/utils/listening_utils/wear_connector
 import '../../extensions/theme_extension.dart';
 import '../../utils/helpers/watch_icons.dart';
 import '../components/circular_button.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 class WatchPlaybackConfirmationBottomSheet extends StatefulWidget {
   final VoidCallback onPlayOnWatch;
@@ -128,7 +129,7 @@ class _WatchPlaybackConfirmationBottomSheetState
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.info_outline,
+                            MawaqitIcons.info,
                             size: 16,
                             color: context.colorScheme.primaryFixed.withOpacity(0.6),
                           ),
@@ -214,9 +215,7 @@ class _WatchPlaybackConfirmationBottomSheetState
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      Platform.isIOS
-                                          ? Icons.phone_iphone
-                                          : Icons.phone_android,
+                                      MawaqitIcons.phone,
                                       color: context.colorScheme.primaryFixed,
                                       size: 20,
                                     ),
@@ -247,7 +246,7 @@ class _WatchPlaybackConfirmationBottomSheetState
             key: const Key('watch_confirmation_bottom_sheet_close'),
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: CircularButton(
-              icon: Icons.keyboard_arrow_down,
+              icon: MawaqitIcons.arrow_down,
               iconColor: context.colorScheme.primaryFixed,
               size: 32,
               borderColor: context.colorScheme.primaryFixed,

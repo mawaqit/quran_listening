@@ -5,7 +5,7 @@ import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import '../../../mawaqit_quran_listening.dart';
 import 'package:provider/provider.dart';
-import '../../utils/helpers/mawaqit_icon_v3_cions.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 class DownloadedSurahTileV3 extends StatelessWidget {
   final SurahModel chapter;
@@ -189,7 +189,7 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                         }
                       },
                       icon: Icon(
-                        isPlaying ? Icons.pause : Icons.play_arrow_rounded,
+                        isPlaying ? MawaqitIcons.pause : MawaqitIcons.play,
                         color: context.colorScheme.primaryFixed,
                       ),
                     );
@@ -255,7 +255,7 @@ class DownloadedSurahTileV3 extends StatelessWidget {
                   key: Key('delete_downloaded_surah_key_$index'),
                   tooltip: '${context.tr.remove} $surahLabel',
                   icon: Icon(
-                    Icons.close,
+                    MawaqitIcons.close,
                     color: context.colorScheme.primaryFixed,
                   ),
                   onPressed: () async {
@@ -393,7 +393,7 @@ class DownloadedSurahTile extends StatelessWidget {
               key: Key('play_button_key_$index'),
               onPressed: onTap,
               icon: Icon(
-                isPlaying ? ReciterIconV3.pause : ReciterIconV3.play,
+                isPlaying ? MawaqitIcons.pause : MawaqitIcons.play,
                 color: context.colorScheme.primaryFixed,
               ),
             ),
@@ -416,7 +416,7 @@ class DownloadedSurahTile extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        ReciterIconV3.downloaded,
+                        MawaqitIcons.downloaded,
                         size: 14,
                         color: Colors.green,
                       ),
@@ -440,12 +440,12 @@ class DownloadedSurahTile extends StatelessWidget {
                 key: Key('delete_button_key_$index'),
                 constraints: const BoxConstraints(),
                 padding: EdgeInsets.zero,
-                icon: Icon(Icons.delete, color: Colors.red, size: 22),
+                icon: Icon(MawaqitIcons.delete, color: Colors.red, size: 22),
                 onPressed: onDelete,
               ),
             const SizedBox(width: 8),
             Icon(
-              Icons.arrow_forward_ios,
+              MawaqitIcons.arrow_end,
               size: 16,
               color: context.colorScheme.onSurface.withOpacity(0.5),
             ),

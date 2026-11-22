@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mawaqit_quran_listening/src/extensions/semantics_extension.dart';
 import '../../extensions/theme_extension.dart';
-import '../components/svg_image_asset.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 class ListeningSearchTextField extends StatelessWidget {
   const ListeningSearchTextField({
@@ -41,10 +41,9 @@ class ListeningSearchTextField extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
         prefixIcon: Padding(
           padding: const EdgeInsets.only(left: 16.0, right: 15, top: 1),
-          child: SvgImageAsset('assets/icons/ic_search.svg',
+          child: Icon(MawaqitIcons.search,
               color: Theme.of(context).disabledColor,
-              height: 24,
-              width: 24,
+              size: 27,
           ),
         ),
         suffixIcon:
@@ -53,7 +52,7 @@ class ListeningSearchTextField extends StatelessWidget {
                   onPressed: onSuffixPressed,
                   icon: Container(
                     margin: const EdgeInsets.only(right: 6),
-                    child: Icon(Icons.close, color: Theme.of(context).disabledColor, size: 16),
+                    child: Icon(MawaqitIcons.close, color: Theme.of(context).disabledColor, size: 16),
                   ),
                 )
                 : null,
