@@ -17,11 +17,20 @@ generated from this folder.
    root of the `quran_listening` repository. The browser then asks twice whether the page may view and save files in that
    folder: choose **Allow** both times. Next time, use **Reopen last project** (the browser asks once more after it
    has been closed).
+
+   ![The editor before a folder is opened](docs/1_open.png)
+
 2. **Add:** drop an SVG on the page. The file name becomes the name in code (`Prayer Mat.svg` → `prayer_mat`); you can
    change it before saving.
    **Replace:** drop the new SVG on the icon's tile, or select it and use **Replace drawing**. The name and code stay.
+
+   ![A new icon added: it shows NEW, its name and its previews](docs/3_add.png)
+
 3. Check the previews (16, 24 and 48 px, light and dark). Use **Size** if it looks too big or small next to the
    others, and tick **Mirror** for arrows that should flip in Arabic and Urdu.
+
+   ![An icon selected: large view, 16/24/48 px on light and dark, size and position sliders](docs/2_select.png)
+
 4. Click **Save to project**, then commit the files it lists (the SVG, `icons.json`, the font and the Dart class).
 5. Fully restart the app (hot reload does not reload fonts).
 

@@ -133,6 +133,7 @@ const state = {
 };
 const DART_WORDS = new Set('abstract as assert async await break case catch class const continue covariant default deferred do dynamic else enum export extends extension external factory false final finally for function get hide if implements import in interface is late library mixin new null of on operator part required rethrow return sealed set show static super switch sync this throw true try type typedef var void when while with yield'.split(' '));
 const UPM = () => state.data.font.unitsPerEm;
+const CLS = () => state.data.font.className || state.data.font.family;
 const ROOT_KEY = 'root:' + location.pathname; // each copy of the editor remembers its own project
 
 // ---------- files ----------
@@ -310,7 +311,7 @@ function renderDetail() {
   const isNew = state.isNew.has(ic.name);
   d.innerHTML = `
     <h2>${esc(ic.name)}</h2>
-    <div class="code">MawaqitIcons.${esc(ic.name)} · 0x${ic.code}</div>
+    <div class="code">${esc(CLS())}.${esc(ic.name)} · 0x${ic.code}</div>
     ${probs.map((p) => `<div class="msg err">${esc(p)}</div>`).join('')}
     <div class="big"><span class="g">${c}</span></div>
     <div class="sizes">
@@ -399,7 +400,7 @@ async function renameNew(oldName, value) {
 async function removeIcon(name) {
   const isNew = state.isNew.has(name);
   if (state.data.aliases.some((a) => a.glyph === name)) { alert(`${name} is used by ${state.data.aliases.filter((a) => a.glyph === name).map((a) => a.name).join(', ')}; it can't be removed.`); return; }
-  if (!isNew && !confirm(`Remove ${name}?\n\nApp code that uses MawaqitIcons.${name} will stop compiling until it's changed. Its code 0x${icon(name).code} is retired and never reused.`)) return;
+  if (!isNew && !confirm(`Remove ${name}?\n\nApp code that uses ${CLS()}.${name} will stop compiling until it's changed. Its code 0x${icon(name).code} is retired and never reused.`)) return;
   const ic = icon(name);
   state.data.icons = state.data.icons.filter((i) => i !== ic);
   if (!isNew) { state.data.retiredCodes.push(ic.code); state.removed.add(name); }
