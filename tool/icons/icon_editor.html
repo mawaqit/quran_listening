@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Icon Font Editor</title>
+<style>
+  :root {
+    --bg: #f6f4fa; --panel: #ffffff; --ink: #1f1a2b; --muted: #6b6478; --line: #e3dfea;
+    --brand: #490094; --brand-ink: #ffffff; --tile: #ffffff; --tile-hover: #f0eaf8; --sel: #e6dcf4;
+    --warn: #8a4b00; --warn-bg: #fff3e0; --err: #a4001e; --ok: #1d6b35; --dark-tile: #1c182b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141120; --panel: #1d1930; --ink: #ece8f4; --muted: #a49cb5; --line: #2f2944;
+      --brand: #b58cf0; --brand-ink: #1a1230; --tile: #1d1930; --tile-hover: #272140; --sel: #33295a;
+      --warn: #ffcf8a; --warn-bg: #3a2a12; --err: #ff8a9b; --ok: #8fd6a4;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+  header { position: sticky; top: 0; z-index: 2; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    padding: 12px 20px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 17px; margin: 0 12px 0 0; }
+  button, .btn { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+    padding: 7px 14px; border-radius: 8px; cursor: pointer; }
+  button:hover { border-color: var(--brand); }
+  button.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); font-weight: 600; }
+  button:disabled { opacity: .45; cursor: default; }
+  input[type=search], input[type=text] { font: inherit; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--ink); min-width: 0; }
+  #status { color: var(--muted); }
+  #changes { color: var(--warn); font-weight: 600; }
+  main { display: grid; grid-template-columns: 1fr 360px; gap: 16px; padding: 16px 20px; align-items: start; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  #drop { border: 2px dashed var(--line); border-radius: 12px; padding: 18px; text-align: center; color: var(--muted);
+    margin-bottom: 14px; }
+  #drop.over { border-color: var(--brand); color: var(--brand); background: var(--tile-hover); }
+  #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+  .tile { background: var(--tile); border: 1px solid var(--line); border-radius: 10px; padding: 12px 4px 8px;
+    text-align: center; cursor: pointer; position: relative; }
+  .tile:hover { background: var(--tile-hover); }
+  .tile.sel { background: var(--sel); border-color: var(--brand); }
+  .tile .g { font-family: var(--icon-font), sans-serif; font-size: 32px; line-height: 1; color: var(--brand); height: 34px; }
+  .tile .n { font-size: 11px; color: var(--muted); margin-top: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tile .badge { position: absolute; top: 5px; right: 6px; font-size: 10px; font-weight: 700; color: var(--warn); }
+  .tile.bad { border-color: var(--err); }
+  .g { font-family: var(--icon-font), sans-serif; }
+  #detail h2 { margin: 0 0 4px; font-size: 18px; word-break: break-all; }
+  #detail .code { color: var(--muted); font-family: ui-monospace, Consolas, monospace; }
+  .big { display: flex; justify-content: center; align-items: center; height: 200px; margin: 12px 0;
+    background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 20px 20px; background-position: center; border-radius: 10px; border: 1px solid var(--line); }
+  .big .g { font-size: 160px; line-height: 1; color: var(--brand); outline: 1px dashed var(--muted); }
+  .sizes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .sizes div { display: flex; gap: 12px; align-items: center; justify-content: center; padding: 10px; border-radius: 10px; }
+  .sizes .light { background: #ffffff; color: #490094; border: 1px solid var(--line); }
+  .sizes .dark { background: var(--dark-tile); color: #ffffff; }
+  label.row { display: block; margin: 10px 0; }
+  label.row span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+  input[type=range] { width: 100%; accent-color: var(--brand); }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .msg { border-radius: 8px; padding: 8px 10px; margin: 8px 0; font-size: 13px; }
+  .msg.warn { background: var(--warn-bg); color: var(--warn); }
+  .msg.err { background: var(--warn-bg); color: var(--err); }
+  .msg.ok { color: var(--ok); }
+  .help { color: var(--muted); font-size: 13px; }
+  .hidden { display: none !important; }
+  #start { max-width: 640px; margin: 48px auto; }
+  #start ol { padding-left: 20px; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; overflow-wrap: anywhere; }
+  main > * { min-width: 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Icon font</h1>
+  <button id="open" class="primary">Open project folder</button>
+  <button id="reopen" class="hidden">Reopen last project</button>
+  <input id="search" type="search" placeholder="Search icons" class="hidden">
+  <span id="status"></span>
+  <span id="changes"></span>
+  <span style="flex:1"></span>
+  <button id="save" class="primary hidden" disabled>Save to project</button>
+</header>
+
+<section id="start" class="card">
+  <h2>Edit the project's icon font</h2>
+  <p>This page builds the icon font and its Dart class from the drawings in <code>tool/icons/svg</code>, as set in
+    <code>tool/icons/icons.json</code>. Nothing to install.</p>
+  <ol>
+    <li>Click <b>Open project folder</b> and choose the root of the repository (the folder that contains <code>tool/icons</code>).</li>
+    <li>Add an icon: drop an SVG on the page. Replace one: select it, then drop the new SVG on it or use <b>Replace drawing</b>.</li>
+    <li>Check the previews and the size, then click <b>Save to project</b> and commit the changed files.</li>
+  </ol>
+  <p class="help">Every icon keeps its code forever, so saving never breaks existing icons. Use Edge or Chrome
+    (other browsers download the files instead of saving them in place).</p>
+  <div id="startMsg"></div>
+</section>
+
+<main id="app" class="hidden">
+  <section>
+    <div id="drop">Drop SVG files here to add icons, or <label class="btn">choose files<input id="pick" type="file" accept=".svg,image/svg+xml" multiple hidden></label>
+      <div class="help">A file named like an existing icon replaces its drawing (same code). Any other name adds a new icon.</div>
+    </div>
+    <div id="grid"></div>
+  </section>
+  <aside id="detail" class="card">
+    <p class="help">Select an icon to see it large, at real sizes, and change its size.</p>
+  </aside>
+</main>
+
+<div id="host" aria-hidden="true"></div>
+<script src="icon_font.js"></script>
+<script>
+'use strict';
+const $ = (s) => document.querySelector(s);
+const state = {
+  root: null,            // FileSystemDirectoryHandle of the repo, or null in download mode
+  files: null,           // Map path -> File, when opened with the folder input fallback
+  data: null,            // icons.json
+  svg: new Map(),        // name -> svg text
+  parsed: new Map(),     // name -> parseSvg result
+  glyph: new Map(),      // name -> glyph
+  problems: new Map(),   // name -> [string]
+  changedSvg: new Set(), // names whose svg must be written
+  removed: new Set(),    // names whose svg must be deleted
+  isNew: new Set(),      // names added in this session
+  dirty: false,
+  selected: null,
+  fontSeq: 0,
+};
+const DART_WORDS = new Set('abstract as assert async await break case catch class const continue covariant default deferred do dynamic else enum export extends extension external factory false final finally for function get hide if implements import in interface is late library mixin new null of on operator part required rethrow return sealed set show static super switch sync this throw true try type typedef var void when while with yield'.split(' '));
+const UPM = () => state.data.font.unitsPerEm;
+const CLS = () => state.data.font.className || state.data.font.family;
+const ROOT_KEY = 'root:' + location.pathname; // each copy of the editor remembers its own project
+
+// ---------- files ----------
+async function dirAt(path, create) {
+  let d = state.root;
+  for (const part of path.split('/').filter(Boolean)) d = await d.getDirectoryHandle(part, { create });
+  return d;
+}
+async function readText(path) {
+  if (state.files) {
+    const f = state.files.get(path);
+    if (!f) throw new Error('missing ' + path);
+    return f.text();
+  }
+  const i = path.lastIndexOf('/');
+  const dir = await dirAt(path.slice(0, i), false);
+  return (await (await dir.getFileHandle(path.slice(i + 1))).getFile()).text();
+}
+async function listSvgs() {
+  if (state.files) return [...state.files.keys()].filter((p) => p.startsWith('tool/icons/svg/') && p.endsWith('.svg')).map((p) => p.slice(15, -4));
+  const out = [];
+  for await (const [name, h] of (await dirAt('tool/icons/svg', false)).entries()) if (h.kind === 'file' && name.endsWith('.svg')) out.push(name.slice(0, -4));
+  return out;
+}
+async function writeFile(path, content) {
+  if (!state.root) { // download fallback
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content]));
+    a.download = path.replaceAll('/', '__');
+    a.click();
+    return;
+  }
+  const i = path.lastIndexOf('/');
+  const dir = await dirAt(path.slice(0, i), true);
+  const w = await (await dir.getFileHandle(path.slice(i + 1), { create: true })).createWritable();
+  await w.write(content);
+  await w.close();
+}
+async function removeFile(path) {
+  if (!state.root) return;
+  const i = path.lastIndexOf('/');
+  try { await (await dirAt(path.slice(0, i), false)).removeEntry(path.slice(i + 1)); } catch (e) { /* already gone */ }
+}
+
+// remember the folder between visits (Edge/Chrome)
+function idb(mode, fn) {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('mawaqit-icons', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => { const t = r.result.transaction('kv', mode); const q = fn(t.objectStore('kv')); t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); };
+    r.onerror = () => rej(r.error);
+  });
+}
+
+async function openFolder(handle) {
+  try {
+    if (handle) {
+      if ((await handle.requestPermission({ mode: 'readwrite' })) !== 'granted') return;
+      state.root = handle;
+    } else if (window.showDirectoryPicker) {
+      state.root = await window.showDirectoryPicker({ id: 'icon-font-project', mode: 'readwrite' });
+    } else {
+      // fallback: read with a folder input, save by downloading
+      const inp = document.createElement('input');
+      inp.type = 'file'; inp.webkitdirectory = true;
+      const files = await new Promise((res) => { inp.onchange = () => res(inp.files); inp.click(); });
+      state.files = new Map();
+      for (const f of files) { const p = f.webkitRelativePath.split('/').slice(1).join('/'); state.files.set(p, f); }
+    }
+    await load();
+    if (state.root) idb('readwrite', (s) => s.put(state.root, ROOT_KEY)).catch(() => {});
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    $('#startMsg').innerHTML = `<div class="msg err">${esc(e.message)}. Choose the root folder of the repository (the one that contains <code>tool/icons</code>).</div>`;
+    state.root = null; state.files = null;
+  }
+}
+
+async function load() {
+  $('#status').textContent = 'Loading…';
+  state.data = JSON.parse(await readText('tool/icons/icons.json'));
+  const cls = state.data.font.className || state.data.font.family;
+  $('#title').textContent = cls + ' icons';
+  document.title = cls + ' icons';
+  const names = await listSvgs();
+  const known = new Set(state.data.icons.map((i) => i.name));
+  for (const n of known) if (!names.includes(n)) throw new Error(`tool/icons/svg/${n}.svg is missing`);
+  for (const ic of state.data.icons) {
+    const text = await readText(`tool/icons/svg/${ic.name}.svg`);
+    state.svg.set(ic.name, text);
+    prepare(ic);
+  }
+  $('#start').classList.add('hidden');
+  $('#app').classList.remove('hidden');
+  for (const id of ['#search', '#save']) $(id).classList.remove('hidden');
+  $('#open').textContent = 'Open another folder';
+  $('#reopen').classList.add('hidden');
+  await rebuildFont();
+  renderGrid();
+  status();
+}
+
+// ---------- icons ----------
+function prepare(ic) {
+  const probs = [];
+  try {
+    const p = IconFont.parseSvg(state.svg.get(ic.name), $('#host'));
+    state.parsed.set(ic.name, p);
+    probs.push(...p.warnings);
+    rebuildGlyph(ic, probs);
+  } catch (e) {
+    state.parsed.delete(ic.name);
+    state.glyph.delete(ic.name);
+    probs.push(e.message);
+  }
+  state.problems.set(ic.name, probs);
+}
+function rebuildGlyph(ic, probs) {
+  const g = IconFont.makeGlyph(state.parsed.get(ic.name), ic.box, ic.cy, UPM());
+  state.glyph.set(ic.name, g);
+  if (probs) probs.push(...IconFont.checkGlyph(g, UPM()));
+}
+const icon = (name) => state.data.icons.find((i) => i.name === name);
+
+async function rebuildFont() {
+  const glyphs = state.data.icons.filter((i) => state.glyph.has(i.name)).map((i) => ({ code: parseInt(i.code, 16), glyph: state.glyph.get(i.name) }));
+  state.font = IconFont.buildFont(glyphs, state.data.font);
+  const fam = 'MawaqitIconsPreview' + (++state.fontSeq);
+  const face = new FontFace(fam, state.font);
+  await face.load();
+  document.fonts.add(face);
+  document.documentElement.style.setProperty('--icon-font', fam);
+}
+let rebuildTimer;
+function scheduleFont() { clearTimeout(rebuildTimer); rebuildTimer = setTimeout(rebuildFont, 60); }
+
+function markDirty() { state.dirty = true; $('#save').disabled = false; status(); }
+function status() {
+  const n = state.data.icons.length;
+  $('#status').textContent = `${n} icons`;
+  const c = state.changedSvg.size + state.removed.size;
+  $('#changes').textContent = state.dirty ? `Unsaved changes${c ? ` (${c} drawing${c > 1 ? 's' : ''})` : ''}` : '';
+}
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const ch = (code) => String.fromCodePoint(parseInt(code, 16));
+
+function renderGrid() {
+  const q = $('#search').value.trim().toLowerCase();
+  const grid = $('#grid');
+  grid.innerHTML = '';
+  for (const ic of [...state.data.icons].sort((a, b) => (a.name < b.name ? -1 : 1))) {
+    if (q && !ic.name.includes(q)) continue;
+    const t = document.createElement('div');
+    const bad = (state.problems.get(ic.name) || []).length;
+    t.className = 'tile' + (ic.name === state.selected ? ' sel' : '') + (bad ? ' bad' : '');
+    t.title = `${ic.name}  0x${ic.code}`;
+    t.innerHTML = `<div class="g">${ch(ic.code)}</div><div class="n">${esc(ic.name)}</div>` +
+      (state.isNew.has(ic.name) ? '<span class="badge">NEW</span>' : state.changedSvg.has(ic.name) ? '<span class="badge">EDITED</span>' : '');
+    t.onclick = () => select(ic.name);
+    t.ondragover = (e) => { e.preventDefault(); t.classList.add('sel'); };
+    t.ondragleave = () => t.classList.toggle('sel', ic.name === state.selected);
+    t.ondrop = (e) => { e.preventDefault(); e.stopPropagation(); const f = [...e.dataTransfer.files][0]; if (f) replaceDrawing(ic.name, f); };
+    grid.appendChild(t);
+  }
+}
+
+function select(name) { state.selected = name; renderGrid(); renderDetail(); }
+
+function renderDetail() {
+  const ic = icon(state.selected);
+  const d = $('#detail');
+  if (!ic) { d.innerHTML = '<p class="help">Select an icon to see it large, at real sizes, and change its size.</p>'; return; }
+  const c = ch(ic.code);
+  const probs = state.problems.get(ic.name) || [];
+  const isNew = state.isNew.has(ic.name);
+  d.innerHTML = `
+    <h2>${esc(ic.name)}</h2>
+    <div class="code">${esc(CLS())}.${esc(ic.name)} · 0x${ic.code}</div>
+    ${probs.map((p) => `<div class="msg err">${esc(p)}</div>`).join('')}
+    <div class="big"><span class="g">${c}</span></div>
+    <div class="sizes">
+      <div class="light"><span class="g" style="font-size:16px">${c}</span><span class="g" style="font-size:24px">${c}</span><span class="g" style="font-size:48px">${c}</span></div>
+      <div class="dark"><span class="g" style="font-size:16px">${c}</span><span class="g" style="font-size:24px">${c}</span><span class="g" style="font-size:48px">${c}</span></div>
+    </div>
+    ${isNew ? `<label class="row"><span>Name used in code (lower_snake_case)</span><input id="name" type="text" value="${esc(ic.name)}"></label>` : ''}
+    <label class="row"><span>Size: <b id="boxv">${ic.box}</b> / ${UPM()} (the longer side of the drawing)</span><input id="box" type="range" min="300" max="${UPM()}" step="5" value="${ic.box}"></label>
+    <label class="row"><span>Vertical position: <b id="cyv">${ic.cy}</b> (343 = centred like the other icons)</span><input id="cy" type="range" min="200" max="500" step="1" value="${ic.cy}"></label>
+    <label class="row" style="display:flex;gap:8px;align-items:center"><input id="mirror" type="checkbox" ${ic.mirror ? 'checked' : ''}> Mirror in right-to-left languages (Arabic, Urdu)</label>
+    <div class="actions">
+      <label class="btn">Replace drawing<input id="rep" type="file" accept=".svg,image/svg+xml" hidden></label>
+      <button id="remove">Remove icon</button>
+    </div>
+    <p class="help">${isNew ? 'New icon: it gets the next free code when saved.' : 'Replacing the drawing keeps the name and code, so existing code keeps working.'}</p>`;
+  const live = (el, field, out) => {
+    el.oninput = () => {
+      ic[field] = +el.value; $(out).textContent = el.value;
+      const probs2 = [...(state.parsed.get(ic.name)?.warnings || [])];
+      rebuildGlyph(ic, probs2); state.problems.set(ic.name, probs2);
+      markDirty(); scheduleFont();
+    };
+  };
+  if (state.parsed.has(ic.name)) { live($('#box'), 'box', '#boxv'); live($('#cy'), 'cy', '#cyv'); }
+  $('#mirror').onchange = (e) => { ic.mirror = e.target.checked; markDirty(); };
+  $('#rep').onchange = (e) => { if (e.target.files[0]) replaceDrawing(ic.name, e.target.files[0]); };
+  $('#remove').onclick = () => removeIcon(ic.name);
+  if (isNew) $('#name').onchange = (e) => renameNew(ic.name, e.target.value);
+}
+
+function cleanName(s) {
+  return s.replace(/\.svg$/i, '').replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').replace(/^(\d)/, 'icon_$1');
+}
+function nameProblem(name, except) {
+  if (!/^[a-z][a-z0-9_]*$/.test(name)) return 'use lower_snake_case letters, digits and _ (starting with a letter)';
+  if (DART_WORDS.has(name)) return `"${name}" is a Dart keyword`;
+  if (name !== except && (icon(name) || state.data.aliases.some((a) => a.name === name))) return `"${name}" is already used`;
+  return null;
+}
+
+async function addFiles(files) {
+  const msgs = [];
+  for (const f of files) {
+    if (!/\.svg$/i.test(f.name) && f.type !== 'image/svg+xml') { msgs.push(`${f.name}: only SVG files (export the drawing as SVG from Figma or Illustrator)`); continue; }
+    const name = cleanName(f.name);
+    if (icon(name)) { await replaceDrawing(name, f); continue; }
+    const prob = nameProblem(name);
+    if (prob) { msgs.push(`${f.name}: ${prob}`); continue; }
+    const text = await f.text();
+    const ic = { name, code: IconFont.nextCode(state.data), box: 940, cy: 343, mirror: false };
+    state.svg.set(name, text);
+    state.data.icons.push(ic);
+    prepare(ic);
+    if (!state.parsed.has(name)) { msgs.push(`${f.name}: ${state.problems.get(name).join(', ')}`); state.data.icons.pop(); state.svg.delete(name); continue; }
+    state.isNew.add(name); state.changedSvg.add(name); state.removed.delete(name);
+    state.selected = name;
+  }
+  if (msgs.length) alert(msgs.join('\n'));
+  markDirty(); await rebuildFont(); renderGrid(); renderDetail();
+}
+
+async function replaceDrawing(name, file) {
+  if (!/\.svg$/i.test(file.name) && file.type !== 'image/svg+xml') { alert('Only SVG files: export the drawing as SVG.'); return; }
+  const ic = icon(name);
+  const old = state.svg.get(name);
+  state.svg.set(name, await file.text());
+  prepare(ic);
+  if (!state.parsed.has(name)) { alert(`${file.name}: ${state.problems.get(name).join(', ')}`); state.svg.set(name, old); prepare(ic); return; }
+  state.changedSvg.add(name);
+  state.selected = name;
+  markDirty(); await rebuildFont(); renderGrid(); renderDetail();
+}
+
+async function renameNew(oldName, value) {
+  const name = cleanName(value);
+  const prob = nameProblem(name, oldName);
+  if (prob) { alert(prob); renderDetail(); return; }
+  const ic = icon(oldName);
+  ic.name = name;
+  for (const m of [state.svg, state.parsed, state.glyph, state.problems]) { m.set(name, m.get(oldName)); m.delete(oldName); }
+  for (const s of [state.isNew, state.changedSvg]) { s.delete(oldName); s.add(name); }
+  state.selected = name;
+  markDirty(); renderGrid(); renderDetail();
+}
+
+async function removeIcon(name) {
+  const isNew = state.isNew.has(name);
+  if (state.data.aliases.some((a) => a.glyph === name)) { alert(`${name} is used by ${state.data.aliases.filter((a) => a.glyph === name).map((a) => a.name).join(', ')}; it can't be removed.`); return; }
+  if (!isNew && !confirm(`Remove ${name}?\n\nApp code that uses ${CLS()}.${name} will stop compiling until it's changed. Its code 0x${icon(name).code} is retired and never reused.`)) return;
+  const ic = icon(name);
+  state.data.icons = state.data.icons.filter((i) => i !== ic);
+  if (!isNew) { state.data.retiredCodes.push(ic.code); state.removed.add(name); }
+  for (const m of [state.svg, state.parsed, state.glyph, state.problems]) m.delete(name);
+  state.isNew.delete(name); state.changedSvg.delete(name);
+  state.selected = null;
+  markDirty(); await rebuildFont(); renderGrid(); renderDetail();
+}
+
+async function save() {
+  const bad = state.data.icons.filter((i) => !state.glyph.has(i.name) || (state.problems.get(i.name) || []).some((p) => /not centred|empty|wider/.test(p)));
+  if (bad.length) { alert('Fix these icons first:\n' + bad.map((i) => `${i.name}: ${(state.problems.get(i.name) || ['no drawing']).join(', ')}`).join('\n')); return; }
+  $('#save').disabled = true;
+  $('#changes').textContent = 'Saving…';
+  try {
+    await rebuildFont();
+    const f = state.data.font;
+    const written = [];
+    for (const n of state.changedSvg) { await writeFile(`tool/icons/svg/${n}.svg`, state.svg.get(n)); written.push(`tool/icons/svg/${n}.svg`); }
+    for (const n of state.removed) { await removeFile(`tool/icons/svg/${n}.svg`); written.push(`tool/icons/svg/${n}.svg (deleted)`); }
+    await writeFile('tool/icons/icons.json', IconFont.jsonText(state.data)); written.push('tool/icons/icons.json');
+    await writeFile(f.fontFile, new Uint8Array(state.font)); written.push(f.fontFile);
+    await writeFile(f.dartFile, IconFont.dartClass(state.data)); written.push(f.dartFile);
+    state.changedSvg.clear(); state.removed.clear(); state.isNew.clear(); state.dirty = false;
+    status();
+    $('#changes').textContent = '';
+    const d = $('#detail');
+    d.innerHTML = `<div class="msg ok"><b>${state.root ? 'Saved to the project.' : 'Files downloaded: put each one at the path in its name (__ = /).'}</b></div>
+      <p class="help">Commit these files:</p><ul>${written.map((w) => `<li><code>${esc(w)}</code></li>`).join('')}</ul>
+      <p class="help">Then use them in code as <code>Icon(${esc(f.className || f.family)}.name)</code>. Do a full restart of the app (not hot reload) to see font changes.</p>`;
+    state.selected = null; renderGrid();
+  } catch (e) {
+    alert('Saving failed: ' + e.message);
+    $('#save').disabled = false; status();
+  }
+}
+
+// ---------- wiring ----------
+$('#open').onclick = () => openFolder();
+$('#reopen').onclick = async () => openFolder(await idb('readonly', (s) => s.get(ROOT_KEY)));
+$('#save').onclick = save;
+$('#search').oninput = renderGrid;
+$('#pick').onchange = (e) => addFiles([...e.target.files]);
+const drop = $('#drop');
+drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove('over'); addFiles([...e.dataTransfer.files]); };
+document.addEventListener('dragover', (e) => e.preventDefault());
+document.addEventListener('drop', (e) => {
+  const handled = e.defaultPrevented; // the drop zone or a tile took it
+  e.preventDefault();
+  if (state.data && !handled) addFiles([...e.dataTransfer.files]);
+});
+window.addEventListener('beforeunload', (e) => { if (state.dirty) { e.preventDefault(); e.returnValue = ''; } });
+if (window.indexedDB && window.showDirectoryPicker) {
+  idb('readonly', (s) => s.get(ROOT_KEY)).then((h) => { if (h) $('#reopen').classList.remove('hidden'); }).catch(() => {});
+}
+if (!window.showDirectoryPicker) {
+  $('#startMsg').innerHTML = '<div class="msg warn">This browser can\'t save into the folder: the changed files will be downloaded instead. Edge or Chrome save in place.</div>';
+}
+</script>
+</body>
+</html>

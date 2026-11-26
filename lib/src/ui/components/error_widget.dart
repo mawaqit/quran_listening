@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 class ApiErrorWidget extends StatelessWidget {
   final String? error;
@@ -35,7 +36,7 @@ class ApiErrorWidget extends StatelessWidget {
           children: <Widget>[
             if (isOffline) ...[
               Icon(
-                Icons.wifi_off_rounded,
+                MawaqitIcons.wifi_off,
                 size: 80,
                 color: subtitleColor,
               ),
@@ -58,7 +59,7 @@ class ApiErrorWidget extends StatelessWidget {
               ),
             ] else ...[
               const Icon(
-                Icons.error,
+                MawaqitIcons.alert,
                 size: 100,
                 color: errorColor,
               ),

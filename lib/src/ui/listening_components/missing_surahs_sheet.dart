@@ -10,16 +10,16 @@ import '../../models/reciter.dart';
 import '../../models/surah_model.dart';
 import '../../providers/favorite_reciter.dart';
 import '../../providers/reciters_controller.dart';
-import '../../utils/helpers/mawaqit_icon_v3_cions.dart';
 import '../../utils/listening_utils/surah_availability.dart';
 import '../pages/quran_listening_page.dart';
 import 'reciter_list_tile.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 /// Forward arrow used as a row's trailing icon, mirrored for RTL.
 IconData _forwardArrow(BuildContext context) =>
     Directionality.of(context) == TextDirection.rtl
-        ? ReciterIconV3.arrow_left
-        : ReciterIconV3.arrow_right;
+        ? MawaqitIcons.arrow_left
+        : MawaqitIcons.arrow_right;
 
 /// Info row for an incomplete reciter. Above the list it shows the
 /// reciter's coverage; with [searchMatchCount] it sits below search results
@@ -71,7 +71,7 @@ class MissingSurahsBanner extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    Icons.info_outline_rounded,
+                    MawaqitIcons.info,
                     size: 20,
                     color: context.colorScheme.primaryFixed,
                   ),
@@ -326,7 +326,7 @@ class _SheetHeader extends StatelessWidget {
       children: [
         if (onBack != null)
           _SheetIconButton(
-            icon: isRtl ? ReciterIconV3.arrow_right : ReciterIconV3.arrow_left,
+            icon: isRtl ? MawaqitIcons.arrow_right : MawaqitIcons.arrow_left,
             label: context.semanticTr.back,
             onTap: onBack!,
           )
@@ -343,7 +343,7 @@ class _SheetHeader extends StatelessWidget {
           ).semantic(context: context, header: true),
         ),
         _SheetIconButton(
-          icon: ReciterIconV3.close,
+          icon: MawaqitIcons.close,
           label: context.semanticTr.close,
           onTap: () => Navigator.of(context).pop(),
         ),

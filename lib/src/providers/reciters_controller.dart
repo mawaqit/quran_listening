@@ -7,6 +7,7 @@ import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../mawaqit_quran_listening.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 enum RecitersScreenState { loading, success, failed }
 
@@ -161,7 +162,7 @@ class RecitorsProvider extends ChangeNotifier {
             shape: BoxShape.circle,
           ),
           child: Icon(
-            Icons.person,
+            MawaqitIcons.reciter,
             color: Colors.grey[600],
             size: (height ?? 40) * 0.6,
           ),

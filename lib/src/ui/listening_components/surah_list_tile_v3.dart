@@ -3,7 +3,6 @@ import 'package:mawaqit_core_logger/mawaqit_core_logger.dart';
 import 'package:mawaqit_mobile_i18n/mawaqit_localization.dart';
 import 'package:mawaqit_quran_listening/src/extensions/device_extensions.dart';
 import 'package:mawaqit_quran_listening/src/extensions/semantics_extension.dart';
-import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icon_v3_cions.dart';
 import 'package:provider/provider.dart';
 import '../../extensions/theme_extension.dart';
 import '../../models/reciter.dart';
@@ -14,6 +13,7 @@ import '../../providers/player_screens_controller.dart';
 import '../../utils/helpers/connectivity.dart';
 import '../../utils/listening_utils/surah_availability.dart';
 import '../components/no_internet_dialog.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 class SurahListTileV3 extends StatefulWidget {
   final SurahModel chapter;
@@ -103,7 +103,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                 }
               },
               icon: Icon(
-                isPlaying ? Icons.pause : Icons.play_arrow_rounded,
+                isPlaying ? MawaqitIcons.pause : MawaqitIcons.play,
                 color: context.colorScheme.primaryFixed,
               ),
             ),
@@ -167,7 +167,7 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                         icon: SizedBox(
                           child: Icon(
                             size: 14,
-                            ReciterIconV3.close,
+                            MawaqitIcons.close,
                             color: context.colorScheme.primaryFixed,
                           ),
                         ),
@@ -188,12 +188,12 @@ class _SurahListTileV3State extends State<SurahListTileV3> {
                             key: Key(
                               'downloaded_completed_key_${widget.index}',
                             ),
-                            ReciterIconV3.close,
+                            MawaqitIcons.close,
                             color: context.colorScheme.primaryFixed,
                           )
                           : Icon(
                             key: Key('download_button_key_${widget.index}'),
-                            ReciterIconV3.download,
+                            MawaqitIcons.download,
                             color: context.colorScheme.primaryFixed,
                             size: 22,
                           ),

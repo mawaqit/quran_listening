@@ -4,6 +4,7 @@ import 'package:mawaqit_quran_listening/mawaqit_quran_listening.dart';
 
 import '../../utils/helpers/connectivity.dart';
 import '../components/no_internet_dialog.dart';
+import 'package:mawaqit_quran_listening/src/utils/helpers/mawaqit_icons_icons.dart';
 
 class AllSurahDownloadWidget extends StatelessWidget {
   final BulkDownloadStatus? bulkStatus;
@@ -43,8 +44,8 @@ class AllSurahDownloadWidget extends StatelessWidget {
                   onPressed: () => _confirmAndDownload(context),
                   icon: Icon(
                     isAllDownloaded
-                        ? Icons.download_done_rounded
-                        : Icons.cloud_download_rounded,
+                        ? MawaqitIcons.downloaded
+                        : MawaqitIcons.download,
                   ),
                   label: Text(context.tr.download_all_surahs),
                   style: FilledButton.styleFrom(
