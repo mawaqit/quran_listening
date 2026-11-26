@@ -43,7 +43,7 @@ class ListeningSearchTextField extends StatelessWidget {
           padding: const EdgeInsets.only(left: 16.0, right: 15, top: 1),
           child: Icon(MawaqitIcons.search,
               color: Theme.of(context).disabledColor,
-              size: 27,
+              size: 24,
           ),
         ),
         suffixIcon:

@@ -129,7 +129,7 @@ class _RecitorListTileState extends State<RecitorListTile> {
                   },
                   icon: Icon(
                         isFavorite ? MawaqitIcons.heart : MawaqitIcons.heart_outline,
-                        size: 18,
+                        size: 17,
                         color: context.colorScheme.primaryFixed,
                       ).excludeSemantics(),
                 ),
